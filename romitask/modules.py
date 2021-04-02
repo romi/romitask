@@ -34,7 +34,7 @@ MODULES = {
     # Visu modules:
     "Visualization": "plant3dvision.tasks.visualization",
     # Database modules:
-    "Clean": "plantdb.task"
+    "Clean": "romitask.task"
 }
 
 TASKS = list(MODULES.keys())
