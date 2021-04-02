@@ -26,7 +26,7 @@
 import time
 
 from plantdb.db import DBBusyError
-from plantdb.runner import DBRunner
+from romitask.runner import DBRunner
 from watchdog.events import FileSystemEventHandler, DirCreatedEvent
 from watchdog.observers import Observer
 

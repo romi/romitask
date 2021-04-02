@@ -21,7 +21,8 @@ s = setup(
     setup_requires=['setuptools_scm'],
     install_requires=[
         'luigi',
-        'toml'
+        'toml',
+        'watchdog'
     ],
     include_package_data=True
 )
