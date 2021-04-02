@@ -345,7 +345,56 @@ class ImagesFilesetExists(FilesetExists):
     """A Task which requires the presence of a fileset with id ``images``."""
     fileset_id = luigi.Parameter(default="images")
 
+    
+class FileExists(RomiTask):
+    """A Task that requires a file with a given id to exist."""
+    fileset_id = luigi.Parameter()
+    file_id = luigi.Parameter()
+    upstream_task = None
 
+    def requires(self):
+        return []
+
+    def output(self):
+        self.task_id = self.fileset_id
+        return super().output()
+
+    def output_file(self, file_id=None, create=True):
+        if file_id is None:
+            file_id = self.file_id
+        return super().output_file(file_id, False)
+
+    def run(self):
+        if self.output().get() is None:
+            raise OSError(f"Fileset {self.fileset_id} does not exist")
+        if self.output().get.get_file(self.file_id) is None:
+            raise OSError(f"File {self.fileset_id}/{self.file_id} does not exist")
+
+
+class VirtualPlantObj(FileExists):
+    """The VirtualPlantObj task returns a 3D plant model file. The 3D model should                                                                                             
+    be stored as .obj file.                                                                                                                                                  
+                                                                                                                                                                             
+    Attributes                                                                                                                                                               
+    ----------                                                                                                                                                               
+    scan_id: luigi.Parameter, optional                                                                                                                                       
+        The scan id where to look for the fileset. If unspecified, the                                                                                                       
+        current active scan will be used.                                                                                                                                    
+                                                                                                                                                                             
+    fileset_id: luigi.Parameter, optional                                                                                                                                    
+        The ID of the fileset to use. By default "VirtualPlant".                                                                                                                      
+                                                                                                                                                                             
+    file_id : luigi.Parameter, optional                                                                                                                                      
+        The ID of the file to use. The default is "VirtualPlant"                                                                                                             
+                                                                                                                                                                             
+    """
+    scan_id = luigi.Parameter(default="")
+    fileset_id = luigi.Parameter(default="VirtualPlant")
+    file_id = luigi.Parameter(default="VirtualPlant")
+
+
+
+    
 class FileByFileTask(RomiTask):
     """This abstract class is a Task which take every file from a fileset
     and applies some function to it and saves it back
