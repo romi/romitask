@@ -373,7 +373,25 @@ class FileExists(RomiTask):
 
 class VirtualPlantObj(FileExists):
     """The VirtualPlantObj task returns a 3D plant model file. The 3D model should                                                                                             
-    be stored as .obj file.                                                                                                                                                  
+    be stored as .obj file.   
+    
+    Use as follows, using VirtualScan as an example:
+    
+    >>> [VirtualScan]
+    >>> obj_fileset = "VirtualPlantObj"
+
+    This example will seek for the default file with ID VirtualPlant in the fileset
+    VirtualPlant in the active scan directory.
+    
+    These default values can be overriden as follows:
+    
+    >>> [VirtualPlantObj]
+    >>> scan_id = "AnotherScan"
+    >>> fileset_id = "AnotherFileset"
+    >>> file_id = "FileID"
+    >>>
+    >>> [VirtualScan]
+    >>> obj_fileset = "VirtualPlantObj"
                                                                                                                                                                              
     Attributes                                                                                                                                                               
     ----------                                                                                                                                                               
