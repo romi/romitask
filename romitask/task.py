@@ -367,7 +367,7 @@ class FileExists(RomiTask):
     def run(self):
         if self.output().get() is None:
             raise OSError(f"Fileset {self.fileset_id} does not exist")
-        if self.output().get.get_file(self.file_id) is None:
+        if self.output().get().get_file(self.file_id) is None:
             raise OSError(f"File {self.fileset_id}/{self.file_id} does not exist")
 
 
@@ -388,6 +388,7 @@ class VirtualPlantObj(FileExists):
     >>> [VirtualPlantObj]
     >>> scan_id = "AnotherScan"
     >>> fileset_id = "AnotherFileset"
+    >>> fileset_id_prefix = "AnotherFilesetPrefix"
     >>> file_id = "FileID"
     >>>
     >>> [VirtualScan]
@@ -400,17 +401,48 @@ class VirtualPlantObj(FileExists):
         current active scan will be used.                                                                                                                                    
                                                                                                                                                                              
     fileset_id: luigi.Parameter, optional                                                                                                                                    
-        The ID of the fileset to use. By default "VirtualPlant".                                                                                                                      
-                                                                                                                                                                             
+        The ID of the fileset to use. By default "VirtualPlant".
+
+    fileset_id_prefix: luigi.Parameter, optional
+        If the ID of the fileset cannot be provided, a prefix can be an alternative
+        to search for a fileset id.
+
     file_id : luigi.Parameter, optional                                                                                                                                      
         The ID of the file to use. The default is "VirtualPlant"                                                                                                             
                                                                                                                                                                              
     """
     scan_id = luigi.Parameter(default="")
     fileset_id = luigi.Parameter(default="VirtualPlant")
+    fileset_id_prefix = luigi.Parameter(default="VirtualPlant")
     file_id = luigi.Parameter(default="VirtualPlant")
 
+    def output(self):
+        if self.scan_id == "":
+            scan = DatabaseConfig().scan
+        else:
+            scan = db.get_scan(self.scan_id)
 
+        t = FilesetTarget(scan, self.fileset_id)
+        fs = t.get()
+        if fs.get_file(self.fileset_id) is None: # backup solution : search for a fileset id beginning with a specific prefix
+            filesets_with_prefix = [f for f in scan.get_filesets() if f.id.startswith(self.fileset_id_prefix)]
+            if len(filesets_with_prefix) == 0:
+                raise OSError(f"Fileset with {self.fileset_id_prefix} prefix does not exist")
+            else:
+                self.fileset_id = filesets_with_prefix[0].id
+                t = FilesetTarget(scan, self.fileset_id)
+
+        params = dict(
+            self.to_str_params(only_significant=False, only_public=False))
+        for k in params.keys():
+            try:
+                params[k] = json.loads(params[k])
+            except:
+                continue
+        fs.set_metadata("task_params", params)
+
+        self.task_id = self.fileset_id
+        return t
 
     
 class FileByFileTask(RomiTask):
