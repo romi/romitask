@@ -427,7 +427,9 @@ class VirtualPlantObj(FileExists):
         if fs.get_file(self.fileset_id) is None: # backup solution : search for a fileset id beginning with a specific prefix
             filesets_with_prefix = [f for f in scan.get_filesets() if f.id.startswith(self.fileset_id_prefix)]
             if len(filesets_with_prefix) == 0:
-                raise OSError(f"Fileset with {self.fileset_id_prefix} prefix does not exist")
+                raise FileNotFoundError(f"Fileset with {self.fileset_id_prefix} prefix does not exist")
+            elif len(filesets_with_prefix) > 1:
+                raise ValueError(f"Two or more Filesets with {self.fileset_id_prefix} prefix found")
             else:
                 self.fileset_id = filesets_with_prefix[0].id
                 t = FilesetTarget(scan, self.fileset_id)
