@@ -24,7 +24,7 @@ MODULES = {
     "TreeGraph": "plant3dvision.tasks.arabidopsis",
     "AnglesAndInternodes": "plant3dvision.tasks.arabidopsis",
     # Evaluation modules:
-    "VoxelGroundTruth": "plant3dvision.tasks.evaluation",
+    "VoxelsGroundTruth": "plant3dvision.tasks.evaluation",
     "VoxelsEvaluation": "plant3dvision.tasks.evaluation",
     "PointCloudGroundTruth": "plant3dvision.tasks.evaluation",
     "PointCloudEvaluation": "plant3dvision.tasks.evaluation",
