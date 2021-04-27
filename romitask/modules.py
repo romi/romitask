@@ -31,6 +31,8 @@ MODULES = {
     "ClusteredMeshGroundTruth": "plant3dvision.tasks.evaluation",
     "PointCloudSegmentationEvaluation": "plant3dvision.tasks.evaluation",
     "Segmentation2DEvaluation": "plant3dvision.tasks.evaluation",
+    "CylinderRadiusEvaluation": "plant3dvision.tasks.evaluation",
+    "CylinderRadiusGroundTruth": "plant3dvision.tasks.evaluation",
     # Visu modules:
     "Visualization": "plant3dvision.tasks.visualization",
     # Database modules:
