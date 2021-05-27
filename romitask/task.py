@@ -423,8 +423,7 @@ class VirtualPlantObj(FileExists):
             scan = db.get_scan(self.scan_id)
 
         t = FilesetTarget(scan, self.fileset_id)
-        fs = t.get()
-        if fs.get_file(self.fileset_id) is None: # backup solution : search for a fileset id beginning with a specific prefix
+        if not t.exists(): # backup solution : search for a fileset id beginning with a specific prefix
             filesets_with_prefix = [f for f in scan.get_filesets() if f.id.startswith(self.fileset_id_prefix)]
             if len(filesets_with_prefix) == 0:
                 raise FileNotFoundError(f"Fileset with {self.fileset_id_prefix} prefix does not exist")
@@ -433,6 +432,8 @@ class VirtualPlantObj(FileExists):
             else:
                 self.fileset_id = filesets_with_prefix[0].id
                 t = FilesetTarget(scan, self.fileset_id)
+
+        fs = t.get()
 
         params = dict(
             self.to_str_params(only_significant=False, only_public=False))

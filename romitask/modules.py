@@ -29,7 +29,7 @@ MODULES = {
     "PointCloudGroundTruth": "plant3dvision.tasks.evaluation",
     "PointCloudEvaluation": "plant3dvision.tasks.evaluation",
     "ClusteredMeshGroundTruth": "plant3dvision.tasks.evaluation",
-    "PointCloudSegmentationEvaluation": "plant3dvision.tasks.evaluation",
+    "SegmentedPointCloudEvaluation": "plant3dvision.tasks.evaluation",
     "Segmentation2DEvaluation": "plant3dvision.tasks.evaluation",
     # Visu modules:
     "Visualization": "plant3dvision.tasks.visualization",
