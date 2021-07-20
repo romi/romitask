@@ -345,6 +345,9 @@ class ImagesFilesetExists(FilesetExists):
     """A Task which requires the presence of a fileset with id ``images``."""
     fileset_id = luigi.Parameter(default="images")
 
+class Segmentation2DGroundTruthFilesetExists(FilesetExists):
+    """A Task which requires the presence of fileset with id ``Segmentation2DGroundTruth``."""
+    fileset_id = luigi.Parameter(default="Segmentation2DGroundTruth")
     
 class FileExists(RomiTask):
     """A Task that requires a file with a given id to exist."""
