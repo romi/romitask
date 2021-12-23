@@ -9,7 +9,8 @@ s = setup(
     packages=find_packages(),
     scripts=[
         'bin/romi_run_task',
-        'bin/print_task_info'
+        'bin/print_task_info',
+        'bin/romi_run_task_rest_api'
     ],
     author="Nabil Ait Taleb",
     author_email="mohamednabil.aittaleb@sony.com",
@@ -22,7 +23,10 @@ s = setup(
     install_requires=[
         'luigi',
         'toml',
-        'watchdog'
+        'watchdog',
+        'flask',
+        'flask-cors',
+        'flask-restful'
     ],
     include_package_data=True
 )
