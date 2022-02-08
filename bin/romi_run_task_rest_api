@@ -2,9 +2,17 @@
 # -*- coding: utf-8 -*-
 
 import os
+from os import path
+from os.path import expanduser
+import pathlib
+import subprocess
+from pathlib import Path
+import glob
 
+import tempfile
+from types import MethodType
 
-from flask import Flask, send_file
+from flask import Flask, jsonify, send_file
 from flask import request, send_from_directory
 from flask_cors import CORS
 from flask_restful import Resource, Api
@@ -16,26 +24,104 @@ CORS(app)
 api = Api(app)
 
 class TaskList(Resource):
-    """Class representing a task lis HTTP request, subclass of
+    """Class representing a task list HTTP request, subclass of
     flask_restful's Resource class.
     """
-    taskList = []
     def get(self, tasktype):
+        taskList = []
+        print("tasktype = ", tasktype)
         for task_key in MODULES.keys():
             if MODULES[task_key].startswith(tasktype):
-                self.taskList.append(task_key)
-        return self.taskList
+                taskList.append(task_key)
+        return taskList
 
-#class ConfigList(Resource):
-#    """Class representing a config lis HTTP request, subclass of
-#    flask_restful's Resource class.
-#    """
-#    configList = []
-#    def get(self, tasktype):
-#        if tasktype == "plant3dvision":
+class ConfigList(Resource):
+    """Class representing a config list HTTP request, subclass of
+    flask_restful's Resource class.
+    """
+    def get(self, tasktype):
+        configList = {}
+        home = expanduser("~")
+        if tasktype == "plant3dvision":
+            plant3dvision_configDirectory = path.join(home, "plant-3d-vision/config")
+            plant3dvision_configFiles = glob.glob(path.join(plant3dvision_configDirectory, "*.toml"))
+            for configFile in plant3dvision_configFiles:
+                with open(configFile, 'r') as f:
+                    fileContent = f.read()
+                    file_name = Path(configFile).stem
+                    configList[file_name] = fileContent
+        elif tasktype == "plantimager":
+            plantimager_configDirectory = path.join(home, "plant-imager/config")
+            plantimager_configFiles = glob.glob(path.join(plantimager_configDirectory, "*.toml"))
+            for configFile in plantimager_configFiles:
+                with open(configFile, 'r') as f:
+                    fileContent = f.read()
+                    file_name = Path(configFile).stem
+                    configList[file_name] = fileContent
+        return configList
 
+class RunTask(Resource):
+    """Class representing a run task HTTP request, subclass of
+    flask_restful's Resource class.
+    """
+    def post(self):
+        # Check if PYOPENCL_CTX is set
+        if os.getenv('PYOPENCL_CTX') == None:
+            os.environ["PYOPENCL_CTX"] = '0'
+
+        requestParameters = request.json
+
+        scanid = requestParameters['scanid']
+        task = requestParameters['task']
+        config = requestParameters['config']
+
+        home = expanduser("~")
+        #db_path = path.join(home, "Dev/db_3d_explorer")
+        db_path = os.getenv('DB_LOCATION')
+        scan = path.join(db_path, scanid)
+
+        with tempfile.NamedTemporaryFile(mode='w', suffix='.toml', delete=False) as tmp_configFile:
+            print("temp config file = ", tmp_configFile.name)
+
+            tmp_configFile.write(config)
+
+            command = ["romi_run_task", "--config", tmp_configFile.name, task, scan]
+            process = subprocess.run(command, universal_newlines=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+            print(process.stdout)
+            print(process.stderr)
+
+        pass
+
+class CleanScan(Resource):
+    """Class representing a run task HTTP request, subclass of
+    flask_restful's Resource class.
+    """
+    def post(self):
+        # Check if PYOPENCL_CTX is set
+        if os.getenv('PYOPENCL_CTX') == None:
+            os.environ["PYOPENCL_CTX"] = '0'
+
+        requestParameters = request.json
+
+        scanid = requestParameters['scanid']
+
+        home = expanduser("~")
+        #db_path = path.join(home, "Dev/db_3d_explorer")
+        db_path = os.getenv('DB_LOCATION')
+        scan = path.join(db_path, scanid)
+
+        command = ["romi_run_task", "Clean", scan]
+        process = subprocess.run(command, universal_newlines=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        print(process.stdout)
+        print(process.stderr)
+
+        pass
 
 api.add_resource(TaskList, '/tasklist/<string:tasktype>')
+api.add_resource(ConfigList, '/configlist/<string:tasktype>')
+api.add_resource(RunTask, '/runtask/')
+api.add_resource(CleanScan, '/clean/')
 
 if __name__ == "__main__":
-    app.run(host='0.0.0.0', port=2500)
+    app_port = int(os.getenv('APP_PORT'))
+    app.run(host='0.0.0.0', port=app_port, debug=True)
