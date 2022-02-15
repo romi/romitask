@@ -80,15 +80,12 @@ class RunTask(Resource):
         db_path = os.getenv('DB_LOCATION')
         scan = path.join(db_path, scanid)
 
-        with tempfile.NamedTemporaryFile(mode='w', suffix='.toml', delete=False) as tmp_configFile:
-            print("temp config file = ", tmp_configFile.name)
+        tmp_configFile = tempfile.NamedTemporaryFile(mode='w', suffix='.toml', delete=False)
+        tmp_configFile.write(config)
+        tmp_configFile.close()
 
-            tmp_configFile.write(config)
-
-            command = ["romi_run_task", "--config", tmp_configFile.name, task, scan]
-            process = subprocess.run(command, universal_newlines=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-            print(process.stdout)
-            print(process.stderr)
+        command = ["romi_run_task", "--config", tmp_configFile.name, task, scan]
+        process = subprocess.Popen(command)
 
         pass
 
@@ -111,9 +108,7 @@ class CleanScan(Resource):
         scan = path.join(db_path, scanid)
 
         command = ["romi_run_task", "Clean", scan]
-        process = subprocess.run(command, universal_newlines=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-        print(process.stdout)
-        print(process.stderr)
+        process = subprocess.Popen(command)
 
         pass
 
