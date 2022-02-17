@@ -43,7 +43,6 @@ LOGGING_CFG = """
     datefmt=%m-%d %H:%M:%S
     """
 
-
 def parsing():
     parser = argparse.ArgumentParser(
         description='Run a Romi task for a dataset.',
@@ -209,6 +208,9 @@ if __name__ == "__main__":
                "--DatabaseConfig-scan", args.db_path]
         if args.ls == 'True':
             cmd.append("--local-scheduler")
+        else:
+            luigid_port = int(os.getenv('LUIGID_PORT'))
+            cmd.append(f"--scheduler-port {luigid_port}")
         subprocess.run(cmd, env={**os.environ, **env}, check=True)
         # TODO: try to use `luigi.build` instead of CLI ?
         # Next line would require to import all tasks defined in TASKS
