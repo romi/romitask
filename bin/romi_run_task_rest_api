@@ -84,7 +84,7 @@ class RunTask(Resource):
         tmp_configFile.write(config)
         tmp_configFile.close()
 
-        command = ["romi_run_task", "--config", tmp_configFile.name, task, scan]
+        command = ["romi_run_task", "--config", tmp_configFile.name, task, scan, "--local-scheduler", "False"]
         process = subprocess.Popen(command)
 
         pass
@@ -107,7 +107,7 @@ class CleanScan(Resource):
         db_path = os.getenv('DB_LOCATION')
         scan = path.join(db_path, scanid)
 
-        command = ["romi_run_task", "Clean", scan]
+        command = ["romi_run_task", "Clean", scan, "--local-scheduler", "False"]
         process = subprocess.Popen(command)
 
         pass
