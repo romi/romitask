@@ -209,7 +209,7 @@ if __name__ == "__main__":
         if args.ls == 'True':
             cmd.append("--local-scheduler")
         else:
-            luigid_port = int(os.getenv('LUIGID_PORT'))
+            luigid_port = os.getenv('LUIGID_PORT')
             cmd.append("--scheduler-port")
             cmd.append(luigid_port)
         subprocess.run(cmd, env={**os.environ, **env}, check=True)
