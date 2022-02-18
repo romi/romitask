@@ -210,7 +210,8 @@ if __name__ == "__main__":
             cmd.append("--local-scheduler")
         else:
             luigid_port = int(os.getenv('LUIGID_PORT'))
-            cmd.append(f"--scheduler-port {luigid_port}")
+            cmd.append("--scheduler-port")
+            cmd.append(luigid_port)
         subprocess.run(cmd, env={**os.environ, **env}, check=True)
         # TODO: try to use `luigi.build` instead of CLI ?
         # Next line would require to import all tasks defined in TASKS
