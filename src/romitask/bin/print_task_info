@@ -248,8 +248,7 @@ def list_configured_tasks(toml_conf):
     """
     return list(toml_conf.keys())
 
-
-if __name__ == "__main__":
+def run():
     """"""
     args = parsing().parse_args()
 
@@ -288,3 +287,6 @@ if __name__ == "__main__":
     except FileNotFoundError as e:
         print(e)
         print("ERROR: No task output file found! Maybe it did not finish ?!")
+
+if __name__ == "__main__":
+    run()
