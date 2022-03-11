@@ -80,7 +80,7 @@ def parsing():
     return parser
 
 
-if __name__ == "__main__":
+def run():
     """ This script implement the ROMI tasks CLI.
 
     It is intended to be used as the main program to run the various tasks defined
@@ -215,3 +215,6 @@ if __name__ == "__main__":
         # MyTask = type(args.task, (), {})  # `MyTask` is now a class `args.task`
         # luigi_run_result = luigi.build(MyTask(), detailed_summary=True)
         # print(luigi_run_result.summary_text)
+
+if __name__ == "__main__":
+    run()
