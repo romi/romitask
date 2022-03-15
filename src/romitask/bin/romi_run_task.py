@@ -1,5 +1,27 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
+#
+# romitask - Task handling tools for the ROMI project
+#
+# Copyright (C) 2018-2019 Sony Computer Science Laboratories
+# Authors: D. Colliaux, T. Wintz, P. Hanappe
+#
+# This file is part of romitask.
+#
+# romitask is free software: you can redistribute it
+# and/or modify it under the terms of the GNU Lesser General Public
+# License as published by the Free Software Foundation, either
+# version 3 of the License, or (at your option) any later version.
+#
+# romitask is distributed in the hope that it will be
+# useful, but WITHOUT ANY WARRANTY; without even the implied
+# warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+# See the GNU General Public License for more details.
+#
+# You should have received a copy of the GNU Lesser General Public
+# License along with romitask.  If not, see
+# <https://www.gnu.org/licenses/>.
+# ------------------------------------------------------------------------------
 
 import argparse
 import glob
@@ -10,7 +32,9 @@ import tempfile
 from warnings import warn
 
 import toml
-from romitask.modules import MODULES, TASKS
+
+from romitask.modules import MODULES
+from romitask.modules import TASKS
 
 LUIGI_CMD = "luigi"
 LOGLEV = ["DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"]
@@ -150,17 +174,17 @@ def run():
     else:
         print("Using a PREVIOUS configuration.")
 
-    # Set the module to be loaded for the task. 
+    # Set the module to be loaded for the task.
     if args.module is not None:
         module = args.module
     elif args.task in MODULES:
         module = MODULES[args.task]
     else:
-        print(f"WARNING: No module was defined for the task '{args.task}'" )
-        print(f"WARNING: The list of pre-defined tasks is: {', '.join(TASKS)}" )
+        print(f"WARNING: No module was defined for the task '{args.task}'")
+        print(f"WARNING: The list of pre-defined tasks is: {', '.join(TASKS)}")
         print(f"WARNING: For other tasks, use the --module option to load the module containing the task")
         raise ValueError(f"No module was defined for the task '{args.task}'")
-        
+
     # Handle datasets directory:
     #  - if a "Scan" or "VirtualScan" tasks is required, a directory should be created
     #  - else, check it exists
@@ -215,6 +239,7 @@ def run():
         # MyTask = type(args.task, (), {})  # `MyTask` is now a class `args.task`
         # luigi_run_result = luigi.build(MyTask(), detailed_summary=True)
         # print(luigi_run_result.summary_text)
+
 
 if __name__ == "__main__":
     run()

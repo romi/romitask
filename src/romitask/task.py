@@ -41,6 +41,8 @@ To check for a task completeness, the fileset existence is checked as well as al
 import json
 
 import luigi
+from tqdm import tqdm
+
 from plantdb import FSDB
 from plantdb.log import logger
 
@@ -325,6 +327,7 @@ class RomiTask(luigi.Task):
     def get_task_name(self):
         return self.get_task_family().split('.')[-1]
 
+
 class FilesetExists(RomiTask):
     """A Task which requires a fileset with a given id to exist."""
     fileset_id = luigi.Parameter()
@@ -341,14 +344,17 @@ class FilesetExists(RomiTask):
         if self.output().get() is None:
             raise OSError("Fileset %s does not exist" % self.fileset_id)
 
+
 class ImagesFilesetExists(FilesetExists):
     """A Task which requires the presence of a fileset with id ``images``."""
     fileset_id = luigi.Parameter(default="images")
 
+
 class Segmentation2DGroundTruthFilesetExists(FilesetExists):
     """A Task which requires the presence of fileset with id ``Segmentation2DGroundTruth``."""
     fileset_id = luigi.Parameter(default="Segmentation2DGroundTruth")
-    
+
+
 class FileExists(RomiTask):
     """A Task that requires a file with a given id to exist."""
     fileset_id = luigi.Parameter()
@@ -375,8 +381,7 @@ class FileExists(RomiTask):
 
 
 class VirtualPlantObj(FileExists):
-    """The VirtualPlantObj task returns a 3D plant model file. The 3D model should                                                                                             
-    be stored as .obj file.   
+    """The VirtualPlantObj task returns a 3D plant model file. The 3D model should be stored as '.obj' file.
     
     Use as follows, using VirtualScan as an example:
     
@@ -396,23 +401,20 @@ class VirtualPlantObj(FileExists):
     >>>
     >>> [VirtualScan]
     >>> obj_fileset = "VirtualPlantObj"
-                                                                                                                                                                             
-    Attributes                                                                                                                                                               
-    ----------                                                                                                                                                               
-    scan_id: luigi.Parameter, optional                                                                                                                                       
-        The scan id where to look for the fileset. If unspecified, the                                                                                                       
-        current active scan will be used.                                                                                                                                    
-                                                                                                                                                                             
-    fileset_id: luigi.Parameter, optional                                                                                                                                    
-        The ID of the fileset to use. By default "VirtualPlant".
 
+    Attributes
+    ----------
+    scan_id: luigi.Parameter, optional
+        The scan id where to look for the fileset. If unspecified, the
+        current active scan will be used.
+    fileset_id: luigi.Parameter, optional
+        The ID of the fileset to use. By default, "VirtualPlant".
     fileset_id_prefix: luigi.Parameter, optional
         If the ID of the fileset cannot be provided, a prefix can be an alternative
         to search for a fileset id.
+    file_id : luigi.Parameter, optional
+        The ID of the file to use. The default is "VirtualPlant"
 
-    file_id : luigi.Parameter, optional                                                                                                                                      
-        The ID of the file to use. The default is "VirtualPlant"                                                                                                             
-                                                                                                                                                                             
     """
     scan_id = luigi.Parameter(default="")
     fileset_id = luigi.Parameter(default="VirtualPlant")
@@ -426,7 +428,7 @@ class VirtualPlantObj(FileExists):
             scan = db.get_scan(self.scan_id)
 
         t = FilesetTarget(scan, self.fileset_id)
-        if not t.exists(): # backup solution : search for a fileset id beginning with a specific prefix
+        if not t.exists():  # backup solution : search for a fileset id beginning with a specific prefix
             filesets_with_prefix = [f for f in scan.get_filesets() if f.id.startswith(self.fileset_id_prefix)]
             if len(filesets_with_prefix) == 0:
                 raise FileNotFoundError(f"Fileset with {self.fileset_id_prefix} prefix does not exist")
@@ -450,13 +452,13 @@ class VirtualPlantObj(FileExists):
         self.task_id = self.fileset_id
         return t
 
-    
+
 class FileByFileTask(RomiTask):
     """This abstract class is a Task which take every file from a fileset
-    and applies some function to it and saves it back
-    to the target.
+    and applies some function to it and saves it back to the target.
     """
     query = luigi.DictParameter(default={})
+    # n_jobs = luigi.IntParameter(default=-1)  # control number of parallel jobs
     type = None
 
     reader = None
@@ -474,33 +476,50 @@ class FileByFileTask(RomiTask):
 
         Returns
         -------
-        FSDB.File: this file must be created in outfs
+        FSDB.File
+            this file must be created in `outfs`
         """
         raise NotImplementedError
 
     def run(self):
-        """Run the task on every file in the fileset.
-        """
+        """Run the task on every file in the fileset."""
         input_fileset = self.input().get()
         output_fileset = self.output().get()
-        for fi in input_fileset.get_files(query=self.query):
+        for fi in tqdm(input_fileset.get_files(query=self.query), unit="file"):
             outfi = self.f(fi, output_fileset)
             if outfi is not None:
                 m = fi.get_metadata()
                 outm = outfi.get_metadata()
                 outfi.set_metadata({**m, **outm})
 
+        # ATTEMPT to parallelize:
+        # def apply_f(f, fi, output_fileset):
+        #     outfi = f(fi, output_fileset)
+        #     return fi, outfi
+        #
+        # from joblib import Parallel
+        # from joblib import delayed
+        # files = Parallel(n_jobs=self.n_jobs)(
+        #     delayed(apply_f)(self.f, fi, output_fileset) for fi in
+        #     tqdm(input_fileset.get_files(query=self.query), unit="file"))
+        #
+        # for (infi, outfi) in files:
+        #     if outfi is not None:
+        #         m = infi.get_metadata()
+        #         outm = outfi.get_metadata()
+        #         outfi.set_metadata({**m, **outm})
+
+
 
 @RomiTask.event_handler(luigi.Event.FAILURE)
 def mourn_failure(task, exception):
-    """In the case of failure of a task, remove the corresponding fileset from
-    the database.
+    """In the case of failure of a task, remove the corresponding fileset from the database.
 
     Parameters
     ----------
     task : RomiTask
         The task which has failed
-    exception :
+    exception : Exc
         The exception raised by the failure
     """
     output_fileset = task.output().get()

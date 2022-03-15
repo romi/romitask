@@ -1,5 +1,27 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
+#
+# romitask - Task handling tools for the ROMI project
+#
+# Copyright (C) 2018-2019 Sony Computer Science Laboratories
+# Authors: D. Colliaux, T. Wintz, P. Hanappe
+#
+# This file is part of romitask.
+#
+# romitask is free software: you can redistribute it
+# and/or modify it under the terms of the GNU Lesser General Public
+# License as published by the Free Software Foundation, either
+# version 3 of the License, or (at your option) any later version.
+#
+# romitask is distributed in the hope that it will be
+# useful, but WITHOUT ANY WARRANTY; without even the implied
+# warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+# See the GNU General Public License for more details.
+#
+# You should have received a copy of the GNU Lesser General Public
+# License along with romitask.  If not, see
+# <https://www.gnu.org/licenses/>.
+# ------------------------------------------------------------------------------
 
 """
 Python script to call after a ROMI task to print a task summary.
@@ -11,6 +33,7 @@ import os
 
 import numpy as np
 import toml
+
 from romitask.modules import TASKS
 
 HELP_URL = "https://docs.romi-project.eu/Scanner/metadata/tasks_metadata/"
@@ -248,6 +271,7 @@ def list_configured_tasks(toml_conf):
     """
     return list(toml_conf.keys())
 
+
 def run():
     """"""
     args = parsing().parse_args()
@@ -265,13 +289,15 @@ def run():
     md_path = os.path.join(args.db_path, 'metadata')
     json_list = [f for f in os.listdir(md_path) if f.startswith(args.task) and f.endswith('.json')]
     if json_list == []:
-        raise IOError("Could not find the JSON metadata file associated to task '{}' in dataset '{}'!".format(args.task, args.db_path))
+        raise IOError("Could not find the JSON metadata file associated to task '{}' in dataset '{}'!".format(args.task,
+                                                                                                              args.db_path))
     elif len(json_list) == 1:
         md_json = json_list[0]
         print("Found a JSON metadata file associated to task '{}' in dataset '{}'!".format(args.task, args.db_path))
         md_json = os.path.join(md_path, md_json)
     else:
-        print("Found more than one JSON metadata file associated to task '{}' in dataset '{}':".format(args.task, args.db_path))
+        print("Found more than one JSON metadata file associated to task '{}' in dataset '{}':".format(args.task,
+                                                                                                       args.db_path))
         [print(" - {}".format(json_f)) for json_f in json_list]
         md_json = max([os.path.join(md_path, json_f) for json_f in json_list], key=os.path.getctime)
         print("The most recent one is '{}'".format(os.path.split(md_json)[-1]))
@@ -287,6 +313,7 @@ def run():
     except FileNotFoundError as e:
         print(e)
         print("ERROR: No task output file found! Maybe it did not finish ?!")
+
 
 if __name__ == "__main__":
     run()

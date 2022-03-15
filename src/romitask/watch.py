@@ -25,10 +25,12 @@
 
 import time
 
-from plantdb.db import DBBusyError
 from romitask.runner import DBRunner
-from watchdog.events import FileSystemEventHandler, DirCreatedEvent
+from watchdog.events import DirCreatedEvent
+from watchdog.events import FileSystemEventHandler
 from watchdog.observers import Observer
+
+from plantdb.db import DBBusyError
 
 
 # logging.basicConfig(level=logging.INFO,
@@ -44,6 +46,7 @@ class FSDBWatcher():
     observer : Observer
         Watchdog observer for the filesystem
     """
+
     def __init__(self, db, tasks, config):
         """Parameters
         ----------
