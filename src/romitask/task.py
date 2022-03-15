@@ -458,7 +458,6 @@ class FileByFileTask(RomiTask):
     and applies some function to it and saves it back to the target.
     """
     query = luigi.DictParameter(default={})
-    # n_jobs = luigi.IntParameter(default=-1)  # control number of parallel jobs
     type = None
 
     reader = None
@@ -491,24 +490,6 @@ class FileByFileTask(RomiTask):
                 m = fi.get_metadata()
                 outm = outfi.get_metadata()
                 outfi.set_metadata({**m, **outm})
-
-        # ATTEMPT to parallelize:
-        # def apply_f(f, fi, output_fileset):
-        #     outfi = f(fi, output_fileset)
-        #     return fi, outfi
-        #
-        # from joblib import Parallel
-        # from joblib import delayed
-        # files = Parallel(n_jobs=self.n_jobs)(
-        #     delayed(apply_f)(self.f, fi, output_fileset) for fi in
-        #     tqdm(input_fileset.get_files(query=self.query), unit="file"))
-        #
-        # for (infi, outfi) in files:
-        #     if outfi is not None:
-        #         m = infi.get_metadata()
-        #         outm = outfi.get_metadata()
-        #         outfi.set_metadata({**m, **outm})
-
 
 
 @RomiTask.event_handler(luigi.Event.FAILURE)
