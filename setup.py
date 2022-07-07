@@ -21,7 +21,8 @@ s = setup(
     use_scm_version=True,
     setup_requires=['setuptools_scm'],
     install_requires=[
-        'luigi',
+        'luigi==3.0.3',
+        'tqdm',
         'toml',
         'watchdog',
         'colorlog'
