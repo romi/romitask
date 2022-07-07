@@ -5,7 +5,7 @@ with open("README.md", "r", encoding="utf-8") as fh:
 
 s = setup(
     name="romitask",
-    version="0.10.99",
+    version="0.11.0",
     packages=find_packages('src'),
     package_dir={'': 'src'},
     scripts=[
