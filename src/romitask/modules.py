@@ -29,6 +29,7 @@ MODULES = {
     "VirtualPlant": "plantimager.tasks.lpy",
     "VirtualScan": "plantimager.tasks.scan",
     "CalibrationScan": "plantimager.tasks.scan",
+    "IntrinsicCalibrationScan": "plantimager.tasks.scan",
     # Geometric reconstruction modules:
     "Colmap": "plant3dvision.tasks.colmap",
     "Undistorted": "plant3dvision.tasks.proc2d",
