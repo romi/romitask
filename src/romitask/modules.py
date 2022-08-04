@@ -30,6 +30,10 @@ MODULES = {
     "VirtualScan": "plantimager.tasks.scan",
     "CalibrationScan": "plantimager.tasks.scan",
     "IntrinsicCalibrationScan": "plantimager.tasks.scan",
+    # Intrinsic Calibration modules:
+    "CreateCharucoBoard" : "plant3dvision.tasks.proc2d",
+    "DetectCharuco" : "plant3dvision.tasks.proc2d",
+    "IntrinsicCalibration" : "plant3dvision.tasks.proc2d",
     # Geometric reconstruction modules:
     "Colmap": "plant3dvision.tasks.colmap",
     "Undistorted": "plant3dvision.tasks.proc2d",
