@@ -24,17 +24,18 @@
 # ------------------------------------------------------------------------------
 
 MODULES = {
-    # Scanning modules:
+    # Scanning module:
     "Scan": "plantimager.tasks.scan",
     "VirtualPlant": "plantimager.tasks.lpy",
     "VirtualScan": "plantimager.tasks.scan",
     "CalibrationScan": "plantimager.tasks.scan",
     "IntrinsicCalibrationScan": "plantimager.tasks.scan",
-    # Intrinsic Calibration modules:
-    "CreateCharucoBoard" : "plant3dvision.tasks.proc2d",
-    "DetectCharuco" : "plant3dvision.tasks.proc2d",
-    "IntrinsicCalibration" : "plant3dvision.tasks.proc2d",
-    # Geometric reconstruction modules:
+    # Calibration module:
+    "CreateCharucoBoard" : "plant3dvision.tasks.calibration",
+    "DetectCharuco" : "plant3dvision.tasks.calibration",
+    "ExtrinsicCalibration" : "plant3dvision.tasks.calibration",
+    "IntrinsicCalibration" : "plant3dvision.tasks.calibration",
+    # Geometric reconstruction module:
     "Colmap": "plant3dvision.tasks.colmap",
     "Undistorted": "plant3dvision.tasks.proc2d",
     "Masks": "plant3dvision.tasks.proc2d",
@@ -42,15 +43,15 @@ MODULES = {
     "PointCloud": "plant3dvision.tasks.proc3d",
     "TriangleMesh": "plant3dvision.tasks.proc3d",
     "CurveSkeleton": "plant3dvision.tasks.proc3d",
-    # Machine learning reconstruction modules:
+    # Machine learning reconstruction module:
     "Segmentation2D": "plant3dvision.tasks.proc2d",
     "SegmentedPointCloud": "plant3dvision.tasks.proc3d",
     "ClusteredMesh": "plant3dvision.tasks.proc3d",
     "OrganSegmentation": "plant3dvision.tasks.proc3d",
-    # Quantification modules:
+    # Quantification module:
     "TreeGraph": "plant3dvision.tasks.arabidopsis",
     "AnglesAndInternodes": "plant3dvision.tasks.arabidopsis",
-    # Evaluation modules:
+    # Evaluation module:
     "VoxelsGroundTruth": "plant3dvision.tasks.evaluation",
     "VoxelsEvaluation": "plant3dvision.tasks.evaluation",
     "PointCloudGroundTruth": "plant3dvision.tasks.evaluation",
@@ -61,9 +62,9 @@ MODULES = {
     "AnglesAndInternodesEvaluation": "plant3dvision.tasks.evaluation",
     "CylinderRadiusGroundTruth": "plant3dvision.tasks.evaluation",
     "CylinderRadiusEstimation": "plant3dvision.tasks.evaluation",
-    # Visu modules:
+    # Visualization module:
     "Visualization": "plant3dvision.tasks.visualization",
-    # Database modules:
+    # Database module:
     "Clean": "romitask.task"
 }
 
