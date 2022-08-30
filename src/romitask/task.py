@@ -43,8 +43,7 @@ import json
 import luigi
 from tqdm import tqdm
 
-from plantdb import FSDB
-from plantdb.log import logger
+from romitask.log import logger
 
 db = None
 
@@ -81,6 +80,7 @@ class ScanParameter(luigi.Parameter):
         If the given scan dataset id does not exist, it is created.
 
         """
+        from plantdb import FSDB
         global db
         path = scan_path.rstrip('/')
         path = path.split('/')
@@ -89,7 +89,7 @@ class ScanParameter(luigi.Parameter):
         # Defines the scan dataset id
         scan_id = path[-1]
         # create & connect to `db` if not defined:
-        if db is None:  # TODO: cannot change DB during run..
+        if db is None:  # TODO: cannot change DB during run...
             db = FSDB(db_path)
             db.connect()
         # Get the scan dataset object or create one & return it
@@ -523,13 +523,14 @@ def mourn_failure(task, exception):
 
 class DummyTask(RomiTask):
     """A RomiTask which does nothing and requires nothing."""
+    upstream_task = None
 
     def requires(self):
-        """ """
+        """Requires nothing."""
         return []
 
     def run(self):
-        """ """
+        """Do nothing."""
         return
 
 
