@@ -96,44 +96,57 @@ LOGGING_CFG = """
 def parsing():
     parser = argparse.ArgumentParser(
         description='Run a Romi task for a dataset.',
-        epilog="""See {} for help with configuration files.
-                                     """.format(HELP_URL))
-
+        epilog=f"See {HELP_URL} for help with configuration files.")
+    # Positional arguments:
     parser.add_argument('task', metavar='task', type=str,
                         help=f"Luigi task to run. The list of pre-defined is: {', '.join(TASKS)}")
+    parser.add_argument('scan_path', metavar='dataset_path', type=str,
+                        help='Path to the scan dataset to process (directory).')
 
-    parser.add_argument('db_path', metavar='dataset_path', type=str,
-                        help='FSDB scan dataset to process (path)')
-
+    # Optional arguments:
     parser.add_argument('--config', dest='config', default="",
-                        help="""configuration file or directory location.
-                        If a file, reads config from it
+                        help="""TOML configuration file or directory location.
+                        If a file, reads config from it.
                         If a folder, concatenates all configuration files in it.
-                        By default, try read from the scan dataset directory (backup
-                        or manually copied).
-                        """)
-
+                        By default, try read from the scan dataset directory (backup or manually copied).""")
     parser.add_argument('--luigicmd', dest='luigicmd', default=LUIGI_CMD,
-                        help=f"luigi command, default: `{LUIGI_CMD}`")
-
+                        help=f"Luigi command, default: `{LUIGI_CMD}`")
     parser.add_argument('--module', dest='module', default=None,
-                        help="module for the task")
-
-    parser.add_argument('--log-level', dest='log_level', default='INFO',
-                        choices=LOGLEV,
-                        help="defines level of message logging.")
-
-    parser.add_argument('--local-scheduler', dest='ls', action="store_true",
-                        default=True,
-                        help='Luigi CLI argument')
+                        help="Library and module of the task. Use it if not available or different than defined in `romitask.modules.MODULES`.")
+    parser.add_argument('--log-level', dest='log_level', default='INFO', choices=LOGLEV,
+                        help="Level of message logging, defaults to 'INFO'.")
+    parser.add_argument('--local-scheduler', dest='ls', action="store_true", default=True,
+                        help='Luigi CLI argument, `True` by default.')
     return parser
+
+
+def get_version():
+    """Return used ROMI libraries version."""
+    import importlib
+    from importlib.metadata import version
+    from importlib.metadata import PackageNotFoundError
+    hash_dict = {}
+    for package in ["dtw", "plant3dvision", "plantdb", "plantimager", "romicgal", "romiseg", "romitask"]:
+        try:
+            module = importlib.import_module(package)
+        except ModuleNotFoundError or PackageNotFoundError:
+            hash_dict[package] = "Not Installed"
+        else:
+            try:
+                hash_dict[package] = version(package)
+            except AttributeError:
+                hash_dict[package] = "Undefined"
+            except PackageNotFoundError:
+                hash_dict[package] = "Not Installed"
+
+    return hash_dict
 
 
 def main(args):
     config = {}
     # Try to load backup configurations:
-    scan_last_cfg = os.path.join(args.db_path, "scan.toml")
-    pipeline_last_cfg = os.path.join(args.db_path, "pipeline.toml")
+    scan_last_cfg = os.path.join(args.scan_path, "scan.toml")
+    pipeline_last_cfg = os.path.join(args.scan_path, "pipeline.toml")
     if os.path.isfile(scan_last_cfg):
         config = {**config, **toml.load(scan_last_cfg)}
     if os.path.isfile(pipeline_last_cfg):
@@ -142,7 +155,7 @@ def main(args):
         if "Scan" in args.task:
             print(
                 f"WARNING: task '{args.task}' was called in a datasets folder with a backup of a processing pipeline!")
-            print(f"WARNING: datasets folder is '{args.db_path}'")
+            print(f"WARNING: datasets folder is '{args.scan_path}'")
             raise IOError
         config = {**config, **toml.load(pipeline_last_cfg)}
 
@@ -187,7 +200,7 @@ def main(args):
     # Handle datasets directory:
     #  - if a "Scan" or "VirtualScan" tasks is required, a directory should be created
     #  - else, check it exists
-    d = args.db_path
+    d = args.scan_path
     if "Scan" in args.task:
         try:
             os.mkdir(d)
@@ -218,6 +231,8 @@ def main(args):
         config["retcode"] = {"already_running": 10, "missing_data": 20,
                              "not_run": 25, "task_failed": 30,
                              "scheduling_error": 35, "unhandled_exception": 40}
+        # Save the libraries version:
+        config["version"] = get_version()
         toml.dump(config, open(file_path, 'w'))
         # Set ENV variables to provide the logging TOML file path to `luigi`:
         env = {
@@ -225,11 +240,11 @@ def main(args):
             "LUIGI_CONFIG_PATH": file_path
         }
         # Defines the command to run and use it in a subprocess:
-        # "--DatabaseConfig-scan args.db_path" set the value of `scan` for the `DatabaseConfig` Config class
+        # "--DatabaseConfig-scan args.scan_path" set the value of `scan` for the `DatabaseConfig` Config class
         # https://luigi.readthedocs.io/en/stable/parameters.html#setting-parameter-value-for-other-classes
         cmd = [args.luigicmd, "--logging-conf-file", logging_file_path,
                "--module", module, args.task,
-               "--DatabaseConfig-scan", args.db_path]
+               "--DatabaseConfig-scan", args.scan_path]
         if args.ls:
             cmd.append("--local-scheduler")
         subprocess.run(cmd, env={**os.environ, **env}, check=True)
