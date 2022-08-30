@@ -1,11 +1,61 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
+#
+# romitask - Task handling tools for the ROMI project
+#
+# Copyright (C) 2018-2019 Sony Computer Science Laboratories
+# Authors: D. Colliaux, T. Wintz, P. Hanappe
+#
+# This file is part of romitask.
+#
+# romitask is free software: you can redistribute it
+# and/or modify it under the terms of the GNU Lesser General Public
+# License as published by the Free Software Foundation, either
+# version 3 of the License, or (at your option) any later version.
+#
+# romitask is distributed in the hope that it will be
+# useful, but WITHOUT ANY WARRANTY; without even the implied
+# warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+# See the GNU General Public License for more details.
+#
+# You should have received a copy of the GNU Lesser General Public
+# License along with romitask.  If not, see <https://www.gnu.org/licenses/>.
+# ------------------------------------------------------------------------------
 
 import logging
 from os import path
 
 from colorlog import ColoredFormatter
 
+LOGGING_CFG = """
+    [loggers]
+    keys=root
+
+    [logger_root]
+    handlers=console
+    qualname={0}
+    level={1}
+
+    [handlers]
+    keys=console
+
+    [handler_console]
+    class=logging.StreamHandler
+    formatter=color
+    level={1}
+    stream  : ext://sys.stdout
+
+    [formatters]
+    keys=color
+
+    [formatter_color]
+    class=colorlog.ColoredFormatter
+    format=%(log_color)s%(levelname)-8s%(reset)s %(bg_blue)s[%(name)s]%(reset)s %(message)s
+    datefmt=%m-%d %H:%M:%S
+    """
+
+def get_logging_config(name='root', log_level='INFO'):
+    return LOGGING_CFG.format(name, log_level)
 
 def configure_logger(name, log_path="", log_level='INFO'):
     colored_formatter = ColoredFormatter(
@@ -20,16 +70,15 @@ def configure_logger(name, log_path="", log_level='INFO'):
     console = logging.StreamHandler()
     console.setFormatter(colored_formatter)
 
-    if 'logger' not in globals():
-        logger = logging.getLogger(name)
-        logger.addHandler(console)
-        logger.setLevel(getattr(logging, log_level))
+    logger = logging.getLogger(name)
+    logger.addHandler(console)
+    logger.setLevel(getattr(logging, log_level))
 
-        if log_path is not None and log_path != "":
-            # create file handler:
-            fh = logging.FileHandler(path.join(log_path, f'{name}.log'), mode='w')
-            fh.setFormatter(simple_formatter)
-            logger.addHandler(fh)
+    if log_path is not None and log_path != "":
+        # create file handler:
+        fh = logging.FileHandler(path.join(log_path, f'{name}.log'), mode='w')
+        fh.setFormatter(simple_formatter)
+        logger.addHandler(fh)
 
     return logger
 

@@ -39,7 +39,7 @@ using luigi's "config ingestion" [^1] and ROMI configuration classes.
 
 The tasks "CalibrationScan", "IntrinsicCalibrationScan", "Scan" & "VirtualScan"
 requires a non-existent or empty dataset directory.
-The other tasks requires a datasets directory populated by images from one of
+The other tasks requires a dataset directory populated by images from one of
 the previously named task.
 
 References
@@ -53,44 +53,18 @@ import glob
 import json
 import os
 import subprocess
+import sys
 import tempfile
-from warnings import warn
 
 import toml
 
+from romitask.log import get_logging_config
 from romitask.modules import MODULES
 from romitask.modules import TASKS
 
 LUIGI_CMD = "luigi"
 LOGLEV = ["DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"]
 HELP_URL = "https://docs.romi-project.eu/Scanner/user_guide/pipelines/"
-
-LOGGING_CFG = """
-    [loggers]
-    keys=root
-    
-    [logger_root]
-    handlers=console
-    qualname=root
-    level={}
-    
-    [handlers]
-    keys=console
-    
-    [handler_console]
-    class=logging.StreamHandler
-    formatter=color
-    level={}
-    stream  : ext://sys.stdout
-    
-    [formatters]
-    keys=color
-    
-    [formatter_color]
-    class=colorlog.ColoredFormatter
-    format=%(log_color)s%(levelname)-8s%(reset)s %(bg_blue)s[%(name)s]%(reset)s %(message)s
-    datefmt=%m-%d %H:%M:%S
-    """
 
 
 def parsing():
@@ -142,104 +116,312 @@ def get_version():
     return hash_dict
 
 
-def main(args):
-    config = {}
-    # Try to load backup configurations:
-    scan_last_cfg = os.path.join(args.scan_path, "scan.toml")
-    pipeline_last_cfg = os.path.join(args.scan_path, "pipeline.toml")
+#: Name of the scan backup configuration file:
+SCAN_TOML = "scan.toml"
+#: Name of the pipeline backup configuration file:
+PIPE_TOML = "pipeline.toml"
+
+
+def load_backup_scan_cfg(path):
+    """Try to load ``SCAN_TOML`` configuration from path.
+
+    Parameters
+    ----------
+    path : str
+        Where the ``SCAN_TOML`` configuration file should be.
+
+    Returns
+    -------
+    dict
+        The configuration dictionary, if loaded from backup file.
+    """
+    scan_last_cfg = os.path.join(path, SCAN_TOML)
+    bak_scan_config = {}
     if os.path.isfile(scan_last_cfg):
-        config = {**config, **toml.load(scan_last_cfg)}
+        bak_scan_config = {**toml.load(scan_last_cfg)}
+
+    return bak_scan_config
+
+
+def load_backup_pipe_cfg(path, task):
+    """Try to load ``PIPE_TOML`` configuration from path.
+
+    Parameters
+    ----------
+    path : str
+        Where the ``PIPE_TOML`` configuration file should be.
+    task : str
+        Name of the task to perform.
+
+    Returns
+    -------
+    dict
+        The configuration dictionary, if loaded from backup file.
+    """
+    pipeline_last_cfg = os.path.join(path, PIPE_TOML)
+    bak_pipe_config = {}
     if os.path.isfile(pipeline_last_cfg):
         # Raise an IOError when task 'Scan' is required in a folder with a backup of a processing pipeline
-        # This probably means that you are trying to use a datasets that is not EMPTY!
-        if "Scan" in args.task:
-            print(
-                f"WARNING: task '{args.task}' was called in a datasets folder with a backup of a processing pipeline!")
-            print(f"WARNING: datasets folder is '{args.scan_path}'")
-            raise IOError
-        config = {**config, **toml.load(pipeline_last_cfg)}
+        # This probably means that you are trying to use a dataset that is NOT EMPTY!
+        if "Scan" in task:
+            logger.critical(f"Task '{task}' was called with dataset '{path}'!")
+            logger.critical(f"It contains a processing pipeline configuration backup file!")
+            sys.exit(f"Requested {task} task in non-empty folder, clean it up or change location!")
+        bak_pipe_config = {**toml.load(pipeline_last_cfg)}
 
-    # Process given configuration directory of file, if any:
-    if os.path.isdir(args.config):
-        # Read config (json or toml)
-        for f in glob.glob(os.path.join(args.config, "*.toml")):
-            try:
-                c = toml.load(open(f))
-                config = {**config, **c}
-            except:
-                warn("Could not process config file: %s" % f)
-        for f in glob.glob(os.path.join(args.config, "*.json")):
-            try:
-                c = json.load(open(f))
-                config = {**config, **c}
-            except:
-                warn("Could not process config file: %s" % f)
-    elif os.path.isfile(args.config):
+    return bak_pipe_config
+
+
+def load_config_from_directory(path):
+    """Load TOML & JSON configuration files from path.
+
+    Parameters
+    ----------
+    path : str
+        Path to where the configuration file(s) should be.
+
+    Returns
+    -------
+    dict
+        The configuration dictionary, if loaded from the files.
+
+    Notes
+    -----
+    We exclude the backup files ``SCAN_TOML`` & ``PIPE_TOML`` from the list of loadable files.
+
+    """
+    # List TOML config files:
+    toml_list = glob.glob(os.path.join(path, "*.toml"))
+    toml_list = [cfg for cfg in toml_list if cfg.split("/")[-1] not in (SCAN_TOML, PIPE_TOML)]
+    # List JSON config files:
+    json_list = glob.glob(os.path.join(path, "*.json"))
+
+    if len(toml_list) == 0 and len(json_list) == 0:
+        logger.critical(f"Could not find any TOML or JSON configuration file in '{path}'!")
+        sys.exit("Configuration file missing!")
+
+    config = {}
+    # Read TOML configs
+    for f in toml_list:
         try:
-            c = json.load(open(args.config))
+            c = toml.load(open(f))
+            config = {**config, **c}
         except:
-            try:
-                c = toml.load(open(args.config))
-            except:
-                raise IOError("Could not load config file")
-        config = {**config, **c}
-    else:
-        print("Using a PREVIOUS configuration.")
-
-    # Set the module to be loaded for the task.
-    if args.module is not None:
-        module = args.module
-    elif args.task in MODULES:
-        module = MODULES[args.task]
-    else:
-        print(f"WARNING: No module was defined for the task '{args.task}'")
-        print(f"WARNING: The list of pre-defined tasks is: {', '.join(TASKS)}")
-        print(f"WARNING: For other tasks, use the --module option to load the module containing the task")
-        raise ValueError(f"No module was defined for the task '{args.task}'")
-
-    # Handle datasets directory:
-    #  - if a "Scan" or "VirtualScan" tasks is required, a directory should be created
-    #  - else, check it exists
-    d = args.scan_path
-    if "Scan" in args.task:
+            logger.warning(f"Could not process TOML config file: {f}")
+        else:
+            logger.info(f"Loaded configuration file: {f}")
+    # Read JSON configs:
+    for f in json_list:
         try:
-            os.mkdir(d)
-        except FileExistsError as e:
-            # pass  # an error should never go silent...
-            if not os.listdir(d) == []:
-                print(e)
-            else:
-                print(f"Using empty datasets directory: {d}")
-        cfgname = "scan.toml"
-    else:
-        assert (os.path.isdir(d))
-        cfgname = "pipeline.toml"
+            c = json.load(open(f))
+            config = {**config, **c}
+        except:
+            logger.warning(f"Could not process JSON config file: {f}")
+        else:
+            logger.info(f"Loaded configuration file: {f}")
 
-    # Generate logging config for luigi ("logging_config.toml"):
-    logging_config = LOGGING_CFG.format(args.log_level, args.log_level)
+    return config
+
+
+def load_config_from_file(path):
+    """Load TOML or JSON configuration file from path.
+
+    Parameters
+    ----------
+    path : str
+        Path to the configuration file to load.
+
+    Returns
+    -------
+    dict
+        The configuration dictionary.
+
+    """
+    config = None
+    if path.endswith("toml"):
+        try:
+            config = toml.load(open(path))
+        except:
+            logger.critical(f"Could not load TOML configuration file '{path}'!")
+    elif path.endswith("json"):
+        try:
+            config = json.load(open(path))
+        except:
+            logger.critical(f"Could not load JSON configuration file '{path}'!")
+    else:
+        logger.critical(f"Unsupported configuration file format, should be TOML or JSON!")
+
+    if config is None:
+        sys.exit(f"Error while loading configuration file!")
+
+    return config
+
+
+def get_task_module(task, module=None):
+    """Set the name of the `module` to be loaded for the selected `task`.
+
+    Parameters
+    ----------
+    task : str
+        Get the name of the `module` for selected `task`.
+        If `module` is not ``None``, check it exists.
+    module : str, optional
+        A manually defined module name.
+
+    Returns
+    -------
+    str
+        The name of the `module` to use with `task`.
+    """
+    import importlib
+    if module is not None:
+        try:
+            importlib.import_module(module)
+        except ModuleNotFoundError:
+            logger.warning(f"Could not load manually defined module: '{module}'.")
+            module = get_task_predefined_module(task)
+        else:
+            logger.info(f"Got a manually defined module: '{module}'.")
+    else:
+        module = get_task_predefined_module(task)
+    return module
+
+
+def get_task_predefined_module(task: str) -> str:
+    """Try to get the task from the pre-defined ``MODULES`` dictionary."""
+    try:
+        module = MODULES[task]
+    except KeyError:
+        logger.critical(f"Could not find pre-defined module for selected task '{task}'!")
+        logger.critical(f"The list of pre-defined tasks is: {', '.join(sorted(TASKS))}.")
+        logger.critical(f"Use `--module` to manually define the Python module corresponding to the selected task.")
+        sys.exit("Error with module definition!")
+    else:
+        logger.info(f"Found pre-defined module '{module}' for task '{task}'.")
+    return module
+
+
+def create_backup_cfg(path, cfgname, config):
+    """Create the backup configuration file used by luigi.
+
+    Parameters
+    ----------
+    path : str
+        Where to save the backup configuration file used by luigi.
+    cfgname : str
+        Name of the backup configuration file.
+    config : dict
+        Task(s) configuration dictionary.
+
+    Returns
+    -------
+    str
+        Path to the configuration file to use by luigi.
+
+    Notes
+    -----
+    We append "return codes" and "library versioning" to the given configuration dictionary.
+
+    """
+    file_path = os.path.join(path, cfgname)
+    # The following return codes are the recommended exit codes for Luigi
+    # They are in increasing level of severity (for most applications)
+    # https://luigi.readthedocs.io/en/stable/configuration.html#retcode
+    config["retcode"] = {"already_running": 10, "missing_data": 20,
+                         "not_run": 25, "task_failed": 30,
+                         "scheduling_error": 35, "unhandled_exception": 40}
+    # Save the libraries version:
+    config["version"] = get_version()
+    toml.dump(config, open(file_path, 'w'))
+    return file_path
+
+
+def check_dataset_directory(path, task):
+    """Check the dataset directory is correctly defined depending on the `task` to execute.
+
+    Parameters
+    ----------
+    path : str
+        Path to the dataset to check.
+    task : str
+        Name of the task to execute by luigi.
+
+    Returns
+    -------
+    str
+        The name of the (backup) configuration file to use by luigi.
+
+    Notes
+    -----
+    If a "Scan" like tasks is required, a directory should be created to receive the created fileset.
+    Else, the dataset directory should exist as an existing fileset will be processed.
+
+    """
+    if "Scan" in task:
+        try:
+            os.mkdir(path)
+        except FileExistsError:
+            if not os.listdir(path) == []:
+                logger.critical(f"Given dataset directory '{path}' exists and is not empty!")
+                sys.exit("Non-empty dataset directory for scanning process.")
+            else:
+                logger.info(f"Using existing empty dataset directory: {path}")
+        cfgname = SCAN_TOML
+    else:
+        try:
+            assert (os.path.isdir(path))
+        except AssertionError:
+            logger.critical(f"Could not find dataset directory '{path}'!")
+            sys.exit("Non-existing dataset directory for non-scanning process.")
+        cfgname = PIPE_TOML
+    return cfgname
+
+
+def main():
+    # - Parse the input arguments to variables:
+    parser = parsing()
+    args = parser.parse_args()
+    # - Configure a logger from this application:
+    from romitask.log import configure_logger
+    global logger
+    logger = configure_logger('romi_run_task')
+
+    # - Try to load SCAN backup TOML configuration:
+    bak_scan_config = load_backup_scan_cfg(args.scan_path)
+    # - Try to load PIPELINE backup TOML configuration:
+    bak_pipe_config = load_backup_pipe_cfg(args.scan_path, args.task)
+
+    # - Process given configuration directory OR file, if any:
+    config = {}
+    if os.path.isdir(args.config):
+        config = load_config_from_directory(args.config)
+    elif os.path.isfile(args.config):
+        config = load_config_from_file(args.config)
+    else:
+        if bak_pipe_config is None:
+            logger.info("Using NO configuration!")
+        else:
+            config = bak_pipe_config
+            logger.info("Using a PREVIOUS pipeline configuration!")
+
+    # - Set the name of the module to be loaded for the selected task:
+    module = get_task_module(args.task, args.module)
+    # - Check the dataset directory is OK to use:
+    cfgname = check_dataset_directory(args.scan_path, args.task)
 
     with tempfile.TemporaryDirectory() as tmpd:
-        # Create a "logging_config.toml" TOML file to be used by `luigi` for logging
+        # - Generate logging config for luigi ("logging_config.toml"):
+        logging_config = get_logging_config(__file__, args.log_level)
+        # - Create a "logging_config.toml" TOML file to be used by `luigi` for logging
         logging_file_path = os.path.join(tmpd, "logging_config.toml")
         with open(logging_file_path, 'w') as f:
             f.write(logging_config)
-        # Create the "scan.toml" OR "pipeline.toml" backup config file:
-        file_path = os.path.join(d, cfgname)
-        # The following return codes are the recommended exit codes for Luigi
-        # They are in increasing level of severity (for most applications)
-        # https://luigi.readthedocs.io/en/stable/configuration.html#retcode
-        config["retcode"] = {"already_running": 10, "missing_data": 20,
-                             "not_run": 25, "task_failed": 30,
-                             "scheduling_error": 35, "unhandled_exception": 40}
-        # Save the libraries version:
-        config["version"] = get_version()
-        toml.dump(config, open(file_path, 'w'))
-        # Set ENV variables to provide the logging TOML file path to `luigi`:
-        env = {
-            "LUIGI_CONFIG_PARSER": "toml",
-            "LUIGI_CONFIG_PATH": file_path
-        }
-        # Defines the command to run and use it in a subprocess:
+
+        # - Create the "scan.toml" OR "pipeline.toml" (backup) config file used by luigi:
+        file_path = create_backup_cfg(args.scan_path, cfgname, config)
+        # - Define environment variables to provide the logging TOML file path to `luigi`:
+        env = {"LUIGI_CONFIG_PARSER": "toml", "LUIGI_CONFIG_PATH": file_path}
+        # - Define the luigi command to run:
         # "--DatabaseConfig-scan args.scan_path" set the value of `scan` for the `DatabaseConfig` Config class
         # https://luigi.readthedocs.io/en/stable/parameters.html#setting-parameter-value-for-other-classes
         cmd = [args.luigicmd, "--logging-conf-file", logging_file_path,
@@ -247,20 +429,12 @@ def main(args):
                "--DatabaseConfig-scan", args.scan_path]
         if args.ls:
             cmd.append("--local-scheduler")
+
+        # - Start the configured pipeline:
         subprocess.run(cmd, env={**os.environ, **env}, check=True)
-        # TODO: try to use `luigi.build` instead of CLI ?
-        # Next line would require to import all tasks defined in TASKS
-        # MyTask = type(args.task, (), {})  # `MyTask` is now a class `args.task`
-        # luigi_run_result = luigi.build(MyTask(), detailed_summary=True)
-        # print(luigi_run_result.summary_text)
 
-
-def run():
-    # - Parse the input arguments to variables:
-    parser = parsing()
-    args = parser.parse_args()
-    main(args)
+    return
 
 
 if __name__ == '__main__':
-    run()
+    main()
