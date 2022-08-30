@@ -18,10 +18,11 @@ If you do not yet have `miniconda3` on your system, have a look [here](https://d
 ### Installation from sources
 To install this library, simply clone the repo and use `pip` to install it and the required dependencies:
 ```shell
-git clone https://github.com/romi/romitask.git -b dev
+conda activate romitask  # do not forget to activate your environment!
+git clone https://github.com/romi/romitask.git -b dev  # git clone the 'dev' branch of romitask
 cd romitask
-python -m pip install -r requirements.txt
-python -m pip install -e .
+python -m pip install -r requirements.txt  # install the dependencies
+python -m pip install -e .  # install the sources
 ```
 Note that the `-e` option is to install in "developer mode", that is if you make changes to the source code of `romitask` you will not have to `pip install` it again.
 
@@ -34,9 +35,9 @@ In order to do that, you have to manually clone the corresponding [repository](h
 ### Create a dummy database
 To quickly create a _dummy database_, let's use the temporary folder `/tmp`:
 ```shell
-mkdir -p /tmp/dummy_db/dummy_dataset
-touch /tmp/dummy_db/romidb
-export DB_LOCATION='/tmp/dummy_db'
+mkdir -p /tmp/dummy_db/dummy_dataset  # create dummy database and dataset
+touch /tmp/dummy_db/romidb  # add the romidb marker (empty file)
+export DB_LOCATION='/tmp/dummy_db'  # add database location as an environment variable, 'DB_LOCATION', to current shell
 ```
 
 ### Test the CLI
@@ -58,7 +59,7 @@ This progress looks :) because there were no failed tasks or missing dependencie
 ===== Luigi Execution Summary =====
 ```
 
-As no configuration file was provided, you should get a `pipeline.toml` with only a `retcode` and a `version` sections at the root of the `dummy_dataset/` directory.
+As no TOML configuration file was provided, you should get a `pipeline.toml` with only a `retcode` and a `version` sections at the root of the `dummy_dataset/` directory.
 
 The `dummy_database` tree structure should look something like this:
 ```
