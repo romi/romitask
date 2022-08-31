@@ -64,7 +64,7 @@ def configure_logger(name, log_path="", log_level='INFO'):
         reset=True,
         style='%'
     )
-    simple_formatter = logging.Formatter("%(asctime)s - %(levelname)s - %(name)s - %(message)s")
+    simple_formatter = logging.Formatter("%(asctime)s - %(levelname)s - %(name)s - %(lineno)d: %(message)s")
 
     # create console handler:
     console = logging.StreamHandler()
@@ -81,7 +81,3 @@ def configure_logger(name, log_path="", log_level='INFO'):
         logger.addHandler(fh)
 
     return logger
-
-
-logger = configure_logger('romitask')
-
