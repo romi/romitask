@@ -39,12 +39,14 @@ A ``RomiTask`` must implement two methods : ``run`` and ``requires``.
 To check for a task completeness, the fileset existence is checked as well as all it's dependencies.
 """
 import json
+import os.path
 
 import luigi
 from tqdm import tqdm
 
-from romitask.log import logger
+from romitask.log import configure_logger
 
+logger = configure_logger(__name__)
 db = None
 
 
@@ -533,6 +535,8 @@ class DummyTask(RomiTask):
         """Do nothing."""
         return
 
+#: List of original image metadata (to keep in Clean task)
+IMAGES_MD = ["pose", "approximate_pose", "channels", "shot_id"]
 
 class Clean(RomiTask):
     """Cleanup a scan, keeping only the "images" fileset and removing all computed pipelines.
@@ -546,18 +550,20 @@ class Clean(RomiTask):
         Do not ask for confirmation in the command prompt.
 
     """
-    no_confirm = luigi.BoolParameter(default=False)
     upstream_task = None
+    no_confirm = luigi.BoolParameter(default=False)
 
     def requires(self):
         return []
+
+    def output(self):
+        return None
 
     def complete(self):
         return False
 
     def confirm(self, c, default='n'):
-        valid = {"yes": True, "y": True, "ye": True,
-                 "no": False, "n": False}
+        valid = {"yes": True, "y": True, "ye": True, "no": False, "n": False}
         if c == '':
             return valid[default]
         else:
@@ -567,20 +573,41 @@ class Clean(RomiTask):
         if not self.no_confirm:
             del_msg = "This is going to delete all filesets except the scan fileset (images)."
             confirm_msg = "Confirm? [y/N]"
-            logger.critical(del_msg)
-            logger.critical(confirm_msg)
+            logger.warning(del_msg)
+            logger.warning(confirm_msg)
             choice = self.confirm(input().lower())
         else:
             choice = True
 
         if not choice:
-            logger.warning("Did not validate deletion.")
+            logger.info("Did not validate deletion!")
         else:
             scan = DatabaseConfig().scan
             logger.info(f"Cleaner got a scan named '{scan.id}'...")
-            fs_ids = [fs.id for fs in scan.get_filesets()]
-            logger.info(f"Found {len(fs_ids)} Filesets...")
+            # List all filesets in dataset (excluding 'images'):
+            fs_ids = [fs.id for fs in scan.get_filesets() if fs.id != "images"]
+            logger.info(f"Found {len(fs_ids)} Filesets (excluding 'images')...")
+            # Remove all Filesets except 'images':
             for fs in fs_ids:
-                if fs != "images":
-                    logger.warning(f"Deleting {fs} fileset...")
-                    scan.delete_fileset(fs)
+                logger.warning(f"Deleting '{fs}' fileset...")
+                scan.delete_fileset(fs)
+            # Cleanup 'images' metadata:
+            img_fs = scan.get_fileset('images')
+            if img_fs is None:
+                logger.critical(f"Could not get the 'image' fileset for '{scan.id}'!")
+            else:
+                for f in img_fs.get_files():
+                    md = f.get_metadata()
+                    clean_md = {k:v for k,v in md.items() if k in IMAGES_MD}
+                    f.set_metadata(clean_md)
+            # Try to remove 'pipeline.toml' backup, if any:
+            pipe_toml = os.path.abspath(os.path.join(scan.path(), 'pipeline.toml'))
+            if os.path.isfile(pipe_toml):
+                try:
+                    os.remove(pipe_toml)
+                except:
+                    logger.warning(f"Could not delete backup pipeline config: '{pipe_toml}'")
+                else:
+                    logger.warning(f"Deleted backup pipeline config: '{pipe_toml}'")
+            else:
+                logger.info("No backup pipeline config found!")
