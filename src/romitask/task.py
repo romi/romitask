@@ -41,6 +41,7 @@ To check for a task completeness, the fileset existence is checked as well as al
 import glob
 import json
 import os.path
+from shutil import rmtree
 
 import luigi
 from tqdm import tqdm
@@ -607,8 +608,9 @@ class Clean(RomiTask):
                     clean_md = {k: v for k, v in md.items() if k in IMAGES_MD}
                     f.set_metadata(clean_md)
 
-            # Cleanup metadata folder:
+            # - Cleanup metadata folder:
             metadata_path = os.path.abspath(os.path.join(scan.path(), 'metadata'))
+            # Clean orphan metadata JSON files
             fs_metadata = glob.glob(metadata_path + '/*.json')
             fs_metadata = [f for f in fs_metadata if f.split('/')[-1] != 'images.json']
             if len(fs_metadata) != 0:
@@ -616,8 +618,19 @@ class Clean(RomiTask):
             for f in fs_metadata:
                 try:
                     os.remove(f)
+                    logger.warning(f"Deleted file: {f}")
                 except:
                     logger.error(f"Could not delete file '{f}'!")
+            # Clean orphan metadata directories
+            fs_dir = set([d for d in os.listdir(metadata_path) if os.path.isdir(d)]) - {'images'}
+            if len(fs_dir) != 0:
+                logger.info(f"Found {len(fs_dir)} orphan metadata directories!")
+            for md_dir in fs_dir:
+                try:
+                    rmtree(os.path.join(metadata_path, md_dir), ignore_errors=True)
+                    logger.warning(f"Deleted directory: {md_dir}")
+                except:
+                    logger.error(f"Could not delete directory '{md_dir}'!")
 
             # Try to remove 'pipeline.toml' backup, if any:
             pipe_toml = os.path.abspath(os.path.join(scan.path(), 'pipeline.toml'))
