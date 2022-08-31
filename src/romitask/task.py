@@ -38,6 +38,7 @@ A ``RomiTask`` must implement two methods : ``run`` and ``requires``.
 
 To check for a task completeness, the fileset existence is checked as well as all it's dependencies.
 """
+import glob
 import json
 import os.path
 
@@ -535,8 +536,10 @@ class DummyTask(RomiTask):
         """Do nothing."""
         return
 
+
 #: List of original image metadata (to keep in Clean task)
 IMAGES_MD = ["pose", "approximate_pose", "channels", "shot_id"]
+
 
 class Clean(RomiTask):
     """Cleanup a scan, keeping only the "images" fileset and removing all computed pipelines.
@@ -554,15 +557,18 @@ class Clean(RomiTask):
     no_confirm = luigi.BoolParameter(default=False)
 
     def requires(self):
+        """No requirements her."""
         return []
 
     def output(self):
-        return None
+        """Override method to avoid FilesetTarget."""
+        return None  # we do not want the cleaning task to add a Fileset!
 
     def complete(self):
         return False
 
     def confirm(self, c, default='n'):
+        """Method to handle keyboard input from user."""
         valid = {"yes": True, "y": True, "ye": True, "no": False, "n": False}
         if c == '':
             return valid[default]
@@ -598,8 +604,21 @@ class Clean(RomiTask):
             else:
                 for f in img_fs.get_files():
                     md = f.get_metadata()
-                    clean_md = {k:v for k,v in md.items() if k in IMAGES_MD}
+                    clean_md = {k: v for k, v in md.items() if k in IMAGES_MD}
                     f.set_metadata(clean_md)
+
+            # Cleanup metadata folder:
+            metadata_path = os.path.abspath(os.path.join(scan.path(), 'metadata'))
+            fs_metadata = glob.glob(metadata_path + '/*.json')
+            fs_metadata = [f for f in fs_metadata if f.split('/')[-1] != 'images.json']
+            if len(fs_metadata) != 0:
+                logger.info(f"Found {len(fs_metadata)} orphan metadata JSON files!")
+            for f in fs_metadata:
+                try:
+                    os.remove(f)
+                except:
+                    logger.error(f"Could not delete file '{f}'!")
+
             # Try to remove 'pipeline.toml' backup, if any:
             pipe_toml = os.path.abspath(os.path.join(scan.path(), 'pipeline.toml'))
             if os.path.isfile(pipe_toml):
@@ -611,3 +630,5 @@ class Clean(RomiTask):
                     logger.warning(f"Deleted backup pipeline config: '{pipe_toml}'")
             else:
                 logger.info("No backup pipeline config found!")
+
+        return
