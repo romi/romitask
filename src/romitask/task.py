@@ -596,7 +596,7 @@ class Clean(RomiTask):
             logger.info(f"Found {len(fs_ids)} Filesets (excluding 'images')...")
             # Remove all Filesets except 'images':
             for fs in fs_ids:
-                logger.warning(f"Deleting '{fs}' fileset...")
+                logger.info(f"Deleting '{fs}' fileset...")
                 scan.delete_fileset(fs)
             # Cleanup 'images' metadata:
             img_fs = scan.get_fileset('images')
@@ -628,7 +628,7 @@ class Clean(RomiTask):
             for md_dir in fs_dir:
                 try:
                     rmtree(os.path.join(metadata_path, md_dir), ignore_errors=True)
-                    logger.warning(f"Deleted directory: {md_dir}")
+                    logger.info(f"Deleted directory: {md_dir}")
                 except:
                     logger.error(f"Could not delete directory '{md_dir}'!")
 
@@ -640,7 +640,7 @@ class Clean(RomiTask):
                 except:
                     logger.warning(f"Could not delete backup pipeline config: '{pipe_toml}'")
                 else:
-                    logger.warning(f"Deleted backup pipeline config: '{pipe_toml}'")
+                    logger.info(f"Deleted backup pipeline config: '{pipe_toml}'")
             else:
                 logger.info("No backup pipeline config found!")
 
