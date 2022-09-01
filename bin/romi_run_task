@@ -393,7 +393,10 @@ def main():
 
     # - Process given configuration directory OR file, if any:
     config = {}
-    if os.path.isdir(args.config):
+    if args.config != "" and not os.path.isfile(args.config) and not os.path.isdir(args.config):
+        logger.critical(f"Could not understand `config` option '{args.config}'!")
+        sys.exit("Error with configuration file!")
+    elif os.path.isdir(args.config):
         config = load_config_from_directory(args.config)
     elif os.path.isfile(args.config):
         config = load_config_from_file(args.config)
