@@ -345,6 +345,26 @@ class RomiTask(luigi.Task):
         return self.get_task_family().split('.')[-1]
 
 
+class DatasetExists(RomiTask):
+    """Task that requires a dataset (scan) to exist."""
+    scan_id = luigi.Parameter()
+    upstream_task = None
+
+    def requires(self):
+        return []
+
+    def output(self):
+        return None
+
+    def complete(self):
+        return False
+
+    def run(self):
+        db = DatabaseConfig().scan.db
+        if db.get_scan(self.scan_id) is None:
+            raise OSError(f"Scan {self.scan_id} does not exist!")
+
+
 class FilesetExists(RomiTask):
     """A Task which requires a fileset with a given id to exist."""
     fileset_id = luigi.Parameter()
