@@ -206,8 +206,9 @@ def load_config_from_directory(path):
         try:
             c = toml.load(open(f))
             config = {**config, **c}
-        except:
+        except Exception as e:
             logger.warning(f"Could not process TOML config file: {f}")
+            logger.critical(e)
         else:
             logger.info(f"Loaded configuration file: {f}")
     # Read JSON configs:
@@ -215,8 +216,9 @@ def load_config_from_directory(path):
         try:
             c = json.load(open(f))
             config = {**config, **c}
-        except:
+        except Exception as e:
             logger.warning(f"Could not process JSON config file: {f}")
+            logger.critical(e)
         else:
             logger.info(f"Loaded configuration file: {f}")
 
@@ -241,13 +243,15 @@ def load_config_from_file(path):
     if path.endswith("toml"):
         try:
             config = toml.load(open(path))
-        except:
+        except Exception as e:
             logger.critical(f"Could not load TOML configuration file '{path}'!")
+            logger.critical(e)
     elif path.endswith("json"):
         try:
             config = json.load(open(path))
-        except:
+        except Exception as e:
             logger.critical(f"Could not load JSON configuration file '{path}'!")
+            logger.critical(e)
     else:
         logger.critical(f"Unsupported configuration file format, should be TOML or JSON!")
 
