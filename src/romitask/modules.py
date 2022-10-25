@@ -26,6 +26,7 @@
 MODULES = {
     # Scanning module:
     "Scan": "plantimager.tasks.scan",
+    "ScannerToCenter": "plantimager.tasks.scan",
     "VirtualPlant": "plantimager.tasks.lpy",
     "VirtualScan": "plantimager.tasks.scan",
     "CalibrationScan": "plantimager.tasks.scan",
