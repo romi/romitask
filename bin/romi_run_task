@@ -52,6 +52,7 @@ import argparse
 import glob
 import json
 import os
+import shutil
 import subprocess
 import sys
 import tempfile
@@ -365,7 +366,12 @@ def check_dataset_directory(path, task):
         except FileExistsError:
             if not os.listdir(path) == []:
                 logger.critical(f"Given dataset directory '{path}' exists and is not empty!")
-                sys.exit("Non-empty dataset directory for scanning process.")
+                delete = parse_kbdi(input("Do you want ro remove the previous dataset? [y/N]"))
+                if delete:
+                    shutil.rmtree(path)
+                    os.mkdir(path)
+                else:
+                    sys.exit("Non-empty dataset directory for scanning process.")
             else:
                 logger.info(f"Using existing empty dataset directory: {path}")
         cfgname = SCAN_TOML
@@ -378,6 +384,13 @@ def check_dataset_directory(path, task):
         cfgname = PIPE_TOML
     return cfgname
 
+def parse_kbdi(kbdi, default='n'):
+    """Method to handle keyboard input from user."""
+    valid = {"yes": True, "y": True, "ye": True, "no": False, "n": False}
+    if kbdi == '':
+        return valid[default]
+    else:
+        return valid[kbdi]
 
 def main():
     # - Parse the input arguments to variables:
