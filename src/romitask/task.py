@@ -626,6 +626,7 @@ class Clean(RomiTask):
                 for f in img_fs.get_files():
                     md = f.get_metadata()
                     clean_md = {k: v for k, v in md.items() if k in IMAGES_MD}
+                    f.metadata = {}  # need to clear all metadata before setting the clean ones
                     f.set_metadata(clean_md)
 
             # - Cleanup metadata folder:
