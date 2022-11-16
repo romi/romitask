@@ -559,7 +559,7 @@ class DummyTask(RomiTask):
 
 
 #: List of original image metadata (to keep in Clean task)
-IMAGES_MD = ["pose", "approximate_pose", "channels", "shot_id"]
+IMAGES_MD = ["pose", "approximate_pose", "channel", "shot_id"]
 
 
 class Clean(RomiTask):
