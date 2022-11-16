@@ -615,15 +615,16 @@ class Clean(RomiTask):
             fs_ids = [fs.id for fs in scan.get_filesets() if fs.id != "images"]
             logger.info(f"Found {len(fs_ids)} Filesets (excluding 'images')...")
             # Remove all Filesets except 'images':
-            for fs in fs_ids:
+            for fs in tqdm(fs_ids, unit='fileset'):
                 logger.info(f"Deleting '{fs}' fileset...")
                 scan.delete_fileset(fs)
-            # Cleanup 'images' metadata:
+            # Cleanup 'images' Filesets metadata:
             img_fs = scan.get_fileset('images')
             if img_fs is None:
                 logger.critical(f"Could not get the 'image' fileset for '{scan.id}'!")
             else:
-                for f in img_fs.get_files():
+                logger.info("Cleaning 'images' Fileset metadata...")
+                for f in tqdm(img_fs.get_files(), unit='file'):
                     md = f.get_metadata()
                     clean_md = {k: v for k, v in md.items() if k in IMAGES_MD}
                     f.metadata = {}  # need to clear all metadata before setting the clean ones
