@@ -524,7 +524,7 @@ class FileByFileTask(RomiTask):
 
         in_files = input_fileset.get_files(query=self.query)
         logger.debug(f"Got {len(in_files)} input files:")
-        logger.debug(f"{', '.join(in_files)}")
+        logger.debug(f"{', '.join([f.fid for f in in_files])}")
         logger.debug(f"Got a filtering query: {self.query}")
 
         for fi in tqdm(in_files, unit="file"):
