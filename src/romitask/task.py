@@ -521,7 +521,13 @@ class FileByFileTask(RomiTask):
         """Run the task on every file in the fileset."""
         input_fileset = self.input().get()
         output_fileset = self.output().get()
-        for fi in tqdm(input_fileset.get_files(query=self.query), unit="file"):
+
+        in_files = input_fileset.get_files(query=self.query)
+        logger.debug(f"Got {len(in_files)} input files:")
+        logger.debug(f"{', '.join(in_files)}")
+        logger.debug(f"Got a filtering query: {self.query}")
+
+        for fi in tqdm(in_files, unit="file"):
             outfi = self.f(fi, output_fileset)
             if outfi is not None:
                 m = fi.get_metadata()
