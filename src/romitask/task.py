@@ -613,8 +613,8 @@ class Clean(RomiTask):
         scan = DatabaseConfig().scan
         logger.info(f"Cleaning task got a scan named '{scan.id}'...")
 
-        # - Convert the list of metadata to keep (retain) to a set and add the ones defined in `IMAGES_MD`
-        self.keep_metadata = set(self.keep_metadata) & set(IMAGES_MD)
+        # - Create the list of metadata to keep (retain) to a set and add the ones defined in `IMAGES_MD`
+        self.keep_metadata = list(set(self.keep_metadata) & set(IMAGES_MD))
 
         # - Handle the necessity to confirm prior to dataset & metadata cleaning.
         if not self.no_confirm:
@@ -647,7 +647,7 @@ class Clean(RomiTask):
             logger.info("Cleaning 'images' Fileset metadata...")
             for f in tqdm(img_fs.get_files(), unit='file'):
                 md = f.get_metadata()
-                clean_md = {k: v for k, v in md.items() if k in IMAGES_MD}
+                clean_md = {k: v for k, v in md.items() if k in self.keep_metadata}
                 f.metadata = {}  # need to clear all metadata before setting the clean ones
                 f.set_metadata(clean_md)
 
