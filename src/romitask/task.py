@@ -620,7 +620,7 @@ class Clean(RomiTask):
         logger.info(f"Cleaning task got a scan named '{scan.id}'...")
 
         # - Create the list of metadata to keep (retain) to a set and add the ones defined in `IMAGES_MD`
-        keep_metadata = list(set(self.keep_metadata) & set(IMAGES_MD))
+        keep_metadata = list(set(self.keep_metadata) | set(IMAGES_MD))
 
         # - Handle the necessity to confirm prior to dataset & metadata cleaning.
         if not self.no_confirm:
