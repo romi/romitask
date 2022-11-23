@@ -559,8 +559,12 @@ class DummyTask(RomiTask):
 
 
 #: List of original image metadata (to keep in Clean task)
-IMAGES_MD = ["pose", "approximate_pose", "channel", "shot_id"]
-
+IMAGES_MD = ["pose", "approximate_pose", "channel", "shot_id", "camera"]
+# "pose" is added by the PlantImager or VirtualPlantImager
+# "approximate_pose" is added by the PlantImager
+# "channel" is added by the PlantImager or VirtualPlantImager
+# "shot_id" is added by the PlantImager or VirtualPlantImager
+# "camera" is added by the VirtualPlantImager and is used by `Voxels`
 
 class Clean(RomiTask):
     """Cleanup a scan, keeping only the "images" fileset and removing all computed pipelines.
@@ -570,19 +574,28 @@ class Clean(RomiTask):
 
     Parameters
     ----------
-    no_confirm : BoolParameter, default=False
-        Do not ask for confirmation in the command prompt.
+    no_confirm : luigi.BoolParameter
+        Do not ask for confirmation of the cleaning in the command prompt.
+        Default to ``False``.
+    keep_metadata : luigi.ListParameter
+        List of metadata to keep (retain) in the `images` fileset metadata.
+        Default to ``IMAGES_MD``.
+
+    See Also
+    --------
+    romitask.task.IMAGES_MD
 
     """
     upstream_task = None
     no_confirm = luigi.BoolParameter(default=False)
+    keep_metadata = luigi.ListParameter(default=IMAGES_MD)
 
     def requires(self):
-        """No requirements her."""
+        """No requirements here."""
         return []
 
     def output(self):
-        """Override method to avoid FilesetTarget."""
+        """Override inherited method to avoid ``FilesetTarget``."""
         return None  # we do not want the cleaning task to add a Fileset!
 
     def complete(self):
@@ -597,73 +610,81 @@ class Clean(RomiTask):
             return valid[c]
 
     def run(self):
+        scan = DatabaseConfig().scan
+        logger.info(f"Cleaning task got a scan named '{scan.id}'...")
+
+        # - Convert the list of metadata to keep (retain) to a set and add the ones defined in `IMAGES_MD`
+        self.keep_metadata = set(self.keep_metadata) & set(IMAGES_MD)
+
+        # - Handle the necessity to confirm prior to dataset & metadata cleaning.
         if not self.no_confirm:
-            del_msg = "This is going to delete all filesets except the scan fileset (images)."
+            del_msg = "This will delete all filesets and metadata except for the `images` fileset."
             confirm_msg = "Confirm? [y/N]"
             logger.warning(del_msg)
             logger.warning(confirm_msg)
-            choice = self.confirm(input().lower())
+            clean = self.confirm(input().lower())
         else:
-            choice = True
+            clean = True
 
-        if not choice:
-            logger.info("Did not validate deletion!")
+        # - If cleaning not required, abort:
+        if not clean:
+            logger.info("Did not validate dataset cleaning!")
+            return
+
+        # - Perform the dataset & metadata cleaning:
+        # List all filesets in dataset (excluding 'images'):
+        fs_ids = [fs.id for fs in scan.get_filesets() if fs.id != "images"]
+        logger.info(f"Found {len(fs_ids)} Filesets (excluding 'images')...")
+        # Remove all Filesets except 'images':
+        for fs in tqdm(fs_ids, unit='fileset'):
+            logger.info(f"Deleting '{fs}' fileset...")
+            scan.delete_fileset(fs)
+        # Cleanup 'images' Filesets metadata:
+        img_fs = scan.get_fileset('images')
+        if img_fs is None:
+            logger.critical(f"Could not get the 'image' fileset for '{scan.id}'!")
         else:
-            scan = DatabaseConfig().scan
-            logger.info(f"Cleaner got a scan named '{scan.id}'...")
-            # List all filesets in dataset (excluding 'images'):
-            fs_ids = [fs.id for fs in scan.get_filesets() if fs.id != "images"]
-            logger.info(f"Found {len(fs_ids)} Filesets (excluding 'images')...")
-            # Remove all Filesets except 'images':
-            for fs in tqdm(fs_ids, unit='fileset'):
-                logger.info(f"Deleting '{fs}' fileset...")
-                scan.delete_fileset(fs)
-            # Cleanup 'images' Filesets metadata:
-            img_fs = scan.get_fileset('images')
-            if img_fs is None:
-                logger.critical(f"Could not get the 'image' fileset for '{scan.id}'!")
-            else:
-                logger.info("Cleaning 'images' Fileset metadata...")
-                for f in tqdm(img_fs.get_files(), unit='file'):
-                    md = f.get_metadata()
-                    clean_md = {k: v for k, v in md.items() if k in IMAGES_MD}
-                    f.metadata = {}  # need to clear all metadata before setting the clean ones
-                    f.set_metadata(clean_md)
+            logger.info("Cleaning 'images' Fileset metadata...")
+            for f in tqdm(img_fs.get_files(), unit='file'):
+                md = f.get_metadata()
+                clean_md = {k: v for k, v in md.items() if k in IMAGES_MD}
+                f.metadata = {}  # need to clear all metadata before setting the clean ones
+                f.set_metadata(clean_md)
 
-            # - Cleanup metadata folder:
-            metadata_path = os.path.abspath(os.path.join(scan.path(), 'metadata'))
-            # Clean orphan metadata JSON files
-            fs_metadata = glob.glob(metadata_path + '/*.json')
-            fs_metadata = [f for f in fs_metadata if f.split('/')[-1] != 'images.json']
-            if len(fs_metadata) != 0:
-                logger.info(f"Found {len(fs_metadata)} orphan metadata JSON files!")
-            for f in fs_metadata:
-                try:
-                    os.remove(f)
-                    logger.warning(f"Deleted file: {f}")
-                except:
-                    logger.error(f"Could not delete file '{f}'!")
-            # Clean orphan metadata directories
-            fs_dir = set([d for d in os.listdir(metadata_path) if os.path.isdir(d)]) - {'images'}
-            if len(fs_dir) != 0:
-                logger.info(f"Found {len(fs_dir)} orphan metadata directories!")
-            for md_dir in fs_dir:
-                try:
-                    rmtree(os.path.join(metadata_path, md_dir), ignore_errors=True)
-                    logger.info(f"Deleted directory: {md_dir}")
-                except:
-                    logger.error(f"Could not delete directory '{md_dir}'!")
+        # - Cleanup metadata folder:
+        metadata_path = os.path.abspath(os.path.join(scan.path(), 'metadata'))
+        # Clean orphan metadata JSON files
+        fs_metadata = glob.glob(metadata_path + '/*.json')
+        fs_metadata = [f for f in fs_metadata if f.split('/')[-1] != 'images.json']
+        if len(fs_metadata) != 0:
+            logger.info(f"Found {len(fs_metadata)} orphan metadata JSON files!")
+        for f in fs_metadata:
+            try:
+                os.remove(f)
+                logger.warning(f"Deleted file: {f}")
+            except:
+                logger.error(f"Could not delete file '{f}'!")
+        # Clean orphan metadata directories
+        fs_dir = set([d for d in os.listdir(metadata_path) if os.path.isdir(d)]) - {'images'}
+        if len(fs_dir) != 0:
+            logger.info(f"Found {len(fs_dir)} orphan metadata directories!")
+        for md_dir in fs_dir:
+            try:
+                rmtree(os.path.join(metadata_path, md_dir), ignore_errors=True)
+                logger.info(f"Deleted directory: {md_dir}")
+            except:
+                logger.error(f"Could not delete directory '{md_dir}'!")
 
-            # Try to remove 'pipeline.toml' backup, if any:
-            pipe_toml = os.path.abspath(os.path.join(scan.path(), 'pipeline.toml'))
-            if os.path.isfile(pipe_toml):
-                try:
-                    os.remove(pipe_toml)
-                except:
-                    logger.warning(f"Could not delete backup pipeline config: '{pipe_toml}'")
-                else:
-                    logger.info(f"Deleted backup pipeline config: '{pipe_toml}'")
+        # Try to remove 'pipeline.toml' backup, if any:
+        pipe_toml = os.path.abspath(os.path.join(scan.path(), 'pipeline.toml'))
+        if os.path.isfile(pipe_toml):
+            try:
+                os.remove(pipe_toml)
+            except:
+                logger.warning(f"Could not delete backup pipeline config: '{pipe_toml}'")
             else:
-                logger.info("No backup pipeline config found!")
+                logger.info(f"Deleted backup pipeline config: '{pipe_toml}'")
+        else:
+            logger.info("No backup pipeline config found!")
 
         return
