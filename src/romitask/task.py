@@ -518,14 +518,14 @@ class FileByFileTask(RomiTask):
         raise NotImplementedError
 
     def run(self):
-        """Run the task on every file in the fileset."""
+        """Run the task on every file in the fileset that fulfill the ``query``."""
         input_fileset = self.input().get()
         output_fileset = self.output().get()
 
         in_files = input_fileset.get_files(query=self.query)
         logger.debug(f"Got {len(in_files)} input files:")
-        logger.debug(f"{', '.join([f.fid for f in in_files])}")
-        logger.debug(f"Got a filtering query: {self.query}")
+        logger.debug(f"{', '.join([f.id for f in in_files])}")
+        logger.debug(f"Got a filtering query: '{self.query}'.")
 
         for fi in tqdm(in_files, unit="file"):
             outfi = self.f(fi, output_fileset)
