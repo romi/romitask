@@ -588,7 +588,7 @@ class Clean(RomiTask):
     """
     upstream_task = None
     no_confirm = luigi.BoolParameter(default=False)
-    keep_metadata = luigi.ListParameter(default=IMAGES_MD)
+    keep_metadata = luigi.ListParameter(default=[])
 
     def requires(self):
         """No requirements here."""
