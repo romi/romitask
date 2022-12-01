@@ -23,17 +23,19 @@
 # <https://www.gnu.org/licenses/>.
 # ------------------------------------------------------------------------------
 
-""" This script implement the ROMI tasks CLI.
+""" ROMI tasks CLI.
 
-It is intended to be used as the main program to run the various tasks defined
-in ``MODULES``.
+It is intended to be used as the main program to run the various tasks defined in ``MODULES``.
 
 It uses ``luigi`` paradigm with ``Task``, ``Target`` & ``Parameters`` defined
 for each ``RomiTask`` in their module.
 
-The program uses two config files stored in the root dataset folder:
+The program uses two config files stored in the root scan dataset folder:
+
   - ``scan.toml``: the last configuration used with the 'Scan' module;
   - ``pipeline.toml``: the last configuration used with any other module.
+
+
 They define tasks parameters that will override the default tasks parameters
 using luigi's "config ingestion" [^1] and ROMI configuration classes.
 
@@ -56,6 +58,7 @@ import shutil
 import subprocess
 import sys
 import tempfile
+from pathlib import Path
 
 import toml
 
@@ -76,7 +79,8 @@ def parsing():
     parser.add_argument('task', metavar='task', type=str,
                         help=f"Luigi task to run. The list of pre-defined is: {', '.join(TASKS)}")
     parser.add_argument('scan_path', metavar='dataset_path', type=str, default='', nargs='?',
-                        help='Path to the scan dataset to process (directory).')
+                        help='Path to the scan dataset to process (directory).' + \
+                             'You may use Unix pattern matching with "*" and "?" to select a list of scan dataset.')
 
     # Optional arguments:
     parser.add_argument('--config', dest='config', default="",
@@ -384,6 +388,7 @@ def check_dataset_directory(path, task):
         cfgname = PIPE_TOML
     return cfgname
 
+
 def parse_kbdi(kbdi, default='n'):
     """Method to handle keyboard input from user."""
     valid = {"yes": True, "y": True, "ye": True, "no": False, "n": False}
@@ -392,15 +397,8 @@ def parse_kbdi(kbdi, default='n'):
     else:
         return valid[kbdi]
 
-def main():
-    # - Parse the input arguments to variables:
-    parser = parsing()
-    args = parser.parse_args()
-    # - Configure a logger from this application:
-    from romitask.log import configure_logger
-    global logger
-    logger = configure_logger('romi_run_task')
 
+def main(args):
     # - Try to load SCAN backup TOML configuration:
     bak_scan_config = load_backup_scan_cfg(args.scan_path)
     # - Try to load PIPELINE backup TOML configuration:
@@ -455,4 +453,24 @@ def main():
 
 
 if __name__ == '__main__':
-    main()
+    # - Parse the input arguments to variables:
+    parser = parsing()
+    args = parser.parse_args()
+
+    # - Configure a logger from this application:
+    from romitask.log import configure_logger
+
+    global logger
+    logger = configure_logger('romi_run_task')
+
+    folders = sorted(glob.glob(args.scan_path))
+
+    if len(folders) > 1:
+        fnames = [Path(folder).name for folder in folders]
+        logger.info(f"Got a list of {len(folders)} scan dataset to analyze: {', '.join(fnames)}")
+        for folder in folders:
+            args.scan_path = folder
+            main(args)
+    else:
+        args.scan_path = folders[0]
+        main(args)
