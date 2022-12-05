@@ -1,0 +1,13 @@
+name: romitask
+channels:
+  - defaults
+  - conda-forge
+  - romi-eu
+dependencies:
+  - python >=3.7,<3.10
+  - colorlog
+  - luigi
+  - tqdm
+  - toml
+  - watchdog
+  - plantdb

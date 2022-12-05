@@ -95,3 +95,33 @@ dummy_database/
 │   └── pipeline.toml
 └── romidb
 ```
+
+
+## Developers & contributors
+
+### Conda packaging
+
+To build the `romitask` conda package, from the `base` conda environment, run:
+
+```shell
+conda build conda/recipe/ -c conda-forge --user romi-eu
+```
+
+This requires the `conda-build` package to be installed in the `base` environment!
+
+```shell
+conda install conda-build
+```
+
+To upload the built package, you need a valid account (here `romi-eu`) on [anaconda.org](www.anaconda.org) & to log ONCE
+with `anaconda login`, then:
+
+```shell
+anaconda upload ~/miniconda3/conda-bld/linux-64/romitask*.tar.bz2 --user romi-eu
+```
+
+This requires the `anaconda-client` package to be installed in the `base` environment!
+
+```shell
+conda install anaconda-client
+```
