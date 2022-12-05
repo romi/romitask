@@ -15,13 +15,13 @@ s = setup(
     ],
     author="Nabil Ait Taleb",
     author_email="mohamednabil.aittaleb@sony.com",
-    description="A romi task runner",
+    description="The ROMI task runner, a luigi based task pipeline.",
     long_description=long_description,
     long_description_content_type="text/markdown",
     zip_safe=False,
     python_requires='>=3.7',
-    use_scm_version=True,
-    setup_requires=['setuptools_scm'],
+    # use_scm_version=True,
+    # setup_requires=['setuptools_scm'],
     install_requires=[],
     include_package_data=True
 )
