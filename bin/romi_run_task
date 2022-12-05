@@ -68,34 +68,41 @@ from romitask.modules import TASKS
 
 LUIGI_CMD = "luigi"
 LOGLEV = ["DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"]
-HELP_URL = "https://docs.romi-project.eu/Scanner/user_guide/pipelines/"
+HELP_URL = "https://docs.romi-project.eu/plant_imager/tutorials/basics/"
 
 
 def parsing():
     parser = argparse.ArgumentParser(
-        description='Run a Romi task for a dataset.',
-        epilog=f"See {HELP_URL} for help with configuration files.")
+        description="Run a ROMI task on selected dataset.",
+        formatter_class=argparse.RawDescriptionHelpFormatter,
+        epilog=f"The list of pre-defined tasks is: {', '.join(TASKS)}.\n" + \
+               f"See {HELP_URL} for a detailed help with CLI.")
+
     # Positional arguments:
     parser.add_argument('task', metavar='task', type=str,
-                        help=f"Luigi task to run. The list of pre-defined is: {', '.join(TASKS)}")
-    parser.add_argument('scan_path', metavar='dataset_path', type=str, default='', nargs='?',
-                        help='Path to the scan dataset to process (directory).' + \
-                             'You may use Unix pattern matching with "*" and "?" to select a list of scan dataset.')
+                        help=f"Name of the ROMI task to run. See the list of pre-defined tasks below.")
+    parser.add_argument('dataset_path', type=str, default='', nargs='?',
+                        help="""Path to the dataset to process (directory).
+                        You may use Unix pattern matching with "*" and "?" to select a list of dataset.""")
 
     # Optional arguments:
     parser.add_argument('--config', dest='config', default="",
-                        help="""TOML configuration file or directory location.
-                        If a file, reads config from it.
-                        If a folder, concatenates all configuration files in it.
-                        By default, try read from the scan dataset directory (backup or manually copied).""")
-    parser.add_argument('--luigicmd', dest='luigicmd', default=LUIGI_CMD,
-                        help=f"Luigi command, default: `{LUIGI_CMD}`")
+                        help="""Pipeline configuration file or directory (JSON or TOML).
+                        If a file, read the configuration from it.
+                        If a directory, read & concatenate all configuration files in it.
+                        By default, search in the selected dataset directory.""")
     parser.add_argument('--module', dest='module', default=None,
-                        help="Library and module of the task. Use it if not available or different than defined in `romitask.modules.MODULES`.")
+                        help="""Library and module of the task.
+                        Use it if not available or different than defined in `romitask.modules.MODULES`.""")
     parser.add_argument('--log-level', dest='log_level', default='INFO', choices=LOGLEV,
                         help="Level of message logging, defaults to 'INFO'.")
-    parser.add_argument('--local-scheduler', dest='ls', action="store_true", default=True,
-                        help='Luigi CLI argument, `True` by default.')
+
+    # Luigi related arguments:
+    luigi = parser.add_argument_group("luigi options")
+    luigi.add_argument('--luigicmd', dest='luigicmd', default=LUIGI_CMD,
+                       help=f"Luigi command, defaults to `{LUIGI_CMD}`.")
+    luigi.add_argument('--local-scheduler', dest='ls', action="store_true", default=True,
+                       help="Use the local luigi scheduler, defaults to `True`.")
     return parser
 
 
@@ -121,6 +128,8 @@ def get_version():
     return hash_dict
 
 
+#: Name of the object configuration file:
+OBJECT_TOML = "object.toml"
 #: Name of the scan backup configuration file:
 SCAN_TOML = "scan.toml"
 #: Name of the pipeline backup configuration file:
@@ -197,10 +206,12 @@ def load_config_from_directory(path):
     """
     # List TOML config files:
     toml_list = glob.glob(os.path.join(path, "*.toml"))
-    toml_list = [cfg for cfg in toml_list if cfg.split("/")[-1] not in (SCAN_TOML, PIPE_TOML)]
     # List JSON config files:
     json_list = glob.glob(os.path.join(path, "*.json"))
 
+    # Exclude BACKUP configuration files from TOML config files list:
+    toml_list = [cfg for cfg in toml_list if cfg.split("/")[-1] not in (SCAN_TOML, PIPE_TOML)]
+    # Make sure we got at least one TOML or JSON config file:
     if len(toml_list) == 0 and len(json_list) == 0:
         logger.critical(f"Could not find any TOML or JSON configuration file in '{path}'!")
         sys.exit("Configuration file missing!")
@@ -210,20 +221,20 @@ def load_config_from_directory(path):
     for f in toml_list:
         try:
             c = toml.load(open(f))
-            config = {**config, **c}
+            config = {**config, **c}  # update the config with the new one
         except:
             logger.warning(f"Could not process TOML config file: {f}")
         else:
-            logger.info(f"Loaded configuration file: {f}")
+            logger.info(f"Loaded TOML configuration file: {f}")
     # Read JSON configs:
     for f in json_list:
         try:
             c = json.load(open(f))
-            config = {**config, **c}
+            config = {**config, **c}  # update the config with the new one
         except:
             logger.warning(f"Could not process JSON config file: {f}")
         else:
-            logger.info(f"Loaded configuration file: {f}")
+            logger.info(f"Loaded JSON configuration file: {f}")
 
     return config
 
@@ -248,11 +259,15 @@ def load_config_from_file(path):
             config = toml.load(open(path))
         except:
             logger.critical(f"Could not load TOML configuration file '{path}'!")
+        else:
+            logger.info(f"Loaded TOML configuration file: {path}")
     elif path.endswith("json"):
         try:
             config = json.load(open(path))
         except:
             logger.critical(f"Could not load JSON configuration file '{path}'!")
+        else:
+            logger.info(f"Loaded JSON configuration file: {path}")
     else:
         logger.critical(f"Unsupported configuration file format, should be TOML or JSON!")
 
@@ -400,9 +415,9 @@ def parse_kbdi(kbdi, default='n'):
 
 def main(args):
     # - Try to load SCAN backup TOML configuration:
-    bak_scan_config = load_backup_scan_cfg(args.scan_path)
+    bak_scan_config = load_backup_scan_cfg(args.dataset_path)
     # - Try to load PIPELINE backup TOML configuration:
-    bak_pipe_config = load_backup_pipe_cfg(args.scan_path, args.task)
+    bak_pipe_config = load_backup_pipe_cfg(args.dataset_path, args.task)
 
     # - Process given configuration directory OR file, if any:
     config = {}
@@ -423,7 +438,7 @@ def main(args):
     # - Set the name of the module to be loaded for the selected task:
     module = get_task_module(args.task, args.module)
     # - Check the dataset directory is OK to use:
-    cfgname = check_dataset_directory(args.scan_path, args.task)
+    cfgname = check_dataset_directory(args.dataset_path, args.task)
 
     with tempfile.TemporaryDirectory() as tmpd:
         # - Generate logging config for luigi ("logging_config.toml"):
@@ -434,15 +449,15 @@ def main(args):
             f.write(logging_config)
 
         # - Create the "scan.toml" OR "pipeline.toml" (backup) config file used by luigi:
-        file_path = create_backup_cfg(args.scan_path, cfgname, config)
+        file_path = create_backup_cfg(args.dataset_path, cfgname, config)
         # - Define environment variables to provide the logging TOML file path to `luigi`:
         env = {"LUIGI_CONFIG_PARSER": "toml", "LUIGI_CONFIG_PATH": file_path}
         # - Define the luigi command to run:
-        # "--DatabaseConfig-scan args.scan_path" set the value of `scan` for the `DatabaseConfig` Config class
+        # "--DatabaseConfig-scan args.dataset_path" set the value of `scan` for the `DatabaseConfig` Config class
         # https://luigi.readthedocs.io/en/stable/parameters.html#setting-parameter-value-for-other-classes
         cmd = [args.luigicmd, "--logging-conf-file", logging_file_path,
                "--module", module, args.task,
-               "--DatabaseConfig-scan", args.scan_path]
+               "--DatabaseConfig-scan", args.dataset_path]
         if args.ls:
             cmd.append("--local-scheduler")
 
@@ -463,14 +478,14 @@ if __name__ == '__main__':
     global logger
     logger = configure_logger('romi_run_task')
 
-    folders = sorted(glob.glob(args.scan_path))
+    folders = sorted(glob.glob(args.dataset_path))
 
     if len(folders) > 1:
         fnames = [Path(folder).name for folder in folders]
         logger.info(f"Got a list of {len(folders)} scan dataset to analyze: {', '.join(fnames)}")
         for folder in folders:
-            args.scan_path = folder
+            args.dataset_path = folder
             main(args)
     else:
-        args.scan_path = folders[0]
+        args.dataset_path = folders[0]
         main(args)
