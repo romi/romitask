@@ -480,7 +480,10 @@ if __name__ == '__main__':
         logger.info(f"Got a list of {len(folders)} scan dataset to analyze: {', '.join(fnames)}")
         for folder in folders:
             args.dataset_path = folder
-            main(args)
+            try:
+                main(args)
+            except Exception as e:
+                print(e)
     else:
         args.dataset_path = folders[0]
         main(args)
