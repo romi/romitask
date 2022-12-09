@@ -62,6 +62,7 @@ from pathlib import Path
 
 import toml
 
+from romitask import SCAN_TOML, PIPE_TOML
 from romitask.log import get_logging_config
 from romitask.modules import MODULES
 from romitask.modules import TASKS
@@ -128,12 +129,6 @@ def get_version():
     return hash_dict
 
 
-#: Name of the object configuration file:
-OBJECT_TOML = "object.toml"
-#: Name of the scan backup configuration file:
-SCAN_TOML = "scan.toml"
-#: Name of the pipeline backup configuration file:
-PIPE_TOML = "pipeline.toml"
 
 
 def load_backup_scan_cfg(path):
