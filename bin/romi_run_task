@@ -485,5 +485,4 @@ if __name__ == '__main__':
             except Exception as e:
                 print(e)
     else:
-        args.dataset_path = folders[0]
         main(args)
