@@ -30,7 +30,7 @@ romitask.task
 ROMI Luigi Tasks
 
 This module implements subclasses of ``luigi.Config``, ``luigi.Target`` and ``luigi.Tasks``.
-The goal is to have luigi tasks work seamlessly with the database API implemented in ``plantdb.db``.
+The goal is to have luigi tasks work seamlessly with the ROMI database API implemented in ``plantdb.db``.
 
 A ``FilesetTarget`` is a luigi target corresponding to a ``Fileset`` object.
 
@@ -53,27 +53,26 @@ db = None
 
 
 class ScanParameter(luigi.Parameter):
-    """Register a luigi `Parameter` object to access `fsdb.Scan` class.
-    Override the default implementation methods `parse` & `serialize`
+    """Register a ``luigi.Parameter`` object to access `plantdb.fsdb.Scan` class.
+    Override the default implementation methods ``parse`` & ``serialize``
 
     Notes
     -----
-    The `parse` method connect to the given path to an `FSDB` database.
-
+    The `parse` method connect to the given path to a ``plantdb.fsdb.FSDB`` database.
     """
 
     def parse(self, scan_path):
-        """Convert the scan path to an `fsdb.Scan` object...
+        """Convert the scan path to a `plantdb.fsdb.Scan` object...
         Override the default implementation method for specialized parsing.
 
         Parameters
         ----------
         scan_path : str
-            The value to parse, here the path to an `fsdb.Scan` dataset.
+            The value to parse, here the path to an `plantdb.fsdb.Scan` dataset.
 
         Returns
         -------
-        fsdb.Scan
+        plantdb.fsdb.Scan
             The object corresponding to given path.
 
         Notes
@@ -82,7 +81,6 @@ class ScanParameter(luigi.Parameter):
           - the database root dir with `/db/root/path`
           - the scan dataset id with `scan_id`
         If the given scan dataset id does not exist, it is created.
-
         """
         from plantdb import FSDB
         global db
@@ -103,20 +101,19 @@ class ScanParameter(luigi.Parameter):
         return scan
 
     def serialize(self, scan):
-        """Converts `fsdb.Scan` in its path.
+        """Converts `plantdb.fsdb.Scan` in its path.
 
         Opposite of `parse()`.
 
         Parameters
         ----------
-        scan : fsdb.Scan
-            The value to serialize, here an `fsdb.Scan` object.
+        scan : plantdb.fsdb.Scan
+            The value to serialize, here a `plantdb.fsdb.Scan` object.
 
         Returns
         -------
         str
-            The path to the corresponding `Scan` object.
-
+            The path to the corresponding `plantdb.fsdb.Scan` object.
         """
         db_path = scan.db.basedir
         scan_id = scan.id
@@ -124,7 +121,12 @@ class ScanParameter(luigi.Parameter):
 
 
 class DatabaseConfig(luigi.Config):
-    """Configuration for the `FSBD` database.
+    """Configuration for a ``plantdb.FSBD`` database.
+
+    Attributes
+    ----------
+    scan : plantdb.fsdb.Scan
+        The scan dataset to use for configuration.
 
     Examples
     --------
@@ -142,7 +144,7 @@ class DatabaseConfig(luigi.Config):
 
 
 class FilesetTarget(luigi.Target):
-    """Subclass luigi `Target` for `Fileset` as defined in romitask `FSDB` API.
+    """Subclass ``luigi.Target`` for `Fileset` as defined in romitask ``plantdb.fsdb.FSDB`` API.
 
     A `FilesetTarget` is used by `luigi.Task` (or subclass) methods:
      * `requires` to assert the existence of the `Fileset` prior to starting the task;
@@ -216,7 +218,6 @@ class FilesetTarget(luigi.Target):
         -------
         plantdb.fsdb.Fileset
             The created `Fileset` instance.
-
         """
         return self.scan.create_fileset(self.fileset_id)
 
@@ -229,7 +230,6 @@ class FilesetTarget(luigi.Target):
         -------
         bool
             ``True`` if the target exists, else ``False``.
-
         """
         fs = self.scan.get_fileset(self.fileset_id)
         return fs is not None and len(fs.get_files()) > 0
@@ -239,29 +239,26 @@ class FilesetTarget(luigi.Target):
 
         Parameters
         ----------
-        create : bool
-            If ``True`` (default), create the fileset if it does not exist in
-             the database.
+        create : bool, optional
+            If ``True`` (default), create the fileset if it does not exist in the database.
 
         Returns
         -------
         plantdb.fsdb.Fileset
             The fetched/created `Fileset` instance.
-
         """
         return self.scan.get_fileset(self.fileset_id, create=create)
 
 
 class RomiTask(luigi.Task):
-    """Implementation of a luigi Task for the plantdb DB API.
+    """ROMI implementation of a ``luigi.Task``, working with the `plantdb` DB API.
 
     Attributes
     ----------
     upstream_task : luigi.TaskParameter
         The upstream task.
     scan_id : luigi.Parameter, optional
-        The scan id to use to get or create the FilesetTarget.
-
+        The scan id to use to get or create the ``FilesetTarget``.
     """
     upstream_task = luigi.TaskParameter()
     scan_id = luigi.Parameter(default="")
@@ -275,7 +272,6 @@ class RomiTask(luigi.Task):
         -------
         luigi.TaskParameter
             The upstream task.
-
         """
         return self.upstream_task()
 
@@ -288,7 +284,6 @@ class RomiTask(luigi.Task):
         -------
         FilesetTarget
             A set of file(s) in the ???
-
         """
         # Get the `Fileset` id from the `task_id` attribute generated by `luigi.Task`
         # Can be overriding in inheriting class as for the `Visualization` task
@@ -299,8 +294,7 @@ class RomiTask(luigi.Task):
         else:
             t = FilesetTarget(db.get_scan(self.scan_id), fileset_id)
         fs = t.get()
-        params = dict(
-            self.to_str_params(only_significant=False, only_public=False))
+        params = dict(self.to_str_params(only_significant=False, only_public=False))
         for k in params.keys():
             try:
                 params[k] = json.loads(params[k])
@@ -310,38 +304,47 @@ class RomiTask(luigi.Task):
         return t
 
     def input_file(self, file_id=None):
-        """Helper function to get a file from the input fileset.
+        """Helper method to get a file from the input fileset.
 
         Parameters
         ----------
-        file_id : str
-            Id of the input file
+        file_id : str, optional
+            Id of the input file. Defaults to ``None``.
 
         Returns
         -------
-        db.File
-
+        plantdb.db.File
+            The input file.
         """
         return self.upstream_task().output_file(file_id, False)
 
     def output_file(self, file_id=None, create=True):
-        """Helper function to get a file from the output  fileset.
+        """Helper method to create & get a file from the output fileset.
 
         Parameters
         ----------
-        file_id : str
-            Id of the input file
+        file_id : str, optional
+            Id of the output file. Defaults to ``None``.
+        create : bool, optional
+            Define if the output file should be created. Defaults to ``True``
 
         Returns
         -------
-        db.File
-
+        plantdb.db.File
+            The (created) output file.
         """
         if file_id is None:
             file_id = self.get_task_name()
         return self.output().get().get_file(file_id, create)
 
     def get_task_name(self):
+        """Helper method to get the name of the current task.
+
+        Returns
+        -------
+        str
+            The name of the current task.
+        """
         return self.get_task_family().split('.')[-1]
 
 

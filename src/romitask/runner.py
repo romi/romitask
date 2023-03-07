@@ -25,26 +25,32 @@
 
 import luigi
 
+from romitask.log import configure_logger
+
+logger = configure_logger(__name__)
+
 
 class DBRunner(object):
-    """Class for running a given task on a database using luigi.
+    """Class for running a given (list of) task(s) on a database using luigi.
 
     Attributes
     ----------
-    db : DB
-        Target database
+    db : plantdb.db.DB
+        Target database.
+    task : list of RomiTask
+        The list of task to run.
     """
 
     def __init__(self, db, tasks, config):
         """
         Parameters
         ----------
-        db : DB
-            Target database
-        tasks : list or RomiTask
-            Tasks
+        db : plantdb.db.DB
+            Target database to use to run the task.
+        tasks : RomiTask or list of RomiTask
+            Task or list of task to run.
         config : dict
-            Luigi configuration for tasks
+            Luigi configuration for tasks.
         """
         if not isinstance(tasks, (list, tuple)):
             tasks = [tasks]
@@ -67,26 +73,28 @@ class DBRunner(object):
         tasks = [t() for t in self.tasks]
         luigi.build(tasks=tasks,
                     local_scheduler=True)
+        return
 
     def run_scan(self, scan_id):
-        """Run the tasks on a single scan.
+        """Run the task(s) on a single scan.
 
         Parameters
         ----------
         scan_id : str
-            Id of the scan to process
+            Id of the scan to process.
         """
         self.db.connect()
         scan = self.db.get_scan(scan_id)
         self._run_scan_connected(scan)
         self.db.disconnect()
+        return
 
     def run(self):
-        """Run the tasks on all scans in the DB
-        """
+        """Run the task(s) on all scans in the DB."""
         self.db.connect()
         for scan in self.db.get_scans():
-            print("scan = %s" % scan.id)
+            logger.info(f"scan = {scan.id}")
             self._run_scan_connected(scan)
-        print("done")
+        logger.info("Done")
         self.db.disconnect()
+        return
