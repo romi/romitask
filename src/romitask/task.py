@@ -662,8 +662,10 @@ class Clean(RomiTask):
         # - Perform the dataset & metadata cleaning:
         # List all filesets in dataset (excluding 'images'):
         fs_ids = [fs.id for fs in scan.get_filesets() if fs.id != "images"]
+        # Also exclude the dataset associated to VirtualPlant:
+        fs_ids = [fs for fs in fs_ids if not fs.startswith("VirtualPlant")]
         logger.info(f"Found {len(fs_ids)} Filesets (excluding 'images')...")
-        # Remove all Filesets except 'images':
+        # Remove all Filesets except 'images' & VirtualPlant*:
         for fs in tqdm(fs_ids, unit='fileset'):
             logger.info(f"Deleting '{fs}' fileset...")
             scan.delete_fileset(fs)
