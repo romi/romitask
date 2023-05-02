@@ -375,7 +375,7 @@ def check_dataset_directory(path, task):
     """
     if task == "ScannerToCenter":
         cfgname = SCAN_TOML
-    elif "Scan" in task:
+    elif task in DATA_CREATION_TASK:
         try:
             os.mkdir(path)
         except FileExistsError:
@@ -386,7 +386,7 @@ def check_dataset_directory(path, task):
                     shutil.rmtree(path)
                     os.mkdir(path)
                 else:
-                    sys.exit("Non-empty dataset directory for scanning process.")
+                    sys.exit("Non-empty dataset directory for data creation task.")
             else:
                 logger.info(f"Using existing empty dataset directory: {path}")
         cfgname = SCAN_TOML
@@ -395,7 +395,7 @@ def check_dataset_directory(path, task):
             assert (os.path.isdir(path))
         except AssertionError:
             logger.critical(f"Could not find dataset directory '{path}'!")
-            sys.exit("Non-existing dataset directory for non-scanning process.")
+            sys.exit("Non-existing dataset directory for processing task.")
         cfgname = PIPE_TOML
     return cfgname
 
