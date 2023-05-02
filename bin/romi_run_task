@@ -64,6 +64,7 @@ import toml
 
 from romitask import SCAN_TOML, PIPE_TOML
 from romitask.log import get_logging_config
+from romitask.modules import DATA_CREATION_TASK
 from romitask.modules import MODULES
 from romitask.modules import TASKS
 
@@ -473,12 +474,12 @@ if __name__ == '__main__':
     global logger
     logger = configure_logger('romi_run_task')
 
-    if "Scan" in args.task:
-        # Scan like modules are "data creation modules", we thus require a single path to dataset...
+    if args.task in DATA_CREATION_TASK:
+        # These are "data creation modules", we thus require a single path to dataset...
         try:
             assert len(args.dataset_path) == 1 and isinstance(args.dataset_path[0], str)
         except AssertionError:
-            logger.critical(f"For a 'scan' like module ({args.task}), the path to dataset should be a string.")
+            logger.critical(f"Task {args.task} requires the `dataset_path` to be a string.")
             logger.critical(f"Got '{args.dataset_path}'!")
             sys.exit(f"Error with input dataset path for {args.task} module!")
         else:
@@ -491,7 +492,7 @@ if __name__ == '__main__':
             #   - may contain UNIX matching symbols (like '*' or '?'):
             folders = sorted(glob.glob(args.dataset_path))
         elif isinstance(args.dataset_path, list):
-            # Check the path in the list exists:
+            # Check that listed paths do exist:
             folders = sorted([path for path in args.dataset_path if Path(path).exists()])
         else:
             logger.critical(f"Can not understand input dataset path: {args.dataset_path}")

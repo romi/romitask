@@ -32,10 +32,10 @@ MODULES = {
     "CalibrationScan": "plantimager.tasks.scan",
     "IntrinsicCalibrationScan": "plantimager.tasks.scan",
     # Calibration module:
-    "CreateCharucoBoard" : "plant3dvision.tasks.calibration",
-    "DetectCharuco" : "plant3dvision.tasks.calibration",
-    "ExtrinsicCalibration" : "plant3dvision.tasks.calibration",
-    "IntrinsicCalibration" : "plant3dvision.tasks.calibration",
+    "CreateCharucoBoard": "plant3dvision.tasks.calibration",
+    "DetectCharuco": "plant3dvision.tasks.calibration",
+    "ExtrinsicCalibration": "plant3dvision.tasks.calibration",
+    "IntrinsicCalibration": "plant3dvision.tasks.calibration",
     # Geometric reconstruction module:
     "Colmap": "plant3dvision.tasks.colmap",
     "Undistorted": "plant3dvision.tasks.proc2d",
@@ -71,3 +71,13 @@ MODULES = {
 }
 
 TASKS = list(MODULES.keys())
+
+#: List of task that create a dataset or that can be used without specifying an existing dataset.
+DATA_CREATION_TASK = [
+    "Scan",
+    "ScannerToCenter",
+    "VirtualPlant",
+    "VirtualScan",
+    "CalibrationScan",
+    "IntrinsicCalibrationScan",
+]
