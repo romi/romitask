@@ -407,6 +407,35 @@ def parse_kbdi(kbdi, default='n'):
         return valid[kbdi]
 
 
+def update_config(config, update):
+    """Update a configuration dictionary.
+
+    Parameters
+    ----------
+    config : dict
+        The configuration dictionary to update.
+    update : dict
+        The update dictionary.
+
+    Returns
+    -------
+    dict
+        Updated configuration dictionary.
+
+    Notes
+    -----
+    We update only the values from the update dictionary without removing any existing keys.
+
+    """
+    from collections.abc import Mapping
+    for k, v in update.items():
+        if isinstance(v, Mapping):
+            config[k] = update_config(config.get(k, {}), v)
+        else:
+            config[k] = v
+    return config
+
+
 def run_task(args):
     # - Try to load PIPELINE backup TOML configuration:
     bak_pipe_config = load_backup_pipe_cfg(args.dataset_path, args.task)
@@ -441,7 +470,7 @@ def run_task(args):
         if local_config != {}:
             logger.info(f"Got local definitions for: {list(local_config.keys())}")
             # Update the given PIPELINE configuration with the local configuration:
-            config.update(local_config)
+            update_config(config, local_config)
             logger.info("Updated given configuration with local definitions!")
         else:
             logger.error(f"Failed to load local TOML configuration file{'s' if len(local_toml) > 1 else ''}!")
