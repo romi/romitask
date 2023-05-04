@@ -62,7 +62,8 @@ from pathlib import Path
 
 import toml
 
-from romitask import SCAN_TOML, PIPE_TOML
+from romitask import PIPE_TOML
+from romitask import SCAN_TOML
 from romitask.log import get_logging_config
 from romitask.modules import DATA_CREATION_TASK
 from romitask.modules import MODULES
@@ -88,20 +89,22 @@ def parsing():
                         You may use Unix pattern matching with "*" and "?" to select a list of dataset.""")
 
     # Optional arguments:
-    parser.add_argument('--config', dest='config', default="",
+    parser.add_argument('--config', dest='config', type=str, default="",
                         help="""Pipeline configuration file or directory (JSON or TOML).
                         If a file, read the configuration from it.
                         If a directory, read & concatenate all configuration files in it.
                         By default, search in the selected dataset directory.""")
-    parser.add_argument('--module', dest='module', default=None,
+    parser.add_argument('--module', dest='module', type=str, default=None,
                         help="""Library and module of the task.
                         Use it if not available or different than defined in `romitask.modules.MODULES`.""")
-    parser.add_argument('--log-level', dest='log_level', default='INFO', choices=LOGLEV,
+    parser.add_argument('--log-level', dest='log_level', type=str, default='INFO', choices=LOGLEV,
                         help="Level of message logging, defaults to 'INFO'.")
+    parser.add_argument('--dry-run', dest='dry_run', action="store_true",
+                        help="Use this to test the command-line by doing everything except calling the task(s).")
 
     # Luigi related arguments:
     luigi = parser.add_argument_group("luigi options")
-    luigi.add_argument('--luigicmd', dest='luigicmd', default=LUIGI_CMD,
+    luigi.add_argument('--luigicmd', dest='luigicmd', type=str, default=LUIGI_CMD,
                        help=f"Luigi command, defaults to `{LUIGI_CMD}`.")
     luigi.add_argument('--local-scheduler', dest='ls', action="store_true", default=True,
                        help="Use the local luigi scheduler, defaults to `True`.")
@@ -128,8 +131,6 @@ def get_version():
                 hash_dict[package] = "Not Installed"
 
     return hash_dict
-
-
 
 
 def load_backup_scan_cfg(path):
@@ -249,7 +250,7 @@ def load_config_from_file(path):
         The configuration dictionary.
 
     """
-    config = None
+    config = {}
     if path.endswith("toml"):
         try:
             config = toml.load(open(path))
@@ -266,9 +267,6 @@ def load_config_from_file(path):
             logger.info(f"Loaded JSON configuration file: {path}")
     else:
         logger.critical(f"Unsupported configuration file format, should be TOML or JSON!")
-
-    if config is None:
-        sys.exit(f"Error while loading configuration file!")
 
     return config
 
@@ -410,26 +408,43 @@ def parse_kbdi(kbdi, default='n'):
 
 
 def run_task(args):
-    # - Try to load SCAN backup TOML configuration:
-    bak_scan_config = load_backup_scan_cfg(args.dataset_path)
     # - Try to load PIPELINE backup TOML configuration:
     bak_pipe_config = load_backup_pipe_cfg(args.dataset_path, args.task)
 
-    # - Process given configuration directory OR file, if any:
+    # - Process given PIPELINE configuration directory OR file, if any:
     config = {}
-    if args.config != "" and not os.path.isfile(args.config) and not os.path.isdir(args.config):
-        logger.critical(f"Could not understand `config` option '{args.config}'!")
-        sys.exit("Error with configuration file!")
-    elif os.path.isdir(args.config):
+    if os.path.isdir(args.config):
         config = load_config_from_directory(args.config)
     elif os.path.isfile(args.config):
         config = load_config_from_file(args.config)
+    elif args.config != "":
+        logger.critical(f"Could not understand `config` option '{args.config}'!")
+        sys.exit("Error with configuration file!")
     else:
         if bak_pipe_config is None:
             logger.info("Using NO configuration!")
         else:
             config = bak_pipe_config
             logger.info("Using a PREVIOUS pipeline configuration!")
+
+    # - Look for "local" PIPELINE configuration file(s) to load:
+    local_path = Path(args.dataset_path)
+    local_toml = list(local_path.glob('*.toml'))
+    local_toml = [f for f in local_toml if f.name != SCAN_TOML]  # exclude SCAN backup TOML config
+    local_toml = [f for f in local_toml if f.name != PIPE_TOML]  # exclude PIPELINE backup TOML config
+    # - Load the local configuration from detected file(s):
+    local_config = {}
+    if len(local_toml) > 0:
+        logger.info(f"Found {len(local_toml)} local TOML configuration file{'s' if len(local_toml) > 1 else ''}!")
+        for f in local_toml:
+            local_config.update(load_config_from_file(str(f)))
+        if local_config != {}:
+            logger.info(f"Got local definitions for: {list(local_config.keys())}")
+            # Update the given PIPELINE configuration with the local configuration:
+            config.update(local_config)
+            logger.info("Updated given configuration with local definitions!")
+        else:
+            logger.error(f"Failed to load local TOML configuration file{'s' if len(local_toml) > 1 else ''}!")
 
     # - Set the name of the module to be loaded for the selected task:
     module = get_task_module(args.task, args.module)
@@ -457,8 +472,11 @@ def run_task(args):
         if args.ls:
             cmd.append("--local-scheduler")
 
-        # - Start the configured pipeline:
-        subprocess.run(cmd, env={**os.environ, **env}, check=True)
+        if args.dry_run:
+            logger.info(f"Luigi command to call is:\n{cmd}")
+        else:
+            # - Start the configured pipeline:
+            subprocess.run(cmd, env={**os.environ, **env}, check=True)
 
     return
 
@@ -467,6 +485,7 @@ if __name__ == '__main__':
     # - Parse the input arguments to variables:
     parser = parsing()
     args = parser.parse_args()
+    print(args.dataset_path)
 
     # - Configure a logger from this application:
     from romitask.log import configure_logger
@@ -474,10 +493,14 @@ if __name__ == '__main__':
     global logger
     logger = configure_logger('romi_run_task')
 
+    # - If only one path in the list, get the first one:
+    if len(args.dataset_path) == 1:
+        args.dataset_path = args.dataset_path[0]
+
     if args.task in DATA_CREATION_TASK:
         # These are "data creation modules", we thus require a single path to dataset...
         try:
-            assert len(args.dataset_path) == 1 and isinstance(args.dataset_path[0], str)
+            assert isinstance(args.dataset_path, str)
         except AssertionError:
             logger.critical(f"Task {args.task} requires the `dataset_path` to be a string.")
             logger.critical(f"Got '{args.dataset_path}'!")
@@ -491,23 +514,26 @@ if __name__ == '__main__':
             #   - check existence of path:
             #   - may contain UNIX matching symbols (like '*' or '?'):
             folders = sorted(glob.glob(args.dataset_path))
+            # Check that globed paths are directory (and exist, implied):
+            folders = sorted([path for path in folders if Path(path).is_dir()])
         elif isinstance(args.dataset_path, list):
-            # Check that listed paths do exist:
-            folders = sorted([path for path in args.dataset_path if Path(path).exists()])
+            # Check that listed paths are directory (and exist, implied):
+            folders = sorted([path for path in args.dataset_path if Path(path).is_dir()])
         else:
             logger.critical(f"Can not understand input dataset path: {args.dataset_path}")
             sys.exit(f"Error with input dataset path for {args.task} module!")
-        # Check we indeed find a folder to process:
-        if len(folders)==0:
-            # Stop here if the list of folder to process is empty:
-            logger.critical("The input dataset path is empty!")
-            sys.exit(f"Error with input dataset path for {args.task} module!")
 
-    if len(folders) > 1:
+    if len(folders) == 0:
+        # Stop here if the list of folder to process is empty:
+        logger.critical("The input dataset path is empty!")
+        sys.exit(f"Error with input dataset path for {args.task} module!")
+    elif len(folders) > 1:
         fnames = [Path(folder).name for folder in folders]
         logger.info(f"Got a list of {len(folders)} scan dataset to analyze: {', '.join(fnames)}")
         for folder in folders:
             args.dataset_path = folder
+            print("\n\n")  # to facilitate the search in the console by separating the datasets
+            logger.info(f"Processing dataset '{args.dataset_path}'.")
             try:
                 run_task(args)
             except Exception as e:

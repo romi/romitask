@@ -72,7 +72,7 @@ MODULES = {
 
 TASKS = list(MODULES.keys())
 
-#: List of task that create a dataset or that can be used without specifying an existing dataset.
+#: List of tasks that create a dataset or that can be used without specifying an existing dataset.
 DATA_CREATION_TASK = [
     "Scan",
     "ScannerToCenter",
