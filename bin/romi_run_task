@@ -437,6 +437,13 @@ def update_config(config, update):
 
 
 def run_task(args):
+    """Load the configuration to use and call the luigi command to run the selected task.
+
+    Parameters
+    ----------
+    args : parser.parse_args
+        Parsed input arguments.
+    """
     # - Try to load PIPELINE backup TOML configuration:
     bak_pipe_config = load_backup_pipe_cfg(args.dataset_path, args.task)
 
@@ -561,8 +568,8 @@ if __name__ == '__main__':
         logger.info(f"Got a list of {len(folders)} scan dataset to analyze: {', '.join(fnames)}")
         for folder in folders:
             args.dataset_path = folder
-            print("\n\n")  # to facilitate the search in the console by separating the datasets
-            logger.info(f"Processing dataset '{args.dataset_path}'.")
+            print("\n")  # to facilitate the search in the console by separating the datasets
+            logger.info(f"Processing dataset '{Path(args.dataset_path).name}'.")
             try:
                 run_task(args)
             except Exception as e:
