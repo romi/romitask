@@ -42,7 +42,8 @@ class DBRunner(object):
     """
 
     def __init__(self, db, tasks, config):
-        """
+        """Class constructor.
+
         Parameters
         ----------
         db : plantdb.db.DB
@@ -62,11 +63,11 @@ class DBRunner(object):
     def _run_scan_connected(self, scan):
         db_config = {}
         db_config['worker'] = {
-            "no_install_shutdown_handler": True
+            "no_install_shutdown_handler": True,
         }
         db_config['DatabaseConfig'] = {
             'db': self.db,
-            'scan_id': scan
+            'scan_id': scan,
         }
         luigi_config = luigi.configuration.get_config()
         luigi_config.read_dict(db_config)

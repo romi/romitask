@@ -23,7 +23,7 @@
 # ------------------------------------------------------------------------------
 
 import logging
-from os import path
+from pathlib import Path
 
 from colorlog import ColoredFormatter
 
@@ -54,15 +54,41 @@ LOGGING_CFG = """
     datefmt=%m-%d %H:%M:%S
     """
 
+
 def get_logging_config(name='root', log_level='INFO'):
+    """Return the logging configuration.
+
+    Parameters
+    ----------
+    name : str
+        The name of the logger.
+        Defaults to `'root'`.
+    log_level : {'CRITICAL', 'ERROR', 'WARNING', 'INFO', 'DEBUG', 'NOTSET'}
+        A valid logging level.
+        Defaults to `'INFO'`.
+    """
     return LOGGING_CFG.format(name, log_level)
 
+
 def configure_logger(name, log_path="", log_level='INFO'):
+    """Return a configured logger.
+
+    Parameters
+    ----------
+    name : str
+        The name of the logger.
+    log_path : str
+        A file path to save the log.
+        Defaults to `''`.
+    log_level : {'CRITICAL', 'ERROR', 'WARNING', 'INFO', 'DEBUG', 'NOTSET'}
+        A valid logging level.
+        Defaults to `'INFO'`.
+    """
     colored_formatter = ColoredFormatter(
         "%(log_color)s%(levelname)-8s%(reset)s %(bg_blue)s[%(name)s]%(reset)s %(message)s",
         datefmt=None,
         reset=True,
-        style='%'
+        style='%',
     )
     simple_formatter = logging.Formatter("%(asctime)s - %(levelname)s - %(name)s - %(lineno)d: %(message)s")
 
@@ -76,7 +102,7 @@ def configure_logger(name, log_path="", log_level='INFO'):
 
     if log_path is not None and log_path != "":
         # create file handler:
-        fh = logging.FileHandler(path.join(log_path, f'{name}.log'), mode='w')
+        fh = logging.FileHandler(Path(log_path) / f'{name}.log', mode='w')
         fh.setFormatter(simple_formatter)
         logger.addHandler(fh)
 

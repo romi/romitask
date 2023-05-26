@@ -25,70 +25,80 @@
 
 import time
 
-from romitask.runner import DBRunner
+from plantdb.db import DBBusyError
 from watchdog.events import DirCreatedEvent
 from watchdog.events import FileSystemEventHandler
 from watchdog.observers import Observer
 
-from plantdb.db import DBBusyError
+from romitask.runner import DBRunner
 
-
-# logging.basicConfig(level=logging.INFO,
-#     format='%(asctime)s - %(message)s',
-#     datefmt='%Y-%m-%d %H:%M:%S')
 
 class FSDBWatcher():
-    """Class for watching changes on a FSDB database and launching a task when it has changed.
-
+    """Watch changes on a FSDB database and launch a task when it does.
 
     Attributes
     ----------
-    observer : Observer
-        Watchdog observer for the filesystem
+    observer : watchdog.observers.Observer
+        Watchdog observer for the filesystem.
     """
 
     def __init__(self, db, tasks, config):
-        """Parameters
+        """Class constructor.
+
+        Parameters
         ----------
-        db : FSDB
-            The target database
+        db : plantdb.fsdb.FSDB
+            The target database.
         tasks : list of RomiTask
-            The list of tasks to do on change
+            The list of tasks to do on change.
         config : dict
-            Configuration for the task
+            Configuration for the task.
         """
         self.observer = Observer()
         handler = FSDBEventHandler(db, tasks, config)
         self.observer.schedule(handler, db.basedir, recursive=False)
 
     def start(self):
+        """Start the observer."""
         self.observer.start()
 
     def stop(self):
+        """Stop the observer."""
         self.observer.stop()
 
     def join(self):
+        """Wait until the observer terminates."""
         self.observer.join()
 
 
 class FSDBEventHandler(FileSystemEventHandler):
+    """Event handler for FSDB.
+
+    Attributes
+    ----------
+    runner : romitask.runner.DBRunner
+        The runner to handle.
+    running : bool
+        Indicate if the `runner` is running or not.
+    """
+
     def __init__(self, db, tasks, config):
-        """Parameters
+        """Class constructor.
+
+        Parameters
         ----------
-        db : FSDB
-            The target database
+        db : plantdb.fsdb.FSDB
+            The target database.
         tasks : list of RomiTask
-            The list of tasks to do on change
+            The list of tasks to do on change.
         config : dict
-            Configuration for the task
+            Configuration for the task.
         """
         self.runner = DBRunner(db, tasks, config)
         self.running = False
 
     def on_created(self, event):
-        """Run tasks on the database when it becomes available, if a new
-        folder has been created (new scan)
-        """
+        """Run tasks on the database when it becomes available, if a new folder has been created (new scan)."""
         if not isinstance(event, DirCreatedEvent):
             return
         while True:

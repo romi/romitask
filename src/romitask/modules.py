@@ -67,7 +67,7 @@ MODULES = {
     "Visualization": "plant3dvision.tasks.visualization",
     # Database module:
     "DummyTask": "romitask.task",
-    "Clean": "romitask.task"
+    "Clean": "romitask.task",
 }
 
 TASKS = list(MODULES.keys())

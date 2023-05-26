@@ -23,11 +23,7 @@
 # <https://www.gnu.org/licenses/>.
 # ------------------------------------------------------------------------------
 
-"""
-romitask.task
-=============
-
-ROMI Luigi Tasks
+"""ROMI Luigi Tasks
 
 This module implements subclasses of ``luigi.Config``, ``luigi.Target`` and ``luigi.Tasks``.
 The goal is to have luigi tasks work seamlessly with the ROMI database API implemented in ``plantdb.db``.
@@ -41,6 +37,7 @@ To check for a task completeness, the fileset existence is checked as well as al
 import glob
 import json
 import os.path
+from pathlib import Path
 from shutil import rmtree
 
 import luigi
@@ -54,7 +51,8 @@ db = None
 
 class ScanParameter(luigi.Parameter):
     """Register a ``luigi.Parameter`` object to access `plantdb.fsdb.Scan` class.
-    Override the default implementation methods ``parse`` & ``serialize``
+
+    Override the default implementation methods ``parse`` & ``serialize``.
 
     Notes
     -----
@@ -62,7 +60,8 @@ class ScanParameter(luigi.Parameter):
     """
 
     def parse(self, scan_path):
-        """Convert the scan path to a `plantdb.fsdb.Scan` object...
+        """Convert the scan path to a `plantdb.fsdb.Scan` object.
+
         Override the default implementation method for specialized parsing.
 
         Parameters
@@ -140,6 +139,7 @@ class DatabaseConfig(luigi.Config):
     >>> db_cfg = DatabaseConfig(scan=scan)
 
     """
+
     scan = ScanParameter()
 
 
@@ -157,7 +157,7 @@ class FilesetTarget(luigi.Target):
     scan : plantdb.fsdb.Scan
         A `Scan` dataset instance within `db`.
     fileset_id : str
-        Id of the target `Fileset` instance within `scan`.
+        Name of the target `Fileset` instance within `scan`.
 
     Notes
     -----
@@ -202,7 +202,7 @@ class FilesetTarget(luigi.Target):
         scan : plantdb.fsdb.Scan
             The `Scan` dataset instance where to find/create the `Fileset`.
         fileset_id : str
-            Id of the target `Fileset`.
+            Name of the target `Fileset`.
 
         """
         self.db = scan.db
@@ -260,6 +260,7 @@ class RomiTask(luigi.Task):
     scan_id : luigi.Parameter, optional
         The scan id to use to get or create the ``FilesetTarget``.
     """
+
     upstream_task = luigi.TaskParameter()
     scan_id = luigi.Parameter(default="")
 
@@ -298,7 +299,7 @@ class RomiTask(luigi.Task):
         for k in params.keys():
             try:
                 params[k] = json.loads(params[k])
-            except:
+            except KeyError:
                 continue
         fs.set_metadata("task_params", params)
         return t
@@ -309,7 +310,7 @@ class RomiTask(luigi.Task):
         Parameters
         ----------
         file_id : str, optional
-            Id of the input file. Defaults to ``None``.
+            Name of the input file. Defaults to ``None``.
 
         Returns
         -------
@@ -324,7 +325,7 @@ class RomiTask(luigi.Task):
         Parameters
         ----------
         file_id : str, optional
-            Id of the output file. Defaults to ``None``.
+            Name of the output file. Defaults to ``None``.
         create : bool, optional
             Define if the output file should be created. Defaults to ``True``
 
@@ -349,20 +350,39 @@ class RomiTask(luigi.Task):
 
 
 class DatasetExists(RomiTask):
-    """Task that requires a dataset (scan) to exist."""
+    """Task that requires a dataset (scan) to exist.
+
+    Attributes
+    ----------
+    upstream_task : None
+        No upstream task is required.
+    scan_id : luigi.Parameter, optional
+        The scan id (dataset name) to check.
+    """
+
+    upstream_task = None  # override from RomiTask
     scan_id = luigi.Parameter()
-    upstream_task = None
 
     def requires(self):
+        """Require nothing."""
         return []
 
     def output(self):
+        """Returns nothing."""
         return None
 
     def complete(self):
-        return False
+        """Indicate the task as complete."""
+        return False  # there is no output
 
     def run(self):
+        """Check the dataset exist.
+
+        Raises
+        ------
+        OSError
+            If the `scan_id` does not exist.
+        """
         db = DatabaseConfig().scan.db
         if db.get_scan(self.scan_id) is None:
             raise OSError(f"Scan {self.scan_id} does not exist!")
@@ -370,52 +390,109 @@ class DatasetExists(RomiTask):
 
 
 class FilesetExists(RomiTask):
-    """A Task which requires a fileset with a given id to exist."""
+    """A Task which requires a fileset with a given id to exist.
+
+    Attributes
+    ----------
+    upstream_task : None
+        No upstream task is required.
+    scan_id : luigi.Parameter, optional
+        The scan id to use to get or create the ``FilesetTarget``.
+    fileset_id : luigi.Parameter
+        The name of the fileset that should exist.
+    """
+
+    upstream_task = None  # override from RomiTask
     fileset_id = luigi.Parameter()
-    upstream_task = None
 
     def requires(self):
+        """Require nothing."""
         return []
 
     def output(self):
-        self.task_id = self.fileset_id
+        """The output of the task is the fileset."""
+        self.task_id = self.fileset_id  # name the task using the fileset
         return super().output()
 
     def run(self):
+        """Check the fileset exist.
+
+        Raises
+        ------
+        OSError
+            If the `fileset_id` does not exist.
+        """
         if self.output().get() is None:
-            raise OSError("Fileset %s does not exist" % self.fileset_id)
+            raise OSError(f"Fileset {self.fileset_id} does not exist!")
         return
 
 
 class ImagesFilesetExists(FilesetExists):
-    """A Task which requires the presence of a fileset with id ``images``."""
+    """Task to assert the presence of a fileset containing the *images*.
+
+    Attributes
+    ----------
+    fileset_id : luigi.Parameter
+        Name of the fileset containing the images. Defaults to `'images'`.
+    """
+
     fileset_id = luigi.Parameter(default="images")
 
 
 class Segmentation2DGroundTruthFilesetExists(FilesetExists):
-    """A Task which requires the presence of fileset with id ``Segmentation2DGroundTruth``."""
+    """Task to assert the presence of a fileset containing the *ground-truth images* for CNN training.
+
+    Attributes
+    ----------
+    fileset_id : luigi.Parameter
+        Name of the fileset containing the images. Defaults to `'Segmentation2DGroundTruth'`.
+    """
+
     fileset_id = luigi.Parameter(default="Segmentation2DGroundTruth")
 
 
 class FileExists(RomiTask):
-    """A Task that requires a file with a given id to exist."""
+    """A Task that requires a file with a given id to exist.
+
+    Attributes
+    ----------
+    upstream_task : None
+        No upstream task is required.
+    fileset_id : luigi.Parameter
+        Name of the fileset where to find the file.
+    file_id : luigi.Parameter
+        Name of the file that should exist.
+    """
+
+    upstream_task = None  # override from RomiTask
     fileset_id = luigi.Parameter()
     file_id = luigi.Parameter()
-    upstream_task = None
 
     def requires(self):
+        """Require nothing."""
         return []
 
     def output(self):
-        self.task_id = self.fileset_id
+        """The output of the task is the fileset."""
+        self.task_id = self.fileset_id  # name the task using the fileset
         return super().output()
 
-    def output_file(self, file_id=None, create=True):
+    def output_file(self, file_id=None, create=False):
+        """The output file should exist."""
         if file_id is None:
             file_id = self.file_id
         return super().output_file(file_id, False)
 
     def run(self):
+        """Check the fileset and files exist.
+
+        Raises
+        ------
+        OSError
+            If the `fileset_id` does not exist.
+        OSError
+            If the `file_id` does not exist.
+        """
         if self.output().get() is None:
             raise OSError(f"Fileset {self.fileset_id} does not exist")
         if self.output().get().get_file(self.file_id) is None:
@@ -424,26 +501,32 @@ class FileExists(RomiTask):
 
 
 class VirtualPlantObj(FileExists):
-    """The VirtualPlantObj task returns a 3D plant model file. The 3D model should be stored as '.obj' file.
+    """The VirtualPlantObj task returns a 3D plant model file.
 
-    Use as follows, using VirtualScan as an example:
+    The 3D model should be stored as '.obj' and '.mtl' files.
 
-    >>> [VirtualScan]
-    >>> obj_fileset = "VirtualPlantObj"
+    Use as follows, using ``VirtualScan`` as an example:
+
+    .. code-block::
+
+        [VirtualScan]
+        obj_fileset = "VirtualPlantObj"
 
     This example will seek for the default file with ID VirtualPlant in the fileset
     VirtualPlant in the active scan directory.
 
     These default values can be overriden as follows:
 
-    >>> [VirtualPlantObj]
-    >>> scan_id = "AnotherScan"
-    >>> fileset_id = "AnotherFileset"
-    >>> fileset_id_prefix = "AnotherFilesetPrefix"
-    >>> file_id = "FileID"
-    >>>
-    >>> [VirtualScan]
-    >>> obj_fileset = "VirtualPlantObj"
+    .. code-block::
+
+        [VirtualPlantObj]
+        scan_id = "AnotherScan"
+        fileset_id = "AnotherFileset"
+        fileset_id_prefix = "AnotherFilesetPrefix"
+        file_id = "FileID"
+
+        [VirtualScan]
+        obj_fileset = "VirtualPlantObj"
 
     Attributes
     ----------
@@ -459,12 +542,14 @@ class VirtualPlantObj(FileExists):
         The ID of the file to use. The default is "VirtualPlant"
 
     """
+
     scan_id = luigi.Parameter(default="")
     fileset_id = luigi.Parameter(default="VirtualPlant")
     fileset_id_prefix = luigi.Parameter(default="VirtualPlant")
     file_id = luigi.Parameter(default="VirtualPlant")
 
     def output(self):
+        """Return the fileset containing the model files."""
         if self.scan_id == "":
             scan = DatabaseConfig().scan
         else:
@@ -483,12 +568,11 @@ class VirtualPlantObj(FileExists):
 
         fs = t.get()
 
-        params = dict(
-            self.to_str_params(only_significant=False, only_public=False))
+        params = dict(self.to_str_params(only_significant=False, only_public=False))
         for k in params.keys():
             try:
                 params[k] = json.loads(params[k])
-            except:
+            except KeyError:
                 continue
         fs.set_metadata("task_params", params)
 
@@ -516,6 +600,7 @@ class FileByFileTask(RomiTask):
     Input `File`s metadata are copied to the target/output `File`s metadata.
 
     """
+
     query = luigi.DictParameter(default={})
     type = None  # ???
     reader = None  # ???
@@ -526,15 +611,15 @@ class FileByFileTask(RomiTask):
 
         Parameters
         ----------
-        f: FSDB.File
-            Input file
-        outfs: FSDB.Fileset
-            Output fileset
+        f: plantdb.fsdb.FSDB.File
+            Input file.
+        outfs: plantdb.fsdb.FSDB.Fileset
+            Output fileset.
 
         Returns
         -------
-        FSDB.File
-            this file must be created in `outfs`
+        plantdb.fsdb.FSDB.File
+            Tis file must be created in `outfs`.
         """
         raise NotImplementedError
 
@@ -564,9 +649,9 @@ def mourn_failure(task, exception):
     Parameters
     ----------
     task : RomiTask
-        The task which has failed
+        The task which has failed.
     exception : Exc
-        The exception raised by the failure
+        The exception raised by the failure.
     """
     output_fileset = task.output().get()
     scan = task.output().get().scan
@@ -574,11 +659,20 @@ def mourn_failure(task, exception):
 
 
 class DummyTask(RomiTask):
-    """A RomiTask which does nothing and requires nothing."""
-    upstream_task = None
+    """A dummy task.
+
+    Does nothing and requires nothing.
+
+    Attributes
+    ----------
+    upstream_task : None
+        No upstream task is required.
+    """
+
+    upstream_task = None  # override from RomiTask
 
     def requires(self):
-        """Requires nothing."""
+        """Require nothing."""
         return []
 
     def run(self):
@@ -588,6 +682,8 @@ class DummyTask(RomiTask):
 
 #: List of original image metadata (to keep in Clean task)
 IMAGES_MD = ["pose", "approximate_pose", "channel", "shot_id", "camera"]
+
+
 # "pose" is added by the PlantImager or VirtualPlantImager
 # "approximate_pose" is added by the PlantImager
 # "channel" is added by the PlantImager or VirtualPlantImager
@@ -612,8 +708,8 @@ class Clean(RomiTask):
     See Also
     --------
     romitask.task.IMAGES_MD
-
     """
+
     upstream_task = None
     no_confirm = luigi.BoolParameter(default=False)
     keep_metadata = luigi.ListParameter(default=[])
@@ -627,10 +723,12 @@ class Clean(RomiTask):
         return None  # we do not want the cleaning task to add a Fileset!
 
     def complete(self):
-        return False
+        """Indicate the task as complete."""
+        return False  # there is no output
 
-    def confirm(self, c, default='n'):
-        """Method to handle keyboard input from user."""
+    @staticmethod
+    def confirm(c, default='n'):
+        """Handle keyboard input from user."""
         valid = {"yes": True, "y": True, "ye": True, "no": False, "n": False}
         if c == '':
             return valid[default]
@@ -638,6 +736,7 @@ class Clean(RomiTask):
             return valid[c]
 
     def run(self):
+        """Run the task."""
         scan = DatabaseConfig().scan
         logger.info(f"Cleaning task got a scan named '{scan.id}'...")
 
@@ -682,35 +781,35 @@ class Clean(RomiTask):
                 f.set_metadata(clean_md)
 
         # - Cleanup metadata folder:
-        metadata_path = os.path.abspath(os.path.join(scan.path(), 'metadata'))
+        metadata_path = Path.resolve(Path(scan.path()) / 'metadata')
         # Clean orphan metadata JSON files
-        fs_metadata = glob.glob(metadata_path + '/*.json')
+        fs_metadata = glob.glob(str(metadata_path) + '/*.json')
         fs_metadata = [f for f in fs_metadata if f.split('/')[-1] != 'images.json']
         if len(fs_metadata) != 0:
             logger.info(f"Found {len(fs_metadata)} orphan metadata JSON files!")
         for f in fs_metadata:
             try:
-                os.remove(f)
+                Path(f).unlink(missing_ok=False)
                 logger.warning(f"Deleted file: {f}")
-            except:
+            except FileNotFoundError:
                 logger.error(f"Could not delete file '{f}'!")
         # Clean orphan metadata directories
-        fs_dir = set([d for d in os.listdir(metadata_path) if os.path.isdir(d)]) - {'images'}
+        fs_dir = set([d for d in os.listdir(metadata_path) if Path(d).is_dir()]) - {'images'}
         if len(fs_dir) != 0:
             logger.info(f"Found {len(fs_dir)} orphan metadata directories!")
         for md_dir in fs_dir:
             try:
-                rmtree(os.path.join(metadata_path, md_dir), ignore_errors=True)
+                rmtree(metadata_path / md_dir, ignore_errors=True)
                 logger.info(f"Deleted directory: {md_dir}")
-            except:
+            except FileNotFoundError:
                 logger.error(f"Could not delete directory '{md_dir}'!")
 
         # Try to remove 'pipeline.toml' backup, if any:
-        pipe_toml = os.path.abspath(os.path.join(scan.path(), 'pipeline.toml'))
-        if os.path.isfile(pipe_toml):
+        pipe_toml = Path.resolve(Path(scan.path()) / 'pipeline.toml')
+        if pipe_toml.is_file():
             try:
-                os.remove(pipe_toml)
-            except:
+                pipe_toml.unlink()
+            except FileNotFoundError:
                 logger.warning(f"Could not delete backup pipeline config: '{pipe_toml}'")
             else:
                 logger.info(f"Deleted backup pipeline config: '{pipe_toml}'")
