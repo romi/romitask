@@ -58,6 +58,8 @@ import shutil
 import subprocess
 import sys
 import tempfile
+import time
+from datetime import timedelta
 from pathlib import Path
 
 import toml
@@ -512,8 +514,15 @@ def run_task(args):
         if args.dry_run:
             logger.info(f"Luigi command to call is:\n{cmd}")
         else:
+            t_start = time.time()
             # - Start the configured pipeline:
-            subprocess.run(cmd, env={**os.environ, **env}, check=True)
+            p = subprocess.run(cmd, env={**os.environ, **env}, check=True)
+            delta = timedelta(seconds=time.time() - t_start)
+            delta = str(delta).split('.')[0]  # to get HH:MM:SS
+            if p.returncode == 0:
+                logger.info(f"Done in {delta}s!")
+            else:
+                logger.info(f"Failed after {delta}s!")
 
     return
 
