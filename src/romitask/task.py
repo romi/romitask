@@ -577,6 +577,8 @@ class VirtualPlantObj(FileExists):
                 params[k] = json.loads(params[k])
             except KeyError:
                 continue
+            except JSONDecodeError:
+                continue
         fs.set_metadata("task_params", params)
 
         self.task_id = self.fileset_id
