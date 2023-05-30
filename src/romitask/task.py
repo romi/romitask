@@ -37,6 +37,7 @@ To check for a task completeness, the fileset existence is checked as well as al
 import glob
 import json
 import os.path
+from json import JSONDecodeError
 from pathlib import Path
 from shutil import rmtree
 
@@ -300,6 +301,8 @@ class RomiTask(luigi.Task):
             try:
                 params[k] = json.loads(params[k])
             except KeyError:
+                continue
+            except JSONDecodeError:
                 continue
         fs.set_metadata("task_params", params)
         return t
