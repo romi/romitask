@@ -748,7 +748,7 @@ class Clean(RomiTask):
 
         # - Handle the necessity to confirm prior to dataset & metadata cleaning.
         if not self.no_confirm:
-            del_msg = "This will delete all filesets and metadata except for the `images` fileset."
+            del_msg = "This will delete all filesets and metadata except for the `images` & 'VirtualPlant' filesets."
             confirm_msg = "Confirm? [y/N]"
             logger.warning(del_msg)
             logger.warning(confirm_msg)
@@ -766,7 +766,7 @@ class Clean(RomiTask):
         fs_ids = [fs.id for fs in scan.get_filesets() if fs.id != "images"]
         # Also exclude the dataset associated to VirtualPlant:
         fs_ids = [fs for fs in fs_ids if not fs.startswith("VirtualPlant")]
-        logger.info(f"Found {len(fs_ids)} Filesets (excluding 'images')...")
+        logger.info(f"Found {len(fs_ids)} filesets (excluding 'images' & 'VirtualPlant')...")
         # Remove all Filesets except 'images' & VirtualPlant*:
         for fs in tqdm(fs_ids, unit='fileset'):
             logger.info(f"Deleting '{fs}' fileset...")
