@@ -70,6 +70,7 @@ from romitask.log import configure_logger
 from romitask.log import get_logging_config
 from romitask.modules import DATA_CREATION_TASK
 from romitask.modules import MODULES
+from romitask.modules import NO_DATASET_TASK
 from romitask.modules import TASKS
 
 LUIGI_CMD = "luigi"
@@ -358,7 +359,7 @@ def check_dataset_directory(path, task):
 
     Parameters
     ----------
-    path : str
+    path : pathlib.Path
         Path to the dataset to check.
     task : str
         Name of the task to execute by luigi.
@@ -372,20 +373,19 @@ def check_dataset_directory(path, task):
     -----
     If a "Scan" like tasks is required, a directory should be created to receive the created fileset.
     Else, the dataset directory should exist as an existing fileset will be processed.
-
     """
     if task == "ScannerToCenter":
         cfgname = SCAN_TOML
     elif task in DATA_CREATION_TASK:
         try:
-            os.mkdir(path)
+            path.mkdir(exist_ok=False)
         except FileExistsError:
-            if not os.listdir(path) == []:
+            if not list(path.iterdir()) == []:
                 logger.critical(f"Given dataset directory '{path}' exists and is not empty!")
                 delete = parse_kbdi(input("Do you want ro remove the previous dataset? [y/N]"))
                 if delete:
                     shutil.rmtree(path)
-                    os.mkdir(path)
+                    path.mkdir(exist_ok=False)
                 else:
                     sys.exit("Non-empty dataset directory for data creation task.")
             else:
@@ -393,7 +393,7 @@ def check_dataset_directory(path, task):
         cfgname = SCAN_TOML
     else:
         try:
-            assert (os.path.isdir(path))
+            assert path.is_dir()
         except AssertionError:
             logger.critical(f"Could not find dataset directory '{path}'!")
             sys.exit("Non-existing dataset directory for processing task.")
@@ -545,9 +545,9 @@ if __name__ == '__main__':
         try:
             assert isinstance(args.dataset_path, str)
         except AssertionError:
-            logger.critical(f"Task {args.task} requires the `dataset_path` to be a string.")
+            logger.critical(f"Task '{args.task}' requires the `dataset_path` to be a string.")
             logger.critical(f"Got '{args.dataset_path}'!")
-            sys.exit(f"Error with input dataset path for {args.task} module!")
+            sys.exit(f"Error with input dataset path for '{args.task}' module!")
         else:
             folders = args.dataset_path
     else:
@@ -556,19 +556,27 @@ if __name__ == '__main__':
             # Process the input string `args.dataset_path` with ``glob``:
             #   - check existence of path:
             #   - may contain UNIX matching symbols (like '*' or '?'):
-            folders = sorted(glob.glob(args.dataset_path))
+            folders = glob.glob(args.dataset_path)
+            # Resolve path (make it absolute & normalize):
+            folders = [Path(path).resolve() for path in folders]
             # Check that globed paths are directory (and exist, implied):
-            folders = sorted([path for path in folders if Path(path).is_dir()])
+            folders = sorted([path for path in folders if path.is_dir()])
         elif isinstance(args.dataset_path, list):
+            # Resolve path (make it absolute & normalize):
+            folders = [Path(path).resolve() for path in args.dataset_path]
             # Check that listed paths are directory (and exist, implied):
-            folders = sorted([path for path in args.dataset_path if Path(path).is_dir()])
+            folders = sorted([path for path in folders if path.is_dir()])
         else:
-            logger.critical(f"Can not understand input dataset path: {args.dataset_path}")
-            sys.exit(f"Error with input dataset path for {args.task} module!")
+            logger.critical(f"Can not understand input dataset path: '{args.dataset_path}'")
+            sys.exit(f"Error with input dataset path for '{args.task}' module!")
+
+    if len(folders) == 0 and args.task not in NO_DATASET_TASK:
+        logger.critical(f"Could not obtain a valid path from input dataset path: '{args.dataset_path}'!")
+        sys.exit(f"Error with input dataset path for '{args.task}' module!")
 
     if isinstance(folders, list):
-        fnames = [Path(folder).name for folder in folders]
-        logger.info(f"Got a list of {len(folders)} scan dataset to analyze: {', '.join(fnames)}")
+        dataset = [folder.name for folder in folders]
+        logger.info(f"Got a list of {len(folders)} scan dataset to analyze: {', '.join(dataset)}")
         for folder in folders:
             args.dataset_path = folder
             print("\n")  # to facilitate the search in the console by separating the datasets

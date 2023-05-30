@@ -80,4 +80,10 @@ DATA_CREATION_TASK = [
     "CalibrationScan",
     "IntrinsicCalibrationScan",
 ]
-# NOTE: do NOT add 'VirtualScan' here, else it will break workflow inheritability for 'VirtualPlant'
+# NOTE: do NOT add 'VirtualScan' here, else it will break workflow heritability for 'VirtualPlant'
+
+#: List of tasks that can work without a dataset.
+NO_DATASET_TASK = [
+    "DummyTask",
+    "ScannerToCenter",
+]
