@@ -77,7 +77,7 @@ DATA_CREATION_TASK = [
     "Scan",
     "ScannerToCenter",
     "VirtualPlant",
-    "VirtualScan",
     "CalibrationScan",
     "IntrinsicCalibrationScan",
 ]
+# NOTE: do NOT add 'VirtualScan' here, else it will break workflow inheritability for 'VirtualPlant'
