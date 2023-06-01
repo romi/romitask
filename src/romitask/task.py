@@ -117,7 +117,7 @@ class ScanParameter(luigi.Parameter):
         """
         db_path = scan.db.basedir
         scan_id = scan.id
-        return '/'.join([db_path, scan_id])
+        return str(db_path / scan_id)
 
 
 class DatabaseConfig(luigi.Config):

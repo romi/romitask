@@ -27,6 +27,8 @@ from pathlib import Path
 
 from colorlog import ColoredFormatter
 
+LOGLEV = ["DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"]
+
 LOGGING_CFG = """
     [loggers]
     keys=root

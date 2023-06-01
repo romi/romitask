@@ -66,6 +66,7 @@ import toml
 
 from romitask import PIPE_TOML
 from romitask import SCAN_TOML
+from romitask.log import LOGLEV
 from romitask.log import configure_logger
 from romitask.log import get_logging_config
 from romitask.modules import DATA_CREATION_TASK
@@ -74,7 +75,6 @@ from romitask.modules import NO_DATASET_TASK
 from romitask.modules import TASKS
 
 LUIGI_CMD = "luigi"
-LOGLEV = ["DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"]
 HELP_URL = "https://docs.romi-project.eu/plant_imager/tutorials/basics/"
 
 
