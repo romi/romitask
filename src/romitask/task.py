@@ -23,7 +23,7 @@
 # <https://www.gnu.org/licenses/>.
 # ------------------------------------------------------------------------------
 
-"""ROMI Luigi Tasks
+"""ROMI implentation of `luigi`'s `Tasks`.
 
 This module implements subclasses of ``luigi.Config``, ``luigi.Target`` and ``luigi.Tasks``.
 The goal is to have luigi tasks work seamlessly with the ROMI database API implemented in ``plantdb.db``.
@@ -34,6 +34,7 @@ A ``RomiTask`` must implement two methods : ``run`` and ``requires``.
 
 To check for a task completeness, the fileset existence is checked as well as all it's dependencies.
 """
+
 import glob
 import json
 import os.path
@@ -57,18 +58,18 @@ class ScanParameter(luigi.Parameter):
 
     Notes
     -----
-    The `parse` method connect to the given path to a ``plantdb.fsdb.FSDB`` database.
+    The ``parse`` method connect to the given path to a ``plantdb.fsdb.FSDB`` database.
     """
 
     def parse(self, scan_path):
-        """Convert the scan path to a `plantdb.fsdb.Scan` object.
+        """Convert the scan path to a ``plantdb.fsdb.Scan`` object.
 
         Override the default implementation method for specialized parsing.
 
         Parameters
         ----------
         scan_path : str
-            The value to parse, here the path to an `plantdb.fsdb.Scan` dataset.
+            The value to parse, here the path to an ``plantdb.fsdb.Scan`` dataset.
 
         Returns
         -------
@@ -77,9 +78,10 @@ class ScanParameter(luigi.Parameter):
 
         Notes
         -----
-        Uses given path, eg. `/db/root/path/scan_id`, to defines:
-          - the database root dir with `/db/root/path`
-          - the scan dataset id with `scan_id`
+        Uses given path, eg. ``/db/root/path/scan_id``, to defines:
+          - the database root dir with ``/db/root/path``
+          - the scan dataset id with ``scan_id``
+
         If the given scan dataset id does not exist, it is created.
         """
         from plantdb import FSDB
@@ -101,19 +103,19 @@ class ScanParameter(luigi.Parameter):
         return scan
 
     def serialize(self, scan):
-        """Converts `plantdb.fsdb.Scan` in its path.
+        """Converts ``plantdb.fsdb.Scan`` in its path.
 
-        Opposite of `parse()`.
+        Opposite of ``parse()``.
 
         Parameters
         ----------
         scan : plantdb.fsdb.Scan
-            The value to serialize, here a `plantdb.fsdb.Scan` object.
+            The value to serialize, here a ``plantdb.fsdb.Scan`` object.
 
         Returns
         -------
         str
-            The path to the corresponding `plantdb.fsdb.Scan` object.
+            The path to the corresponding ``plantdb.fsdb.Scan`` object.
         """
         db_path = scan.db.basedir
         scan_id = scan.id
@@ -140,29 +142,28 @@ class DatabaseConfig(luigi.Config):
     >>> db_cfg = DatabaseConfig(scan=scan)
 
     """
-
     scan = ScanParameter()
 
 
 class FilesetTarget(luigi.Target):
-    """Subclass ``luigi.Target`` for `Fileset` as defined in romitask ``plantdb.fsdb.FSDB`` API.
+    """Subclass ``luigi.Target`` for ``Fileset`` as defined in romitask ``plantdb.fsdb.FSDB`` API.
 
-    A `FilesetTarget` is used by `luigi.Task` (or subclass) methods:
-     * `requires` to assert the existence of the `Fileset` prior to starting the task;
-     * `output` to create a `Fileset` after running a task.
+    A ``FilesetTarget`` is used by ``luigi.Task`` (or subclass) methods:
+     * ``requires`` to assert the existence of the ``Fileset`` prior to starting the task;
+     * ``output`` to create a ``Fileset`` after running a task.
 
     Attributes
     ----------
     db : plantdb.fsdb.FSDB
-        An `FSDB` database instance.
+        An ``FSDB`` database instance.
     scan : plantdb.fsdb.Scan
-        A `Scan` dataset instance within `db`.
+        A ``Scan`` dataset instance within ``db``.
     fileset_id : str
-        Name of the target `Fileset` instance within `scan`.
+        Name of the target ``Fileset`` instance within ``scan``.
 
     Notes
     -----
-    A luigi `Target` subclass requires to implement the `exists` method.
+    A luigi ``Target`` subclass requires to implement the ``exists`` method.
 
     Examples
     --------
@@ -201,9 +202,9 @@ class FilesetTarget(luigi.Target):
         Parameters
         ----------
         scan : plantdb.fsdb.Scan
-            The `Scan` dataset instance where to find/create the `Fileset`.
+            The ``Scan`` dataset instance where to find/create the ``Fileset``.
         fileset_id : str
-            Name of the target `Fileset`.
+            Name of the target ``Fileset``.
 
         """
         self.db = scan.db
@@ -211,9 +212,9 @@ class FilesetTarget(luigi.Target):
         self.fileset_id = fileset_id
 
     def create(self):
-        """Creates a `Fileset` using the `plantdb` FSDB API.
+        """Creates a ``Fileset`` using the ``plantdb`` FSDB API.
 
-        The name of the created `Fileset` is given by `self.fileset_id`.
+        The name of the created ``Fileset`` is given by ``self.fileset_id``.
 
         Returns
         -------
@@ -223,7 +224,7 @@ class FilesetTarget(luigi.Target):
         return self.scan.create_fileset(self.fileset_id)
 
     def exists(self):
-        """Assert the target `Fileset` exists.
+        """Assert the target ``Fileset`` exists.
 
         A target exists if the associated fileset exists and is not empty.
 
@@ -236,7 +237,7 @@ class FilesetTarget(luigi.Target):
         return fs is not None and len(fs.get_files()) > 0
 
     def get(self, create=True):
-        """Returns the target `Fileset` instance, can be created.
+        """Returns the target ``Fileset`` instance, can be created.
 
         Parameters
         ----------
@@ -246,13 +247,13 @@ class FilesetTarget(luigi.Target):
         Returns
         -------
         plantdb.fsdb.Fileset
-            The fetched/created `Fileset` instance.
+            The fetched/created ``Fileset`` instance.
         """
         return self.scan.get_fileset(self.fileset_id, create=create)
 
 
 class RomiTask(luigi.Task):
-    """ROMI implementation of a ``luigi.Task``, working with the `plantdb` DB API.
+    """ROMI implementation of a ``luigi.Task``, working with the ``plantdb.db.DB`` API.
 
     Attributes
     ----------
@@ -261,7 +262,6 @@ class RomiTask(luigi.Task):
     scan_id : luigi.Parameter, optional
         The scan id to use to get or create the ``FilesetTarget``.
     """
-
     upstream_task = luigi.TaskParameter()
     scan_id = luigi.Parameter(default="")
 
@@ -278,7 +278,7 @@ class RomiTask(luigi.Task):
         return self.upstream_task()
 
     def output(self):
-        """Defines the returned Target, for a RomiTask it is a FileSetTarget.
+        """Defines the returned ``Target``, for a ``RomiTask`` it is a ``FileSetTarget``.
 
         The fileset ID being the task ID.
 
@@ -362,8 +362,7 @@ class DatasetExists(RomiTask):
     scan_id : luigi.Parameter, optional
         The scan id (dataset name) to check.
     """
-
-    upstream_task = None  # override from RomiTask
+    upstream_task = None  # override default attribute from ``RomiTask``
     scan_id = luigi.Parameter()
 
     def requires(self):
@@ -404,8 +403,7 @@ class FilesetExists(RomiTask):
     fileset_id : luigi.Parameter
         The name of the fileset that should exist.
     """
-
-    upstream_task = None  # override from RomiTask
+    upstream_task = None  # override default attribute from ``RomiTask``
     fileset_id = luigi.Parameter()
 
     def requires(self):
@@ -436,7 +434,8 @@ class ImagesFilesetExists(FilesetExists):
     Attributes
     ----------
     fileset_id : luigi.Parameter
-        Name of the fileset containing the images. Defaults to `'images'`.
+        Name of the fileset containing the images.
+        Defaults to `'images'`.
     """
 
     fileset_id = luigi.Parameter(default="images")
@@ -460,7 +459,8 @@ class Segmentation2DGroundTruthFilesetExists(FilesetExists):
     Attributes
     ----------
     fileset_id : luigi.Parameter
-        Name of the fileset containing the images. Defaults to `'Segmentation2DGroundTruth'`.
+        Name of the fileset containing the ground-truth images.
+        Defaults to `'Segmentation2DGroundTruth'`.
     """
 
     fileset_id = luigi.Parameter(default="Segmentation2DGroundTruth")
@@ -478,8 +478,7 @@ class FileExists(RomiTask):
     file_id : luigi.Parameter
         Name of the file that should exist.
     """
-
-    upstream_task = None  # override from RomiTask
+    upstream_task = None  # override default attribute from ``RomiTask``
     fileset_id = luigi.Parameter()
     file_id = luigi.Parameter()
 
@@ -557,7 +556,6 @@ class VirtualPlantObj(FileExists):
         The ID of the file to use. The default is "VirtualPlant"
 
     """
-
     scan_id = luigi.Parameter(default="")
     fileset_id = luigi.Parameter(default="VirtualPlant")
     fileset_id_prefix = luigi.Parameter(default="VirtualPlant")
@@ -697,15 +695,14 @@ class DummyTask(RomiTask):
         return
 
 
-#: List of original image metadata (to keep in Clean task)
+#: List of original image metadata (to keep in Clean task):
+#: * "pose" is added by the PlantImager or VirtualPlantImager
+#: * "approximate_pose" is added by the PlantImager
+#: * "channel" is added by the PlantImager or VirtualPlantImager
+#: * "shot_id" is added by the PlantImager or VirtualPlantImager
+#: * "camera" is added by the VirtualPlantImager and is used by `Voxels`
 IMAGES_MD = ["pose", "approximate_pose", "channel", "shot_id", "camera"]
 
-
-# "pose" is added by the PlantImager or VirtualPlantImager
-# "approximate_pose" is added by the PlantImager
-# "channel" is added by the PlantImager or VirtualPlantImager
-# "shot_id" is added by the PlantImager or VirtualPlantImager
-# "camera" is added by the VirtualPlantImager and is used by `Voxels`
 
 class Clean(RomiTask):
     """Cleanup a scan, keeping only the "images" fileset and removing all computed pipelines.
@@ -726,8 +723,7 @@ class Clean(RomiTask):
     --------
     romitask.task.IMAGES_MD
     """
-
-    upstream_task = None
+    upstream_task = None  # override default attribute from ``RomiTask``
     no_confirm = luigi.BoolParameter(default=False)
     keep_metadata = luigi.ListParameter(default=[])
 
