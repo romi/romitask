@@ -442,6 +442,18 @@ class ImagesFilesetExists(FilesetExists):
     fileset_id = luigi.Parameter(default="images")
 
 
+class ModelFilesetExists(FilesetExists):
+    """Task to assert the presence of a fileset containing the *trained weight model* for CNN prediction.
+
+    Attributes
+    ----------
+    fileset_id : luigi.Parameter
+        Name of the fileset containing the trained weight model.
+        Defaults to `'models'`.
+    """
+    fileset_id = luigi.Parameter(default="models")
+
+
 class Segmentation2DGroundTruthFilesetExists(FilesetExists):
     """Task to assert the presence of a fileset containing the *ground-truth images* for CNN training.
 
