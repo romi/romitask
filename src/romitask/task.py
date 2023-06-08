@@ -311,6 +311,10 @@ class RomiTask(luigi.Task):
         fs = t.get()  # get the fileset
         # Export all the task parameters as a dictionary:
         params = dict(self.to_str_params(only_significant=False, only_public=False))
+        # Try to fix empty "scan_id":
+        if params["scan_id"] == "":
+            params["scan_id"] = fs.get_scan().get_id()
+        # Check if it needs JSON parsing:
         for k in params.keys():
             try:
                 params[k] = json.loads(params[k])
@@ -318,7 +322,10 @@ class RomiTask(luigi.Task):
                 continue
             except JSONDecodeError:
                 continue
+        # Save the task parameter as fileset metadata under "task_params":
         fs.set_metadata("task_params", params)
+        # Save the task name as fileset metadata under "task_name":
+        fs.set_metadata("task_name", self.get_task_name())
         return t
 
     def input_file(self, file_id=None):
