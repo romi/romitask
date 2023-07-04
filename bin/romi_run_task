@@ -94,10 +94,10 @@ def parsing():
 
     # Optional arguments:
     parser.add_argument('--config', dest='config', type=str, default="",
-                        help="""Pipeline configuration file or directory (JSON or TOML).
+                        help="""Pipeline configuration file (TOML) or directory.
                         If a file, read the configuration from it.
                         If a directory, read & concatenate all configuration files in it.
-                        By default, search in the selected dataset directory.""")
+                        By default, search a 'pipeline.toml' file in the selected dataset directory.""")
     parser.add_argument('--module', dest='module', type=str, default=None,
                         help="""Library and module of the task.
                         Use it if not available or different than defined in `romitask.modules.MODULES`.""")
@@ -153,7 +153,7 @@ def load_backup_scan_cfg(path):
     scan_last_cfg = os.path.join(path, SCAN_TOML)
     bak_scan_config = {}
     if os.path.isfile(scan_last_cfg):
-        bak_scan_config = {**toml.load(scan_last_cfg)}
+        bak_scan_config = toml.load(scan_last_cfg)
 
     return bak_scan_config
 
@@ -173,16 +173,16 @@ def load_backup_pipe_cfg(path, task):
     dict
         The configuration dictionary, if loaded from backup file.
     """
-    pipeline_last_cfg = os.path.join(path, PIPE_TOML)
+    bak_pipe_path = os.path.join(path, PIPE_TOML)
     bak_pipe_config = {}
-    if os.path.isfile(pipeline_last_cfg):
+    if os.path.isfile(bak_pipe_path):
         # Raise an IOError when task 'Scan' is required in a folder with a backup of a processing pipeline
         # This probably means that you are trying to use a dataset that is NOT EMPTY!
         if "Scan" in task:
             logger.critical(f"Task '{task}' was called with dataset '{path}'!")
             logger.critical(f"It contains a processing pipeline configuration backup file!")
             sys.exit(f"Requested {task} task in non-empty folder, clean it up or change location!")
-        bak_pipe_config = {**toml.load(pipeline_last_cfg)}
+        bak_pipe_config = toml.load(bak_pipe_path)
 
     return bak_pipe_config
 
@@ -207,70 +207,57 @@ def load_config_from_directory(path):
     """
     # List TOML config files:
     toml_list = glob.glob(os.path.join(path, "*.toml"))
-    # List JSON config files:
-    json_list = glob.glob(os.path.join(path, "*.json"))
 
     # Exclude BACKUP configuration files from TOML config files list:
-    toml_list = [cfg for cfg in toml_list if cfg.split("/")[-1] not in (SCAN_TOML, PIPE_TOML)]
+    toml_list = [Path(cfg) for cfg in toml_list if cfg.split("/")[-1] not in (SCAN_TOML, PIPE_TOML)]
     # Make sure we got at least one TOML or JSON config file:
-    if len(toml_list) == 0 and len(json_list) == 0:
-        logger.critical(f"Could not find any TOML or JSON configuration file in '{path}'!")
+    if len(toml_list) == 0:
+        logger.critical(f"Could not find any TOML configuration file in '{path}'!")
         sys.exit("Configuration file missing!")
 
     config = {}
     # Read TOML configs
     for f in toml_list:
         try:
-            c = toml.load(open(f))
-            config = {**config, **c}  # update the config with the new one
+            c = toml.load(f)
+            config.update(c)  # update the config with the new one
         except:
             logger.warning(f"Could not process TOML config file: {f}")
         else:
             logger.info(f"Loaded TOML configuration file: {f}")
-    # Read JSON configs:
-    for f in json_list:
-        try:
-            c = json.load(open(f))
-            config = {**config, **c}  # update the config with the new one
-        except:
-            logger.warning(f"Could not process JSON config file: {f}")
-        else:
-            logger.info(f"Loaded JSON configuration file: {f}")
 
     return config
 
 
 def load_config_from_file(path):
-    """Load TOML or JSON configuration file from path.
+    """Load TOML configuration file from path.
 
     Parameters
     ----------
-    path : str
+    path : str or pathlib.Path
         Path to the configuration file to load.
 
     Returns
     -------
     dict
         The configuration dictionary.
-
     """
     config = {}
-    if path.endswith("toml"):
-        try:
-            config = toml.load(open(path))
-        except:
+    if isinstance(path, str):
+        path = Path(path)
+    # Check that the given configuration file exists:
+    if not path.is_file():
+        logger.critical(f"Could not configuration find file: '{path.absolute()}'")
+    # Try to load the TOML configuration file:
+    try:
+        config = toml.load(path)
+    except:
+        if not path.suffix == ".toml":
             logger.critical(f"Could not load TOML configuration file '{path}'!")
         else:
-            logger.info(f"Loaded TOML configuration file: {path}")
-    elif path.endswith("json"):
-        try:
-            config = json.load(open(path))
-        except:
-            logger.critical(f"Could not load JSON configuration file '{path}'!")
-        else:
-            logger.info(f"Loaded JSON configuration file: {path}")
+            logger.critical(f"Unsupported configuration file format, should be a TOML file, got '{path.name}'!")
     else:
-        logger.critical(f"Unsupported configuration file format, should be TOML or JSON!")
+        logger.info(f"Loaded TOML configuration file: {path}")
 
     return config
 
@@ -350,7 +337,8 @@ def create_backup_cfg(path, cfgname, config):
                          "scheduling_error": 35, "unhandled_exception": 40}
     # Save the libraries version:
     config["version"] = get_version()
-    toml.dump(config, open(file_path, 'w'))
+    with open(file_path, 'w') as f:
+        toml.dump(config, f)
     return file_path
 
 
