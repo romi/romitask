@@ -2,22 +2,22 @@
 # -*- coding: utf-8 -*-
 #
 # romitask - Task handling tools for the ROMI project
-# 
+#
 # Copyright (C) 2018-2019 Sony Computer Science Laboratories
 # Authors: D. Colliaux, T. Wintz, P. Hanappe
-# 
+#
 # This file is part of romitask.
-# 
+#
 # romitask is free software: you can redistribute it
 # and/or modify it under the terms of the GNU Lesser General Public
 # License as published by the Free Software Foundation, either
 # version 3 of the License, or (at your option) any later version.
-# 
+#
 # romitask is distributed in the hope that it will be
 # useful, but WITHOUT ANY WARRANTY; without even the implied
 # warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 # See the GNU General Public License for more details.
-# 
+#
 # You should have received a copy of the GNU Lesser General Public
 # License along with romitask.  If not, see
 # <https://www.gnu.org/licenses/>.
@@ -719,12 +719,15 @@ def mourn_failure(task, exception):
     ----------
     task : RomiTask
         The task which has failed.
-    exception : Exc
+    exception : Exception
         The exception raised by the failure.
     """
-    output_fileset = task.output().get()
-    scan = task.output().get().scan
-    scan.delete_fileset(output_fileset.id)
+    # Log the failure:
+    logger.critical(exception)
+    # Delete the task fileset:
+    #output_fileset = task.output().get()
+    #scan = task.output().get().scan
+    #scan.delete_fileset(output_fileset.id)
 
 
 class DummyTask(RomiTask):

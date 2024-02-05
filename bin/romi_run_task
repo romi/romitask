@@ -23,7 +23,7 @@
 # <https://www.gnu.org/licenses/>.
 # ------------------------------------------------------------------------------
 
-""" ROMI tasks CLI.
+"""ROMI tasks CLI.
 
 It is intended to be used as the main program to run the various tasks defined in ``MODULES``.
 
@@ -59,10 +59,9 @@ import subprocess
 import sys
 import tempfile
 import time
+import toml
 from datetime import timedelta
 from pathlib import Path
-
-import toml
 
 from romitask import PIPE_TOML
 from romitask import SCAN_TOML
@@ -329,14 +328,31 @@ def create_backup_cfg(path, cfgname, config):
 
     """
     file_path = os.path.join(path, cfgname)
-    # The following return codes are the recommended exit codes for Luigi
-    # They are in increasing level of severity (for most applications)
+
+    # The following parameters control Luigi worker behavior.
+    # https://luigi.readthedocs.io/en/stable/configuration.html#worker
+    config["worker"] = {
+        "keep_alive": True,
+        "max_keep_alive_idle_duration": 60,  # in seconds
+    }
+
+    # The following parameters control Luigi scheduler behavior.
+    # https://luigi.readthedocs.io/en/stable/configuration.html#scheduler
+    config["scheduler"] = {
+        "retry_count": 5,
+        "retry_delay": 1,
+    }
+
+    # The following return codes are the recommended exit codes for Luigi.
+    # They are in increasing level of severity (for most applications).
     # https://luigi.readthedocs.io/en/stable/configuration.html#retcode
     config["retcode"] = {"already_running": 10, "missing_data": 20,
                          "not_run": 25, "task_failed": 30,
                          "scheduling_error": 35, "unhandled_exception": 40}
+
     # Save the libraries version:
     config["version"] = get_version()
+
     with open(file_path, 'w') as f:
         toml.dump(config, f)
     return file_path
