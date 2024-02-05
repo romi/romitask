@@ -78,7 +78,7 @@ class ScanParameter(luigi.Parameter):
 
         Notes
         -----
-        Uses given path, eg. ``/db/root/path/scan_id``, to defines:
+        Uses given path, e.g. ``/db/root/path/scan_id``, to defines:
           - the database root dir with ``/db/root/path``
           - the scan dataset id with ``scan_id``
 

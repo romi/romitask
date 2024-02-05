@@ -333,13 +333,13 @@ def create_backup_cfg(path, cfgname, config):
     # https://luigi.readthedocs.io/en/stable/configuration.html#worker
     config["worker"] = {
         "keep_alive": True,
-        "max_keep_alive_idle_duration": 60,  # in seconds
+        "max_keep_alive_idle_duration": 10,  # in seconds
     }
 
     # The following parameters control Luigi scheduler behavior.
     # https://luigi.readthedocs.io/en/stable/configuration.html#scheduler
     config["scheduler"] = {
-        "retry_count": 5,
+        "retry_count": 1,
         "retry_delay": 1,
     }
 
