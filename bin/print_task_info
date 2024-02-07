@@ -108,9 +108,9 @@ def curve_skeleton_info(task, task_id, db_path):
 
 def pointcloud_info(task, task_id, db_path):
     """Print info about PointCloud task output."""
-    from plantdb.io import read_point_cloud, fsdbfile_from_local_file
+    from plantdb.io import read_point_cloud
     ply_f = os.path.join(db_path, task_id, f"{task}.ply")
-    ply = read_point_cloud(fsdbfile_from_local_file(ply_f))
+    ply = read_point_cloud(ply_f)
     if ply.is_empty():
         print(f"PLY file for task '{task_id}' is empty!")
     else:
@@ -121,9 +121,9 @@ def pointcloud_info(task, task_id, db_path):
 
 def segmented_pointcloud_info(task, task_id, db_path):
     """Print info about SegmentedPointCloud task output."""
-    from plantdb.io import read_point_cloud, fsdbfile_from_local_file
+    from plantdb.io import read_point_cloud
     ply_f = os.path.join(db_path, task_id, f"{task}.ply")
-    ply = read_point_cloud(fsdbfile_from_local_file(ply_f))
+    ply = read_point_cloud(ply_f)
     if ply.is_empty():
         print(f"PLY file for task '{task_id}' is empty!")
     else:
@@ -135,9 +135,9 @@ def segmented_pointcloud_info(task, task_id, db_path):
 
 def triangle_mesh_info(task, task_id, db_path):
     """Print info about TriangleMesh task output."""
-    from plantdb.io import read_triangle_mesh, fsdbfile_from_local_file
+    from plantdb.io import read_triangle_mesh
     ply_f = os.path.join(db_path, task_id, f"{task}.ply")
-    ply = read_triangle_mesh(fsdbfile_from_local_file(ply_f))
+    ply = read_triangle_mesh(ply_f)
     if ply.is_empty():
         print(f"PLY file for task '{task_id}' is empty!")
     else:
@@ -168,14 +168,14 @@ def segmentation2d_info(task, task_id, db_path):
 
 def clustered_mesh_info(task, task_id, db_path):
     """Print info about ClusteredMesh task output."""
-    from plantdb.io import read_triangle_mesh, fsdbfile_from_local_file
+    from plantdb.io import read_triangle_mesh
     out_dir = os.path.join(db_path, task_id)
     files = os.listdir(out_dir)
     ply_files = [f for f in files if f.endswith('.ply')]
     organs = {}
     for ply in ply_files:
         ply_f = os.path.join(db_path, task_id, ply)
-        ply_mesh = read_triangle_mesh(fsdbfile_from_local_file(ply_f))
+        ply_mesh = read_triangle_mesh(ply_f)
         if ply_mesh.is_empty():
             continue  # don't count empty PLY as valid organs!
         organ = ply.split('_')[0]
