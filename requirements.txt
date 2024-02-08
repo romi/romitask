@@ -1,7 +1,0 @@
-# -*- coding: utf-8 -*-
-luigi
-tqdm
-toml
-watchdog
-colorlog
-#plantdb @ git+https://github.com/romi/plantdb.git@dev
