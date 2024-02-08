@@ -111,7 +111,7 @@ You first have to install the library from sources as explained [here](#installa
 ### Conda packaging
 Start by installing the required `romitask` & `anaconda-client` conda packages in the `base` environment as follows:
 ```shell
-conda install -n conda-build anaconda-client
+conda install -n base conda-build anaconda-client
 ```
 
 #### Build a conda package
