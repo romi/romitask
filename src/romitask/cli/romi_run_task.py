@@ -530,8 +530,7 @@ def run_task(args):
 
     return
 
-
-if __name__ == '__main__':
+def main():
     # - Parse the input arguments to variables:
     parser = parsing()
     args = parser.parse_args()
@@ -591,3 +590,6 @@ if __name__ == '__main__':
                 print(e)
     else:
         run_task(args)
+
+if __name__ == '__main__':
+    main()
