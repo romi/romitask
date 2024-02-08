@@ -6,11 +6,12 @@ build-backend = "setuptools.build_meta"
 name = "romitask"
 version = "0.11.01"
 dependencies = [
-    "luigi",
-    "tqdm",
-    "toml",
-    "watchdog",
+    "numpy",
     "colorlog",
+    "luigi",
+    "toml",
+    "tqdm",
+    "watchdog",
 #    "plantdb @ git+https://github.com/romi/plantdb.git@dev"
 ]
 description = "The ROMI task runner, a luigi based task pipeline."
