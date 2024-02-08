@@ -1,8 +1,12 @@
 # RomiTask
 
+![](https://anaconda.org/romi-eu/romitask/badges/version.svg)
+![](https://anaconda.org/romi-eu/romitask/badges/platforms.svg)
+![](https://anaconda.org/romi-eu/romitask/badges/license.svg)
+
 ## About
 
-This repository gathers scripts and classes needed to run `luigi` based tasks for the ROMI project.
+This repository gathers CLI and classes needed to run `luigi` based tasks for the ROMI project.
 
 Alone, this library does not do much...
 To run a "meaningful" task you need to install other ROMI libraries like `plantdb` and `plant-3d-vision`
@@ -12,25 +16,35 @@ Note that both `plant-3d-vision` & `plant-imager` ROMI libraries have `romitask`
 
 ## Installation
 
-### Conda environment
+We strongly advise to create isolated environments to install the ROMI libraries.
 
-We strongly advise to create a `conda` environment, here named `romitask`:
+We often use `conda` as an environment and python package manager.
+If you do not yet have `miniconda3` installed on your system, have a look [here](https://docs.conda.io/en/latest/miniconda.html).
 
+The `romitask` package is available from the `romi-eu` channel.
+
+### Existing conda environment
+To install the `romitask` conda package in an existing environment, first activate it, then proceed as follows:
 ```shell
-conda create -n romitask 'python>=3.7'
+conda install romitask -c romi-eu
 ```
 
-If you do not yet have `miniconda3` on your system, have a look [here](https://docs.conda.io/en/latest/miniconda.html).
+### New conda environment
+To install the `romitask` conda package in a new environment, here named `romi`, proceed as follows:
+```shell
+conda create -n romi romitask -c romi-eu
+```
 
 ### Installation from sources
+To install this library, simply clone the repo and use `pip` to install it and the required dependencies.
+Again, we strongly advise to create a `conda` environment.
 
-To install this library, simply clone the repo and use `pip` to install it and the required dependencies:
-
+All this can be done as follows:
 ```shell
 git clone https://github.com/romi/romitask.git -b dev  # git clone the 'dev' branch of romitask
 cd romitask
-conda activate romitask  # do not forget to activate your environment!
-python -m pip install -r requirements.txt  # install the dependencies
+conda create -n romi 'python =3.10'
+conda activate romi  # do not forget to activate your environment!
 python -m pip install -e .  # install the sources
 ```
 
@@ -38,9 +52,8 @@ Note that the `-e` option is to install the `romitask` sources in "developer mod
 That is, if you make changes to the source code of `romitask` you will not have to `pip install` it again.
 
 You may want to install the `plantdb` sources to perform the `DummyTask` test example below:
-
 ```shell
-conda activate romitask  # do not forget to activate your environment!
+conda activate romi  # do not forget to activate your environment!
 python -m pip install git+https://github.com/romi/plantdb.git@dev#egg=plantdb # install the `plantdb` sources from 'dev' branch
 ```
 
@@ -49,9 +62,7 @@ This will install the required ROMI library `plantdb`, but not in "developer mod
 ## Usage
 
 ### Create a dummy database
-
 To quickly create a _dummy database_, let's use the temporary folder `/tmp`:
-
 ```shell
 mkdir -p /tmp/dummy_db/dummy_dataset  # create dummy database and dataset
 touch /tmp/dummy_db/romidb  # add the romidb marker (empty file)
@@ -59,15 +70,12 @@ export DB_LOCATION='/tmp/dummy_db'  # add database location as an environment va
 ```
 
 ### Test the CLI with `DummyTask`
-
 To test the CLI `romi_run_task`:
-
 ```shell
 romi_run_task DummyTask $DB_LOCATION/dummy_dataset --module romitask.task
 ```
 
 You should get a "Luigi Execution Summary" similar to this:
-
 ```
 ===== Luigi Execution Summary =====
 
@@ -84,7 +92,6 @@ As no TOML configuration file was provided, you should get a `pipeline.toml` wit
 sections at the root of the `dummy_dataset/` directory.
 
 The `dummy_database` tree structure should look like this:
-
 ```
 dummy_database/
 ├── dummy_dataset/
@@ -99,29 +106,26 @@ dummy_database/
 
 ## Developers & contributors
 
+You first have to install the library from sources as explained [here](#installation-from-sources).
+
 ### Conda packaging
+Start by installing the required `romitask` & `anaconda-client` conda packages in the `base` environment as follows:
+```shell
+conda install -n conda-build anaconda-client
+```
 
+#### Build a conda package
 To build the `romitask` conda package, from the `base` conda environment, run:
-
 ```shell
 conda build conda/recipe/ -c conda-forge --user romi-eu
 ```
 
-This requires the `conda-build` package to be installed in the `base` environment!
-
-```shell
-conda install conda-build
-```
-
+#### Upload a conda package
 To upload the built package, you need a valid account (here `romi-eu`) on [anaconda.org](www.anaconda.org) & to log ONCE
 with `anaconda login`, then:
-
 ```shell
 anaconda upload ~/miniconda3/conda-bld/linux-64/romitask*.tar.bz2 --user romi-eu
 ```
 
-This requires the `anaconda-client` package to be installed in the `base` environment!
-
-```shell
-conda install anaconda-client
-```
+### Documentation
+COMING SOON.
