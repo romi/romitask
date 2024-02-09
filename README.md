@@ -136,6 +136,11 @@ anaconda upload ~/miniconda3/conda-bld/linux-64/romitask*.tar.bz2 --user romi-eu
 ```
 
 #### Clean builds
+To clean the source and build intermediates:
+```shell
+conda build purge
+```
+
 To clean **ALL** the built packages & build environments:
 ```shell
 conda build purge-all
