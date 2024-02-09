@@ -16,7 +16,7 @@ source:
 #  git_tag: dev
 
 build:
-  string: {{ environ.get('GIT_DESCRIBE_HASH', 'latest') }}
+  string: {{ 'py'+ PY_VER.replace('.','') + '_' + environ.get('GIT_DESCRIBE_HASH', 'latest') }}
   script: python -m pip install .
 
 requirements:
