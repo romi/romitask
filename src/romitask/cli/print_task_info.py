@@ -272,44 +272,47 @@ def list_configured_tasks(toml_conf):
     return list(toml_conf.keys())
 
 
-""""""
-args = parsing().parse_args()
+def main():
+    args = parsing().parse_args()
 
-config = toml.load(os.path.join(args.db_path, "pipeline.toml"))
+    config = toml.load(os.path.join(args.db_path, "pipeline.toml"))
     # conf_tasks = list_configured_tasks(config)
-print(f"# -- Summary of task {args.task}:")
-print("# - Used TOML configuration:")
-try:
-    print(config[args.task])
-except KeyError:
-    print(f"Task '{args.task}' is not defined in the configuration file!")
+    print(f"# -- Summary of task {args.task}:")
+    print("# - Used TOML configuration:")
+    try:
+        print(config[args.task])
+    except KeyError:
+        print(f"Task '{args.task}' is not defined in the configuration file!")
 
-print("\n# - Generated metadata:")
-md_path = os.path.join(args.db_path, 'metadata')
-json_list = [f for f in os.listdir(md_path) if f.startswith(args.task) and f.endswith('.json')]
-if json_list == []:
-    raise IOError("Could not find the JSON metadata file associated to task '{}' in dataset '{}'!".format(args.task,
+    print("\n# - Generated metadata:")
+    md_path = os.path.join(args.db_path, 'metadata')
+    json_list = [f for f in os.listdir(md_path) if f.startswith(args.task) and f.endswith('.json')]
+    if json_list == []:
+        raise IOError("Could not find the JSON metadata file associated to task '{}' in dataset '{}'!".format(args.task,
                                                                                                               args.db_path))
-elif len(json_list) == 1:
-    md_json = json_list[0]
-    print("Found a JSON metadata file associated to task '{}' in dataset '{}'!".format(args.task, args.db_path))
-    md_json = os.path.join(md_path, md_json)
-else:
-    print("Found more than one JSON metadata file associated to task '{}' in dataset '{}':".format(args.task,
+    elif len(json_list) == 1:
+        md_json = json_list[0]
+        print("Found a JSON metadata file associated to task '{}' in dataset '{}'!".format(args.task, args.db_path))
+        md_json = os.path.join(md_path, md_json)
+    else:
+        print("Found more than one JSON metadata file associated to task '{}' in dataset '{}':".format(args.task,
                                                                                                        args.db_path))
-    [print(" - {}".format(json_f)) for json_f in json_list]
-    md_json = max([os.path.join(md_path, json_f) for json_f in json_list], key=os.path.getctime)
-    print("The most recent one is '{}'".format(os.path.split(md_json)[-1]))
+        [print(" - {}".format(json_f)) for json_f in json_list]
+        md_json = max([os.path.join(md_path, json_f) for json_f in json_list], key=os.path.getctime)
+        print("The most recent one is '{}'".format(os.path.split(md_json)[-1]))
 
-task_id = os.path.splitext(os.path.split(md_json)[-1])[0]
-print("{} task recorded the following parameters metadata:".format(task_id))
-md_json = json.load(open(md_json, 'r'))
-print(json.dumps(md_json, sort_keys=True, indent=2))
+    task_id = os.path.splitext(os.path.split(md_json)[-1])[0]
+    print("{} task recorded the following parameters metadata:".format(task_id))
+    md_json = json.load(open(md_json, 'r'))
+    print(json.dumps(md_json, sort_keys=True, indent=2))
 
-print("\n# - Task outputs:")
-try:
-    info_from_task(args.task, task_id, args.db_path)
-except FileNotFoundError as e:
-    print(e)
-    print("ERROR: No task output file found! Maybe it did not finish ?!")
+    print("\n# - Task outputs:")
+    try:
+        info_from_task(args.task, task_id, args.db_path)
+    except FileNotFoundError as e:
+        print(e)
+        print("ERROR: No task output file found! Maybe it did not finish ?!")
 
+
+if __name__ == "__main__":
+    main()

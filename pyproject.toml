@@ -1,0 +1,50 @@
+[build-system]
+requires = ["setuptools"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "romitask"
+version = "0.11.01"
+dependencies = [
+    "numpy",
+    "colorlog",
+    "luigi",
+    "toml",
+    "tqdm",
+    "watchdog",
+#    "plantdb @ git+https://github.com/romi/plantdb.git@dev"
+]
+description = "The ROMI task runner, a luigi based task pipeline."
+readme = "README.md"
+requires-python = ">=3.7"
+license = { file = "LICENSE" }
+authors = [
+    { name = "Nabil Ait Taleb", email = "mohamednabil.aittaleb@sony.com" },
+    { name = "Timothée Wintz", email = "timothee@timwin.fr" },
+]
+maintainers = [
+    { name = "Jonathan Legrand", email = "jonathan.legrand@ens-lyon.fr" }
+]
+keywords = [
+    "Robotics for Microfarms",
+    "ROMI",
+    "Runner",
+    "Luigi",
+    "Pipeline",
+]
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Science/Research",
+    "License :: OSI Approved :: GNU Lesser General Public License v3 or later (LGPLv3+)"
+]
+
+[project.scripts]
+print_task_info = "romitask.cli.print_task_info:main"
+romi_run_task = "romitask.cli.romi_run_task:main"
+
+[project.urls]
+Homepage = "https://romi-project.eu/"
+Documentation = "https://docs.romi-project.eu/plant_imager/"
+Repository = "https://github.com/romi/romitask"
+Issues = "https://github.com/romi/romitask/issues"
