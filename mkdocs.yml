@@ -1,0 +1,98 @@
+site_name: RomiTask
+site_description: RomiTask module documentation.
+site_author: ROMI Team
+site_url: https://docs.romi-project.eu/
+copyright: 'CC Attribution-NonCommercial-ShareAlike 4.0 International'
+
+
+nav:
+  - 'Home': index.md
+  - 'Reference API':
+    - api/modules.md
+    - api/runner.md
+    - api/task.md
+    - api/watch.md
+  - 'CLI':
+    - cli/romi_run_task.md
+    - cli/print_task_info.md
+  - 'Examples':
+    - examples/romi_run_task.md
+    - examples/print_task_info.md
+
+
+theme:
+  name: 'material'
+  font:
+    text: Nunito Sans
+    code: Ubuntu Mono
+  logo: 'assets/images/ROMI_logo_white.svg'
+  favicon: 'assets/images/ROMI_ICON_green.png'
+  features:
+    - navigation.tabs
+    - navigation.tabs.sticky
+    - content.code.copy
+
+
+extra:
+  homepage: https://docs.romi-project.eu/
+  social:
+    - icon: fontawesome/brands/twitter
+      link: 'https://twitter.com/ROMI_EU_PROJECT'
+    - icon: fontawesome/brands/facebook
+      link: 'https://www.facebook.com/ROMIEUProject'
+    - icon: fontawesome/brands/github
+      link: 'https://github.com/romi/romitask'
+  project: 'The ROMI project has received funding from the European Community’s H2020 Programme under Grant Agreement No. 773875.'
+  footer_logo: '/assets/images/eu-flag.png'
+  repo_name: romitask
+  repo_url: https://github.com/romi/romitask
+
+
+markdown_extensions:
+  - admonition
+  - attr_list
+  - codehilite
+  - footnotes
+  - pymdownx.emoji:
+      emoji_index: !!python/name:material.extensions.emoji.twemoji
+      emoji_generator: !!python/name:materialx.emoji.to_svg
+  - pymdownx.tabbed:
+      alternate_style: true
+  - toc:
+      permalink: Link
+  - pymdownx.superfences:
+      custom_fences:
+        - name: python
+          class: python
+          validator: !!python/name:markdown_exec.validator
+          format: !!python/name:markdown_exec.formatter
+
+
+plugins:
+  - search
+  - markdown-exec
+  - mkdocstrings:
+      default_handler: python
+      handlers:
+        python:
+          import:
+            - https://docs.python.org/3/objects.inv
+            - https://numpy.org/doc/stable/objects.inv
+            - https://luigi.readthedocs.io/en/stable/objects.inv
+          options:
+            docstring_style: numpy
+            docstring_section_style: table
+            ignore_init_summary: true
+            merge_init_into_class: true
+            show_docstring_examples: true
+            show_docstring_raises: true
+            signature_crossrefs: true
+
+
+extra_css:
+  - assets/css/extra.css
+
+
+extra_javascript:
+  - 'https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.0/MathJax.js?config=TeX-MML-AM_CHTML'
+  - 'https://buttons.github.io/buttons.js'
