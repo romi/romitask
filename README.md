@@ -109,7 +109,7 @@ dummy_database/
 You first have to install the library from sources as explained [here](#installation-from-sources).
 
 ### Conda packaging
-Start by installing the required `romitask` & `anaconda-client` conda packages in the `base` environment as follows:
+Start by installing the required `conda-build` & `anaconda-client` conda packages in the `base` environment as follows:
 ```shell
 conda install -n base conda-build anaconda-client
 ```
