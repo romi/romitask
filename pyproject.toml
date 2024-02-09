@@ -48,3 +48,12 @@ Homepage = "https://romi-project.eu/"
 Documentation = "https://docs.romi-project.eu/plant_imager/"
 Repository = "https://github.com/romi/romitask"
 Issues = "https://github.com/romi/romitask/issues"
+
+[project.optional-dependencies]
+doc = [
+    "mkdocs",
+    "mkdocs-material",
+    "mkdocstrings[python]",
+    "pymdown-extensions",
+    "markdown-exec[ansi]",
+]
