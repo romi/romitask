@@ -156,7 +156,7 @@ Finally, you may want to check the [`pymdown-extensions`](https://facelessuser.g
 #### Requirements
 To install the requirements for documentation edition, simply run:
 ```shell
-pythm -m pip install -e .[doc]
+python -m pip install -e .[doc]
 ```
 
 #### Live edit
