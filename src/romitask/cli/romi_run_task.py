@@ -443,25 +443,46 @@ def update_config(config, update):
     return config
 
 
-def run_task(args):
+def run_task(dataset_path, task, config, **kwargs):
     """Load the configuration to use and call the luigi command to run the selected task.
 
     Parameters
     ----------
-    args : parser.parse_args
-        Parsed input arguments.
+    dataset_path : pathlib.Path or str
+        The path to the dataset directory.
+    task : str
+        The name of the task to execute by luigi.
+    config : pathlib.Path or str or dict
+        The configuration path or dictionary.
+
+    Other Parameters
+    ----------------
+    log_level : {'DEBUG', 'INFO', 'WARNING', 'ERROR', 'CRITICAL'}
+        The logging level to use, defaults to 'INFO'.
+    luigicmd : str
+        The luigi command to use, defaults to 'LUIGI_CMD'.
+    module : str
+        The module name to load the task from. Default to `None`, search in the module dictionary.
+    local_scheduler : bool
+        Whether to run the task locally. Defaults to `True`.
+    dry_run : bool
+        Whether to make it a dry run, returning the command but not calling it. Defaults to `False`.
     """
+    log_level = kwargs.get("log_level", "INFO")
+    luigicmd = kwargs.get("luigicmd", LUIGI_CMD)
+
     # - Try to load PIPELINE backup TOML configuration:
-    bak_pipe_config = load_backup_pipe_cfg(args.dataset_path, args.task)
+    bak_pipe_config = load_backup_pipe_cfg(dataset_path, task)
 
     # - Process given PIPELINE configuration directory OR file, if any:
-    config = {}
-    if os.path.isdir(args.config):
-        config = load_config_from_directory(args.config)
-    elif os.path.isfile(args.config):
-        config = load_config_from_file(args.config)
-    elif args.config != "":
-        logger.critical(f"Could not understand `config` option '{args.config}'!")
+    if os.path.isdir(config):
+        config = load_config_from_directory(config)
+    elif os.path.isfile(config):
+        config = load_config_from_file(config)
+    elif isinstance(config, dict):
+        logger.info("Loading configuration from dictionary.")
+    elif config != "":
+        logger.critical(f"Could not understand `config` option '{config}'!")
         sys.exit("Error with configuration file!")
     else:
         if bak_pipe_config is None:
@@ -471,7 +492,7 @@ def run_task(args):
             logger.info("Using a PREVIOUS pipeline configuration!")
 
     # - Look for "local" PIPELINE configuration file(s) to load:
-    local_path = Path(args.dataset_path)
+    local_path = Path(dataset_path)
     local_toml = list(local_path.glob('*.toml'))
     local_toml = [f for f in local_toml if f.name != SCAN_TOML]  # exclude SCAN backup TOML config
     local_toml = [f for f in local_toml if f.name != PIPE_TOML]  # exclude PIPELINE backup TOML config
@@ -490,32 +511,32 @@ def run_task(args):
             logger.error(f"Failed to load local TOML configuration file{'s' if len(local_toml) > 1 else ''}!")
 
     # - Set the name of the module to be loaded for the selected task:
-    module = get_task_module(args.task, args.module)
+    module = get_task_module(task, kwargs.get("module", None))
     # - Check the dataset directory is OK to use:
-    cfgname = check_dataset_directory(args.dataset_path, args.task)
+    cfgname = check_dataset_directory(dataset_path, task)
 
     with tempfile.TemporaryDirectory() as tmpd:
         # - Generate logging config for luigi ("logging_config.toml"):
-        logging_config = get_logging_config(__file__, args.log_level)
+        logging_config = get_logging_config(__file__, log_level)
         # - Create a "logging_config.toml" TOML file to be used by `luigi` for logging
         logging_file_path = os.path.join(tmpd, "logging_config.toml")
         with open(logging_file_path, 'w') as f:
             f.write(logging_config)
 
         # - Create the "scan.toml" OR "pipeline.toml" (backup) config file used by luigi:
-        file_path = create_backup_cfg(args.dataset_path, cfgname, config)
+        file_path = create_backup_cfg(dataset_path, cfgname, config)
         # - Define environment variables to provide the logging TOML file path to `luigi`:
         env = {"LUIGI_CONFIG_PARSER": "toml", "LUIGI_CONFIG_PATH": file_path}
         # - Define the luigi command to run:
         # "--DatabaseConfig-scan args.dataset_path" set the value of `scan` for the `DatabaseConfig` Config class
         # https://luigi.readthedocs.io/en/stable/parameters.html#setting-parameter-value-for-other-classes
-        cmd = [args.luigicmd, "--logging-conf-file", logging_file_path,
-               "--module", module, args.task,
-               "--DatabaseConfig-scan", args.dataset_path]
-        if args.ls:
+        cmd = [luigicmd, "--logging-conf-file", logging_file_path,
+               "--module", module, task,
+               "--DatabaseConfig-scan", dataset_path]
+        if kwargs.get('local_scheduler', True):
             cmd.append("--local-scheduler")
 
-        if args.dry_run:
+        if kwargs.get('dry_run', False):
             logger.info(f"Luigi command to call is:\n{cmd}")
         else:
             t_start = time.time()
@@ -529,6 +550,7 @@ def run_task(args):
                 logger.info(f"Failed after {delta}s!")
 
     return
+
 
 def main():
     # - Parse the input arguments to variables:
@@ -572,6 +594,9 @@ def main():
         else:
             logger.critical(f"Can not understand input dataset path: '{args.dataset_path}'")
             sys.exit(f"Error with input dataset path for '{args.task}' module!")
+        # If only one element in list, make it a plain str:
+        if len(folders) == 1:
+            folders = folders[0]
 
     if len(folders) == 0 and args.task not in NO_DATASET_TASK:
         logger.critical(f"Could not obtain a valid path from input dataset path: '{args.dataset_path}'!")
@@ -580,16 +605,20 @@ def main():
     if isinstance(folders, list):
         dataset = [folder.name for folder in folders]
         logger.info(f"Got a list of {len(folders)} scan dataset to analyze: {', '.join(dataset)}")
-        for folder in folders:
-            args.dataset_path = folder
+        for dataset_path in folders:
             print("\n")  # to facilitate the search in the console by separating the datasets
             logger.info(f"Processing dataset '{Path(args.dataset_path).name}'.")
             try:
-                run_task(args)
+                run_task(dataset_path, args.task, args.config,
+                         log_level=args.log_level, luigicmd=args.luigicmd, module=args.module,
+                         local_scheduler=args.local_scheduler, dry_run=args.dry_run)
             except Exception as e:
                 print(e)
     else:
-        run_task(args)
+        run_task(folders, args.task, args.config,
+                 log_level=args.log_level, luigicmd=args.luigicmd, module=args.module,
+                 local_scheduler=args.local_scheduler, dry_run=args.dry_run)
+
 
 if __name__ == '__main__':
     main()
