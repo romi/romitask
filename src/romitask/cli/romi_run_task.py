@@ -159,7 +159,7 @@ def load_backup_scan_cfg(path):
     return bak_scan_config
 
 
-def load_backup_pipe_cfg(path, task):
+def load_backup_pipe_cfg(path, task, logger):
     """Try to load ``PIPE_TOML`` configuration from path.
 
     Parameters
@@ -168,6 +168,8 @@ def load_backup_pipe_cfg(path, task):
         Where the ``PIPE_TOML`` configuration file should be.
     task : str
         Name of the task to perform.
+    logger : logging.Logger
+        The logger to use with this method.
 
     Returns
     -------
@@ -188,13 +190,15 @@ def load_backup_pipe_cfg(path, task):
     return bak_pipe_config
 
 
-def load_config_from_directory(path):
+def load_config_from_directory(path, logger):
     """Load TOML & JSON configuration files from path.
 
     Parameters
     ----------
     path : str
         Path to where the configuration file(s) should be.
+    logger : logging.Logger
+        The logger to use with this method.
 
     Returns
     -------
@@ -230,13 +234,15 @@ def load_config_from_directory(path):
     return config
 
 
-def load_config_from_file(path):
+def load_config_from_file(path, logger):
     """Load TOML configuration file from path.
 
     Parameters
     ----------
     path : str or pathlib.Path
         Path to the configuration file to load.
+    logger : logging.Logger
+        The logger to use with this method.
 
     Returns
     -------
@@ -263,7 +269,7 @@ def load_config_from_file(path):
     return config
 
 
-def get_task_module(task, module=None):
+def get_task_module(task, logger, module=None):
     """Set the name of the `module` to be loaded for the selected `task`.
 
     Parameters
@@ -271,6 +277,8 @@ def get_task_module(task, module=None):
     task : str
         Get the name of the `module` for selected `task`.
         If `module` is not ``None``, check it exists.
+    logger : logging.Logger
+        The logger to use with this method.
     module : str, optional
         A manually defined module name.
 
@@ -285,15 +293,15 @@ def get_task_module(task, module=None):
             importlib.import_module(module)
         except ModuleNotFoundError:
             logger.warning(f"Could not load manually defined module: '{module}'.")
-            module = get_task_predefined_module(task)
+            module = get_task_predefined_module(task, logger=logger)
         else:
             logger.info(f"Got a manually defined module: '{module}'.")
     else:
-        module = get_task_predefined_module(task)
+        module = get_task_predefined_module(task, logger=logger)
     return module
 
 
-def get_task_predefined_module(task: str) -> str:
+def get_task_predefined_module(task: str, logger) -> str:
     """Try to get the task from the pre-defined ``MODULES`` dictionary."""
     try:
         module = MODULES[task]
@@ -360,7 +368,7 @@ def create_backup_cfg(path, cfgname, config):
     return file_path
 
 
-def check_dataset_directory(path, task):
+def check_dataset_directory(path, task, logger):
     """Check the dataset directory is correctly defined depending on the `task` to execute.
 
     Parameters
@@ -369,6 +377,8 @@ def check_dataset_directory(path, task):
         Path to the dataset to check.
     task : str
         Name of the task to execute by luigi.
+    logger : logging.Logger
+        The logger to use with this method.
 
     Returns
     -------
@@ -460,7 +470,7 @@ def run_task(dataset_path, task, config, **kwargs):
     Other Parameters
     ----------------
     logger : logging.Logger
-        The logger to use in this task, default to the global logger.
+        The logger to use with this method, default to the global logger.
     log_level : {'DEBUG', 'INFO', 'WARNING', 'ERROR', 'CRITICAL'}
         The logging level to use, defaults to 'INFO'.
     luigicmd : str
@@ -477,15 +487,15 @@ def run_task(dataset_path, task, config, **kwargs):
     luigicmd = kwargs.get("luigicmd", LUIGI_CMD)
 
     # - Try to load PIPELINE backup TOML configuration:
-    bak_pipe_config = load_backup_pipe_cfg(dataset_path, task)
+    bak_pipe_config = load_backup_pipe_cfg(dataset_path, task, logger=logger)
 
     # - Process given PIPELINE configuration directory OR file, if any:
     if isinstance(config, dict):
         logger.info("Loading configuration from dictionary.")
     elif os.path.isdir(config):
-        config = load_config_from_directory(config)
+        config = load_config_from_directory(config, logger=logger)
     elif os.path.isfile(config):
-        config = load_config_from_file(config)
+        config = load_config_from_file(config, logger=logger)
     elif config != "":
         logger.critical(f"Could not understand `config` option '{config}'!")
         sys.exit("Error with configuration file!")
@@ -506,7 +516,7 @@ def run_task(dataset_path, task, config, **kwargs):
     if len(local_toml) > 0:
         logger.info(f"Found {len(local_toml)} local TOML configuration file{'s' if len(local_toml) > 1 else ''}!")
         for f in local_toml:
-            local_config.update(load_config_from_file(str(f)))
+            local_config.update(load_config_from_file(str(f), logger=logger))
         if local_config != {}:
             logger.info(f"Got local definitions for: {list(local_config.keys())}")
             # Update the given PIPELINE configuration with the local configuration:
@@ -516,9 +526,9 @@ def run_task(dataset_path, task, config, **kwargs):
             logger.error(f"Failed to load local TOML configuration file{'s' if len(local_toml) > 1 else ''}!")
 
     # - Set the name of the module to be loaded for the selected task:
-    module = get_task_module(task, kwargs.get("module", None))
+    module = get_task_module(task, logger=logger, module=kwargs.get("module", None))
     # - Check the dataset directory is OK to use:
-    cfgname = check_dataset_directory(dataset_path, task)
+    cfgname = check_dataset_directory(dataset_path, task, logger=logger)
 
     with tempfile.TemporaryDirectory() as tmpd:
         # - Generate logging config for luigi ("logging_config.toml"):
