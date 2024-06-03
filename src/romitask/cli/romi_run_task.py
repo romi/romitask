@@ -622,14 +622,14 @@ def main():
             try:
                 run_task(dataset_path, args.task, args.config,
                          log_level=args.log_level, luigicmd=args.luigicmd, module=args.module,
-                         local_scheduler=args.local_scheduler, dry_run=args.dry_run)
+                         local_scheduler=args.ls, dry_run=args.dry_run)
             except Exception as e:
                 print(e)
     else:
         ## For the folder:
         run_task(folders, args.task, args.config,
                  log_level=args.log_level, luigicmd=args.luigicmd, module=args.module,
-                 local_scheduler=args.local_scheduler, dry_run=args.dry_run)
+                 local_scheduler=args.ls, dry_run=args.dry_run)
 
 
 if __name__ == '__main__':
