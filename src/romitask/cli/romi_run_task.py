@@ -598,16 +598,27 @@ def main():
         if len(folders) == 1:
             folders = folders[0]
 
-    if len(folders) == 0 and args.task not in NO_DATASET_TASK:
+    def _dataset_path_error(args):
         logger.critical(f"Could not obtain a valid path from input dataset path: '{args.dataset_path}'!")
         sys.exit(f"Error with input dataset path for '{args.task}' module!")
 
+    # Some tasks may accept to work without a dataset:
+    if args.task not in NO_DATASET_TASK:
+        # If a pathlib.Path instance, it should exist:
+        if isinstance(folders, Path) and not folders.exists():
+            _dataset_path_error(args)
+        # If a list instance, it should not be empty:
+        if isinstance(folders, list) and len(folders) == 0:
+            _dataset_path_error(args)
+
+    # Finally, we can call the main `run_task` method:
     if isinstance(folders, list):
+        ## For each folder:
         dataset = [folder.name for folder in folders]
         logger.info(f"Got a list of {len(folders)} scan dataset to analyze: {', '.join(dataset)}")
         for dataset_path in folders:
             print("\n")  # to facilitate the search in the console by separating the datasets
-            logger.info(f"Processing dataset '{Path(args.dataset_path).name}'.")
+            logger.info(f"Processing dataset '{Path(dataset_path).name}'.")
             try:
                 run_task(dataset_path, args.task, args.config,
                          log_level=args.log_level, luigicmd=args.luigicmd, module=args.module,
@@ -615,6 +626,7 @@ def main():
             except Exception as e:
                 print(e)
     else:
+        ## For the folder:
         run_task(folders, args.task, args.config,
                  log_level=args.log_level, luigicmd=args.luigicmd, module=args.module,
                  local_scheduler=args.local_scheduler, dry_run=args.dry_run)
