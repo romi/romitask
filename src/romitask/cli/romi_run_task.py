@@ -475,12 +475,12 @@ def run_task(dataset_path, task, config, **kwargs):
     bak_pipe_config = load_backup_pipe_cfg(dataset_path, task)
 
     # - Process given PIPELINE configuration directory OR file, if any:
-    if os.path.isdir(config):
+    if isinstance(config, dict):
+        logger.info("Loading configuration from dictionary.")
+    elif os.path.isdir(config):
         config = load_config_from_directory(config)
     elif os.path.isfile(config):
         config = load_config_from_file(config)
-    elif isinstance(config, dict):
-        logger.info("Loading configuration from dictionary.")
     elif config != "":
         logger.critical(f"Could not understand `config` option '{config}'!")
         sys.exit("Error with configuration file!")
