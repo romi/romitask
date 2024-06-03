@@ -59,6 +59,7 @@ import sys
 import tempfile
 import time
 from datetime import timedelta
+from logging import getLogger
 from pathlib import Path
 
 import toml
@@ -75,6 +76,7 @@ from romitask.modules import TASKS
 
 LUIGI_CMD = "luigi"
 HELP_URL = "https://docs.romi-project.eu/plant_imager/tutorials/basics/"
+LOGGER_NAME = 'romi_run_task'
 
 
 def parsing():
@@ -457,6 +459,8 @@ def run_task(dataset_path, task, config, **kwargs):
 
     Other Parameters
     ----------------
+    logger : logging.Logger
+        The logger to use in this task, default to the global logger.
     log_level : {'DEBUG', 'INFO', 'WARNING', 'ERROR', 'CRITICAL'}
         The logging level to use, defaults to 'INFO'.
     luigicmd : str
@@ -468,6 +472,7 @@ def run_task(dataset_path, task, config, **kwargs):
     dry_run : bool
         Whether to make it a dry run, returning the command but not calling it. Defaults to `False`.
     """
+    logger = kwargs.get("logger", getLogger(LOGGER_NAME))
     log_level = kwargs.get("log_level", "INFO")
     luigicmd = kwargs.get("luigicmd", LUIGI_CMD)
 
@@ -559,7 +564,7 @@ def main():
 
     # - Configure a logger from this application:
     global logger
-    logger = configure_logger('romi_run_task')
+    logger = configure_logger(LOGGER_NAME)
 
     # - If only one path in the list, get the first one:
     if len(args.dataset_path) == 1:
