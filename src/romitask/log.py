@@ -27,8 +27,12 @@ from pathlib import Path
 
 from colorlog import ColoredFormatter
 
+SIMPLE_FMT = "%(asctime)s - %(levelname)s - %(name)s - %(message)s"
+COLORED_FMT = "%(log_color)s%(levelname)-8s%(reset)s %(bg_blue)s[%(name)s]%(reset)s %(message)s"
+DATE_FMT = "%Y-%m-%d %H:%M:%S"
 LOGLEV = ["DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"]
-
+DEFAULT_LOG_LEVEL = LOGLEV[1]
+DEFAULT_LOG_FILENAME = "romitask.log"
 LOGGING_CFG = """
 [loggers]
 keys=root
@@ -36,7 +40,7 @@ keys=root
 [logger_root]
 handlers=console,file
 qualname=root
-level={1}
+level={log_level}
 
 [handlers]
 keys=console,file
@@ -44,13 +48,13 @@ keys=console,file
 [handler_file]
 class=logging.FileHandler
 formatter=simple
-level={1}
-args=('{2}','w')
+level={log_level}
+args=('{logfile_path}','w')
 
 [handler_console]
 class=logging.StreamHandler
 formatter=color
-level={1}
+level={log_level}
 stream : ext://sys.stdout
 
 [formatters]
@@ -58,34 +62,48 @@ keys=simple,color
 
 [formatter_simple]
 class=logging.Formatter
-format=%(asctime)s - %(levelname)s - %(name)s - %(message)s
-datefmt=%Y-%m-%d %H:%M:%S
+format={simple_fmt}
+datefmt={date_fmt}
 
 [formatter_color]
 class=colorlog.ColoredFormatter
-format=%(log_color)s%(levelname)-8s%(reset)s %(bg_blue)s[%(name)s]%(reset)s %(message)s
+format={colored_fmt}
+datefmt={date_fmt}
 """
 
 
-def get_logging_config(name='root', log_level='INFO', fpath='/tmp/combined.log'):
+def get_logging_config(**kwargs):
     """Return the logging configuration.
 
-    Parameters
-    ----------
-    name : str
-        The name of the logger.
-        Defaults to `'root'`.
-    log_level : {'CRITICAL', 'ERROR', 'WARNING', 'INFO', 'DEBUG', 'NOTSET'}
-        A valid logging level. Defaults to `'INFO'`.
-    dir_path : str
-        Path to the logging file to write.
+    Other Parameters
+    ----------------
+    log_level : {"DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"}
+        A valid logging level. Defaults to `DEFAULT_LOG_LEVEL`.
+    logfile_path : str
+        Path to the logging file to write. Defaults to `DEFAULT_LOG_FILENAME`.
+    date_fmt : str
+        String formatting for dates. Defaults to `DATE_FMT`.
+    colored_fmt : str
+        String formatting for console log messages. Defaults to `COLORED_FMT`.
+    simple_fmt : str
+        String formatting for file log messages. Defaults to `SIMPLE_FMT`.
 
     Returns
     -------
     str
         The logging configuration in configparser format.
+
+    Examples
+    --------
+    >>> from romitask.log import get_logging_config
+    >>> print(get_logging_config())
     """
-    return LOGGING_CFG.format(name, log_level, fpath)
+    kwargs['log_level'] = kwargs.get('log_level', DEFAULT_LOG_LEVEL)
+    kwargs['logfile_path'] = kwargs.get('logfile_path', DEFAULT_LOG_FILENAME)
+    kwargs['date_fmt'] = kwargs.get('date_fmt', DATE_FMT)
+    kwargs['colored_fmt'] = kwargs.get('colored_fmt', COLORED_FMT)
+    kwargs['simple_fmt'] = kwargs.get('simple_fmt', SIMPLE_FMT)
+    return LOGGING_CFG.format(**kwargs)
 
 
 def configure_logger(name, log_path="", log_level='INFO'):
