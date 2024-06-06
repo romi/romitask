@@ -58,6 +58,7 @@ import subprocess
 import sys
 import tempfile
 import time
+from datetime import datetime
 from datetime import timedelta
 from logging import getLogger
 from pathlib import Path
@@ -68,6 +69,7 @@ from romitask import PIPE_TOML
 from romitask import SCAN_TOML
 from romitask.log import LOGLEV
 from romitask.log import configure_logger
+from romitask.log import get_log_filename
 from romitask.log import get_logging_config
 from romitask.modules import DATA_CREATION_TASK
 from romitask.modules import MODULES
@@ -470,7 +472,10 @@ def run_task(dataset_path, task, config, **kwargs):
     Other Parameters
     ----------------
     logger : logging.Logger
-        The logger to use with this method, default to the global logger.
+        A logger to use with this method, default to the global logger named `LOGGER_NAME`.
+    log_fname : str
+        The log file name to use.
+        Defaults to use the standardised log filename with the date and task name from `get_log_filename`.
     log_level : {'DEBUG', 'INFO', 'WARNING', 'ERROR', 'CRITICAL'}
         The logging level to use, defaults to 'INFO'.
     luigicmd : str
@@ -481,6 +486,11 @@ def run_task(dataset_path, task, config, **kwargs):
         Whether to run the task locally. Defaults to `True`.
     dry_run : bool
         Whether to make it a dry run, returning the command but not calling it. Defaults to `False`.
+
+    See Also
+    --------
+    romitask.log.get_logging_config
+    romitask.log.get_log_filename
     """
     logger = kwargs.get("logger", getLogger(LOGGER_NAME))
     log_level = kwargs.get("log_level", "INFO")
@@ -531,10 +541,13 @@ def run_task(dataset_path, task, config, **kwargs):
     cfgname = check_dataset_directory(dataset_path, task, logger=logger)
 
     with tempfile.TemporaryDirectory() as tmpd:
-        # - Generate logging config for luigi ("logging_config.toml"):
-        logging_config = get_logging_config(__file__, log_level)
-        # - Create a "logging_config.toml" TOML file to be used by `luigi` for logging
-        logging_file_path = os.path.join(tmpd, "logging_config.toml")
+        # Get the log_file name, with the date & task name by default:
+        log_fname = kwargs.get('log_fname', get_log_filename(task))
+        # -- Logging with fileConfig:
+        # - Get logging configuration string for luigi, specifying the log file name :
+        logging_config = get_logging_config(__file__, log_level, str(local_path / log_fname))
+        # - Create a "logging.cfg" file to be used by `luigi`:
+        logging_file_path = os.path.join(tmpd, "logging.cfg")
         with open(logging_file_path, 'w') as f:
             f.write(logging_config)
 
