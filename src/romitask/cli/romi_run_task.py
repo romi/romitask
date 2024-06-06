@@ -545,7 +545,7 @@ def run_task(dataset_path, task, config, **kwargs):
         log_fname = kwargs.get('log_fname', get_log_filename(task))
         # -- Logging with fileConfig:
         # - Get logging configuration string for luigi, specifying the log file name :
-        logging_config = get_logging_config(__file__, log_level, str(local_path / log_fname))
+        logging_config = get_logging_config(log_level=log_level, logfile_path=str(local_path / log_fname))
         # - Create a "logging.cfg" file to be used by `luigi`:
         logging_file_path = os.path.join(tmpd, "logging.cfg")
         with open(logging_file_path, 'w') as f:
