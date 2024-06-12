@@ -539,20 +539,20 @@ def run_task(dataset_path, task, config, **kwargs):
     module = get_task_module(task, logger=logger, module=kwargs.get("module", None))
     # - Check the dataset directory is OK to use:
     cfgname = check_dataset_directory(dataset_path, task, logger=logger)
+    # - Create the "scan.toml" OR "pipeline.toml" (backup) config file used by luigi:
+    file_path = create_backup_cfg(dataset_path, cfgname, config)
+
+    # Get the log_file name, with the date & task name by default:
+    log_fname = kwargs.get('log_fname', get_log_filename(task))
+    # - Get logging configuration string for luigi, specifying the log file name :
+    logging_config = get_logging_config(log_level=log_level, logfile_path=str(local_path / log_fname))
 
     with tempfile.TemporaryDirectory() as tmpd:
-        # Get the log_file name, with the date & task name by default:
-        log_fname = kwargs.get('log_fname', get_log_filename(task))
-        # -- Logging with fileConfig:
-        # - Get logging configuration string for luigi, specifying the log file name :
-        logging_config = get_logging_config(log_level=log_level, logfile_path=str(local_path / log_fname))
         # - Create a "logging.cfg" file to be used by `luigi`:
         logging_file_path = os.path.join(tmpd, "logging.cfg")
         with open(logging_file_path, 'w') as f:
             f.write(logging_config)
 
-        # - Create the "scan.toml" OR "pipeline.toml" (backup) config file used by luigi:
-        file_path = create_backup_cfg(dataset_path, cfgname, config)
         # - Define environment variables to provide the logging TOML file path to `luigi`:
         env = {"LUIGI_CONFIG_PARSER": "toml", "LUIGI_CONFIG_PATH": file_path}
         # - Define the luigi command to run:
