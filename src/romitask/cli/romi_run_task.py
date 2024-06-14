@@ -58,7 +58,6 @@ import subprocess
 import sys
 import tempfile
 import time
-from datetime import datetime
 from datetime import timedelta
 from logging import getLogger
 from pathlib import Path
@@ -561,7 +560,7 @@ def run_task(dataset_path, task, config, **kwargs):
         cmd = [luigicmd, "--logging-conf-file", logging_file_path,
                "--module", module, task,
                "--DatabaseConfig-scan", dataset_path]
-        if kwargs.get('local_scheduler', True):
+        if kwargs.get('local_scheduler', False):
             cmd.append("--local-scheduler")
 
         if kwargs.get('dry_run', False):
