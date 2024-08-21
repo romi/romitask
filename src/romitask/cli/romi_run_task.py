@@ -74,6 +74,8 @@ from romitask.modules import DATA_CREATION_TASK
 from romitask.modules import MODULES
 from romitask.modules import NO_DATASET_TASK
 from romitask.modules import TASKS
+from romitask.utils import get_version
+from romitask.utils import parse_kbdi
 
 LUIGI_CMD = "luigi"
 HELP_URL = "https://docs.romi-project.eu/plant_imager/tutorials/basics/"
@@ -115,28 +117,6 @@ def parsing():
     luigi.add_argument('--local-scheduler', dest='ls', action="store_true", default=True,
                        help="Use the local luigi scheduler, defaults to `True`.")
     return parser
-
-
-def get_version():
-    """Return used ROMI libraries version."""
-    import importlib
-    from importlib.metadata import version
-    from importlib.metadata import PackageNotFoundError
-    hash_dict = {}
-    for package in ["dtw", "plant3dvision", "plantdb", "plantimager", "romicgal", "romiseg", "romitask"]:
-        try:
-            module = importlib.import_module(package)
-        except ModuleNotFoundError or PackageNotFoundError:
-            hash_dict[package] = "Not Installed"
-        else:
-            try:
-                hash_dict[package] = version(package)
-            except AttributeError:
-                hash_dict[package] = "Undefined"
-            except PackageNotFoundError:
-                hash_dict[package] = "Not Installed"
-
-    return hash_dict
 
 
 def load_backup_scan_cfg(path):
@@ -416,15 +396,6 @@ def check_dataset_directory(path, task, logger):
             sys.exit("Non-existing dataset directory for processing task.")
         cfgname = PIPE_TOML
     return cfgname
-
-
-def parse_kbdi(kbdi, default='n'):
-    """Method to handle keyboard input from user."""
-    valid = {"yes": True, "y": True, "ye": True, "no": False, "n": False}
-    if kbdi == '':
-        return valid[default]
-    else:
-        return valid[kbdi]
 
 
 def update_config(config, update):
