@@ -525,6 +525,7 @@ def run_task(dataset_path, task, config, **kwargs):
 
         # - Define environment variables to provide the logging TOML file path to `luigi`:
         env = {"LUIGI_CONFIG_PARSER": "toml", "LUIGI_CONFIG_PATH": file_path}
+        env.update({'PYOPENCL_CTX': '0'})  # default choice
         # - Define the luigi command to run:
         # "--DatabaseConfig-scan args.dataset_path" set the value of `scan` for the `DatabaseConfig` Config class
         # https://luigi.readthedocs.io/en/stable/parameters.html#setting-parameter-value-for-other-classes
