@@ -25,9 +25,9 @@
 
 import luigi
 
-from romitask.log import configure_logger
+from romitask.log import get_logger
 
-logger = configure_logger(__name__)
+logger = get_logger(__name__)
 
 
 class DBRunner(object):

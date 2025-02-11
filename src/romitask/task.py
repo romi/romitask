@@ -45,9 +45,9 @@ from shutil import rmtree
 import luigi
 from tqdm import tqdm
 
-from romitask.log import configure_logger
+from romitask.log import get_logger
 
-logger = configure_logger(__name__)
+logger = get_logger(__name__)
 db = None
 
 

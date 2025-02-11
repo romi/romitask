@@ -66,8 +66,8 @@ import toml
 
 from romitask import PIPE_TOML
 from romitask import SCAN_TOML
-from romitask.log import LOGLEV
-from romitask.log import configure_logger
+from romitask.log import LOG_LEVELS
+from romitask.log import get_logger
 from romitask.log import get_log_filename
 from romitask.log import get_logging_config
 from romitask.modules import DATA_CREATION_TASK
@@ -105,7 +105,7 @@ def parsing():
     parser.add_argument('--module', dest='module', type=str, default=None,
                         help="""Library and module of the task.
                         Use it if not available or different than defined in `romitask.modules.MODULES`.""")
-    parser.add_argument('--log-level', dest='log_level', type=str, default='INFO', choices=LOGLEV,
+    parser.add_argument('--log-level', dest='log_level', type=str, default='INFO', choices=LOG_LEVELS,
                         help="Level of message logging, defaults to 'INFO'.")
     parser.add_argument('--dry-run', dest='dry_run', action="store_true",
                         help="Use this to test the command-line by doing everything except calling the task(s).")
@@ -558,7 +558,7 @@ def main():
 
     # - Configure a logger from this application:
     global logger
-    logger = configure_logger(LOGGER_NAME)
+    logger = get_logger(LOGGER_NAME)
 
     # - If only one path in the list, get the first one:
     if len(args.dataset_path) == 1:
