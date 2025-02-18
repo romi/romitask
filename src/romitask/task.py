@@ -328,28 +328,32 @@ class RomiTask(luigi.Task):
         fs.set_metadata("task_name", self.get_task_name())
         return t
 
-    def input_file(self, file_id=None):
+    def input_file(self, file_id=None, suffix=None):
         """Helper method to get a file from the input fileset.
 
         Parameters
         ----------
         file_id : str, optional
             Name of the input file. Defaults to ``None``.
+        suffix : str, optional
+            A suffix of the input file name. Defaults to ``None``.
 
         Returns
         -------
         plantdb.db.File
             The input file.
         """
-        return self.upstream_task().output_file(file_id, False)
+        return self.upstream_task().output_file(file_id, suffix=suffix, create=False)
 
-    def output_file(self, file_id=None, create=True):
+    def output_file(self, file_id=None, suffix=None, create=True):
         """Helper method to create & get a file from the output fileset.
 
         Parameters
         ----------
         file_id : str, optional
             Name of the output file. Defaults to ``None``.
+        suffix : str, optional
+            Add a suffix to the output file name. Defaults to ``None``.
         create : bool, optional
             Define if the output file should be created. Defaults to ``True``
 
@@ -360,6 +364,8 @@ class RomiTask(luigi.Task):
         """
         if file_id is None:
             file_id = self.get_task_name()
+        if suffix is not None:
+            file_id += suffix
         return self.output().get().get_file(file_id, create)
 
     def get_task_name(self):
@@ -540,7 +546,7 @@ class FileExists(RomiTask):
         """The output file should exist."""
         if file_id is None:
             file_id = self.file_id
-        return super().output_file(file_id, False)
+        return super().output_file(file_id, create=False)
 
     def run(self):
         """Check the fileset and files exist.
