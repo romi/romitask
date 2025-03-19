@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "romitask"
-version = "0.11.01"
+version = "0.12.0"
 dependencies = [
     "numpy",
     "colorlog",
@@ -17,7 +17,7 @@ dependencies = [
 description = "The ROMI task runner, a luigi based task pipeline."
 readme = "README.md"
 requires-python = ">=3.7"
-license = { file = "LICENSE" }
+license = { name = "GPL-3.0-or-later", file = "LICENSE" }
 authors = [
     { name = "Nabil Ait Taleb", email = "mohamednabil.aittaleb@sony.com" },
     { name = "Timothée Wintz", email = "timothee@timwin.fr" },
