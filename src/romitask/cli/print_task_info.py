@@ -195,11 +195,11 @@ def masks_info(task, task_id, db_path):
     print(f"Found {len(img_files)} mask image files.")
 
 
-def undistorted_info(task, task_id, db_path):
+def undistort_info(task, task_id, db_path):
     out_dir = os.path.join(db_path, task_id)
     files = os.listdir(out_dir)
     img_files = [f for f in files if f.endswith('.jpg')]
-    print(f"Found {len(img_files)} undistorted image files.")
+    print(f"Found {len(img_files)} undistort image files.")
 
 
 def colmap_info(task, task_id, db_path):
@@ -242,8 +242,8 @@ def info_from_task(task, task_id, db_path):
         return masks_info
     elif task == "Colmap":
         return colmap_info(task, task_id, db_path)
-    elif task == "Undistorted":
-        return undistorted_info(task, task_id, db_path)
+    elif task == "Undistort":
+        return undistort_info(task, task_id, db_path)
     ## - ML pipeline specific tasks:
     elif task == "Segmentation2D":
         return segmentation2d_info(task, task_id, db_path)

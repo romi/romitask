@@ -21,12 +21,40 @@
 # You should have received a copy of the GNU Lesser General Public
 # License along with romitask.  If not, see <https://www.gnu.org/licenses/>.
 # ------------------------------------------------------------------------------
+
+"""Logging Configuration and Management
+
+A comprehensive logging utility module that provides flexible and configurable logging setup
+for Python applications, supporting both console and file-based logging with color formatting options.
+
+Key Features
+------------
+- Configurable log levels with sensible defaults
+- Console logging with optional color formatting
+- File-based logging with automatic file handling
+- Dummy logger for testing/development
+- Centralized logging configuration management
+- Custom formatting options for log messages
+- Dynamic log filename generation
+
+Usage Examples
+--------------
+>>> # Basic usage
+>>> from romitask.log import get_logger
+>>> logger = get_logger(__name__)
+>>> logger.info("Application started")
+>>> logger.error("An error occurred")
+
+>>> # With custom configuration
+>>> logger = get_logger(__name__, log_level="DEBUG", colored=True)
+>>> logger.debug("Debugging information")
+"""
+
+
 import logging
 import sys
 from datetime import datetime
-from pathlib import Path
 
-import toml
 from colorlog import ColoredFormatter
 
 # Define a set of log levels by retrieving all existing log level names from Python's logging module,
@@ -58,6 +86,7 @@ COLORED_FORMATTER = ColoredFormatter(
     reset=True,  # Automatically reset styles applied to the log after each log message.
     style='%',
 )
+
 
 def get_console_handler():
     """Creates and configures a console handler for logging that outputs to the standard output stream.
@@ -202,6 +231,7 @@ def get_log_filename(task, date_fmt="%Y.%m.%d_%Hh%Mm%Ss"):
     now_str = now.strftime(date_fmt)
     # Get the log_file name, with the date & task name by default:
     return f'{now_str}_{task.upper()}.log'
+
 
 DEFAULT_LOG_FILENAME = "romitask.log"
 DATE_FMT = "%Y-%m-%d %H:%M:%S"

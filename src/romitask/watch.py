@@ -23,6 +23,35 @@
 # <https://www.gnu.org/licenses/>.
 # ------------------------------------------------------------------------------
 
+"""FSDB Watch Module
+
+A monitoring system for plant database operations that automatically executes Luigi tasks when new scans are added.
+This module enables real-time processing of plant data by watching file system events.
+
+Key Features
+------------
+- Monitors filesystem events in a plant database directory
+- Automatically triggers task execution when new scans are detected
+- Handles database busy states and connection management
+- Supports running multiple Luigi tasks sequentially
+- Provides event handling for filesystem changes
+
+Usage Examples
+--------------
+>>> from romitask.watch import FSDBWatch
+>>> from plantdb.commons.fsdb import FSDB
+>>> from my_tasks import ProcessingTask
+
+>>> # Initialize database and watch
+>>> db = FSDB('/path/to/database')
+>>> config = {'ProcessingTask': {'param': 'value'}}
+>>> watch = FSDBWatch(db, ProcessingTask, config)
+
+>>> # Start monitoring
+>>> watch.start()
+
+"""
+
 import time
 
 from plantdb.db import DBBusyError
@@ -34,12 +63,48 @@ from romitask.runner import DBRunner
 
 
 class FSDBWatcher():
-    """Watch changes on a FSDB database and launch a task when it does.
+    """File system database watcher that monitors changes and triggers tasks.
+
+    A watcher class that monitors a FSDB (File System Database) for changes and
+    executes specified tasks when changes are detected. Uses the watchdog library
+    to monitor filesystem events.
+
+    Parameters
+    ----------
+    db : plantdb.fsdb.FSDB
+        The target database instance to monitor for changes.
+    tasks : list of RomiTask
+        List of tasks to execute when changes are detected in the database.
+    config : dict
+        Configuration dictionary for the tasks. Contains settings and parameters
+        for task execution.
 
     Attributes
     ----------
     observer : watchdog.observers.Observer
-        Watchdog observer for the filesystem.
+        Watchdog observer instance that monitors the filesystem.
+
+    Notes
+    -----
+    The watcher only monitors the base directory of the database and does not
+    watch subdirectories (recursive=False).
+
+    Examples
+    --------
+    >>> from plantdb.fsdb import FSDB
+    >>> db = FSDB("path/to/database")
+    >>> tasks = [MyTask1(), MyTask2()]
+    >>> config = {"param1": "value1", "param2": "value2"}
+    >>> watcher = FSDBWatcher(db, tasks, config)
+    >>> watcher.start()  # Start monitoring
+    >>> # ... do some work ...
+    >>> watcher.stop()   # Stop monitoring
+    >>> watcher.join()   # Wait for the observer to terminate
+
+    See Also
+    --------
+    FSDBEventHandler : Handles the actual filesystem events
+    watchdog.observers.Observer : The underlying observer class
     """
 
     def __init__(self, db, tasks, config):
@@ -59,46 +124,142 @@ class FSDBWatcher():
         self.observer.schedule(handler, db.basedir, recursive=False)
 
     def start(self):
-        """Start the observer."""
+        """Start the filesystem observer.
+
+        Begins monitoring the database directory for changes.
+
+        Notes
+        -----
+        This method is non-blocking. The observer runs in a separate thread.
+        """
         self.observer.start()
 
     def stop(self):
-        """Stop the observer."""
+        """Stop the filesystem observer.
+
+        Stops monitoring the database directory for changes.
+
+        Notes
+        -----
+        This method does not wait for the observer thread to terminate.
+        Use `join()` to ensure complete termination.
+        """
         self.observer.stop()
 
     def join(self):
-        """Wait until the observer terminates."""
+        """Wait for the observer to terminate.
+
+        Blocks until the observer thread has completely terminated.
+
+        Notes
+        -----
+        This method should be called after `stop()` to ensure proper shutdown.
+        """
         self.observer.join()
 
 
 class FSDBEventHandler(FileSystemEventHandler):
-    """Event handler for FSDB.
+    """File system event handler for monitoring and processing database changes.
+
+    This class extends FileSystemEventHandler to watch for directory creation events
+    and trigger processing tasks on a plant database. It manages the execution of
+    database tasks while handling database busy states through retries.
 
     Attributes
     ----------
     runner : romitask.runner.DBRunner
-        The runner to handle.
+        The database runner instance that executes the processing tasks.
     running : bool
-        Indicate if the `runner` is running or not.
+        Flag indicating whether tasks are currently being executed.
+
+    Raises
+    ------
+    DBBusyError
+        When the database is locked or busy during task execution.
+
+    Notes
+    -----
+    - Only responds to directory creation events, ignoring all other file system events
+    - Implements automatic retry mechanism when database is busy
+    - Inherits from watchdog.events.FileSystemEventHandler
+
+    Examples
+    --------
+    >>> from plantdb.fsdb import FSDB
+    >>> from romitask.task import DummyTask
+    >>>
+    >>> # Create database and handler
+    >>> db = FSDB("/path/to/db")
+    >>> tasks = [DummyTask]
+    >>> config = {"DummyTask": {"param": "value"}}
+    >>>
+    >>> # Initialize handler
+    >>> handler = FSDBEventHandler(db, tasks, config)
+    >>>
+    >>> # Add to watchdog observer
+    >>> from watchdog.observers import Observer
+    >>> observer = Observer()
+    >>> observer.schedule(handler, "/path/to/watch", recursive=False)
+    >>> observer.start()
+
+    See Also
+    --------
+    DBRunner : The task execution engine used by this handler
+    FileSystemEventHandler : Base class for file system event handlers
     """
 
     def __init__(self, db, tasks, config):
-        """Class constructor.
+        """Initialize the event handler with a database, tasks, and configuration.
 
         Parameters
         ----------
         db : plantdb.fsdb.FSDB
-            The target database.
+            The target plant database to monitor and process.
         tasks : list of RomiTask
-            The list of tasks to do on change.
+            List of processing tasks to execute when changes are detected.
         config : dict
-            Configuration for the task.
+            Configuration dictionary for task parameters and settings.
         """
         self.runner = DBRunner(db, tasks, config)
         self.running = False
 
     def on_created(self, event):
-        """Run tasks on the database when it becomes available, if a new folder has been created (new scan)."""
+        """Run tasks on the database when a new directory is created.
+
+        This method handles directory creation events by executing database tasks through
+        the associated runner. If the database is busy, it implements a retry mechanism
+        with a 1-second delay between attempts.
+
+        Parameters
+        ----------
+        self : FSDBEventHandler
+            The instance of the event handler.
+        event : watchdog.events.DirCreatedEvent
+            The file system event object containing information about the created directory.
+
+        Returns
+        -------
+        None
+            Returns early if the event is not a DirCreatedEvent.
+
+        Raises
+        ------
+        DBBusyError
+            Caught internally when database is locked or busy. Method will retry until successful.
+
+        Notes
+        -----
+        - Only processes DirCreatedEvent events, all other event types are ignored
+        - Implements an infinite retry loop when database is busy
+        - Sets self.running to False upon successful completion
+
+        Examples
+        --------
+        >>> handler = FSDBEventHandler(db, tasks, config)
+        >>> event = DirCreatedEvent("/path/to/new/directory")
+        >>> handler.on_created(event)  # Will execute tasks or wait if DB is busy
+
+        """
         if not isinstance(event, DirCreatedEvent):
             return
         while True:

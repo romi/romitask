@@ -23,6 +23,25 @@
 # <https://www.gnu.org/licenses/>.
 # ------------------------------------------------------------------------------
 
+"""ROMI Task Module Registry
+
+A centralized registry of task modules for the ROMI (RObot for MIcrofarm) project, providing a mapping between task names and their corresponding module paths for plant imaging, reconstruction, and analysis workflows.
+
+Usage Examples
+--------------
+>>> from romitask.modules import MODULES, TASKS
+>>> # Get the module path for a specific task
+>>> scanning_module = MODULES["Scan"]
+>>> print(scanning_module)
+'plantimager.tasks.scan'
+
+>>> # Check if a task requires a dataset
+>>> task_name = "Scan"
+>>> requires_dataset = task_name not in NO_DATASET_TASK
+>>> print(f"{task_name} requires dataset: {requires_dataset}")
+'Scan requires dataset: True'
+"""
+
 MODULES = {
     # Scanning module:
     "Scan": "plantimager.tasks.scan",
@@ -38,7 +57,8 @@ MODULES = {
     "IntrinsicCalibration": "plant3dvision.tasks.calibration",
     # Geometric reconstruction module:
     "Colmap": "plant3dvision.tasks.colmap",
-    "Undistorted": "plant3dvision.tasks.proc2d",
+    "CameraPoseQC": "plant3dvision.tasks.colmap",
+    "Undistort": "plant3dvision.tasks.proc2d",
     "Masks": "plant3dvision.tasks.proc2d",
     "Voxels": "plant3dvision.tasks.cl",
     "PointCloud": "plant3dvision.tasks.proc3d",

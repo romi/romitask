@@ -23,16 +23,47 @@
 # <https://www.gnu.org/licenses/>.
 # ------------------------------------------------------------------------------
 
-"""ROMI implentation of `luigi`'s `Tasks`.
+"""Task Management System for ROMI Project
 
-This module implements subclasses of ``luigi.Config``, ``luigi.Target`` and ``luigi.Tasks``.
-The goal is to have luigi tasks work seamlessly with the ROMI database API implemented in ``plantdb.db``.
+A comprehensive task management framework that provides base classes and utilities for defining, executing, and managing data processing tasks in the ROMI (RObot for MIcrofarm) project.
+This module implements a dependency-aware task system with database integration for managing plant imaging and analysis workflows.
 
-A ``FilesetTarget`` is a luigi target corresponding to a ``Fileset`` object.
+Key Features
+------------
+- Task dependency management through upstream task declarations
+- File and dataset existence verification
+- Database-integrated file management system
+- Parameter handling with serialization support
+- Task hierarchy support with base classes for:
+    * Generic tasks (RomiTask)
+    * File processing tasks (FileByFileTask)
+    * Dataset verification tasks
+    * File existence checking
+- Clean-up utilities for managing task outputs
+- Virtual plant object handling
+- Error handling and failure management
 
-A ``RomiTask`` must implement two methods : ``run`` and ``requires``.
+Usage Examples
+--------------
+>>> # Creating a simple task
+>>> class MyProcessingTask(RomiTask):
+...     upstream_task = "PreviousTask"
+...
+...     def requires(self):
+...         return {"previous": self.upstream_task()}
+...
+...     def run(self):
+...         # Task implementation
+...         pass
 
-To check for a task completeness, the fileset existence is checked as well as all it's dependencies.
+>>> # Using the file management system
+>>> class MyFileTask(FileByFileTask):
+...     query = "SELECT * FROM files"
+...     type = "process"
+...
+...     def f(self, file):
+...         # Process individual file
+...         return processed_data
 """
 
 import glob
@@ -343,7 +374,7 @@ class RomiTask(luigi.Task):
         plantdb.db.File
             The input file.
         """
-        return self.upstream_task().output_file(file_id, suffix=suffix, create=False)
+        return self.pose_task().output_file(file_id, suffix=suffix, create=False)
 
     def output_file(self, file_id=None, suffix=None, create=True):
         """Helper method to create & get a file from the output fileset.
@@ -731,9 +762,9 @@ def mourn_failure(task, exception):
     # Log the failure:
     logger.critical(exception)
     # Delete the task fileset:
-    #output_fileset = task.output().get()
-    #scan = task.output().get().scan
-    #scan.delete_fileset(output_fileset.id)
+    # output_fileset = task.output().get()
+    # scan = task.output().get().scan
+    # scan.delete_fileset(output_fileset.id)
 
 
 class DummyTask(RomiTask):
@@ -794,6 +825,7 @@ class Clean(RomiTask):
     romitask.task.IMAGES_MD
     """
     upstream_task = None  # override default attribute from ``RomiTask``
+    pose_task = None
     no_confirm = luigi.BoolParameter(default=False)
     keep_metadata = luigi.ListParameter(default=[])
 
@@ -846,11 +878,14 @@ class Clean(RomiTask):
         fs_ids = [fs.id for fs in scan.get_filesets() if fs.id != "images"]
         # Also exclude the dataset associated to VirtualPlant:
         fs_ids = [fs for fs in fs_ids if not fs.startswith("VirtualPlant")]
-        logger.info(f"Found {len(fs_ids)} filesets (excluding 'images' & 'VirtualPlant')...")
-        # Remove all Filesets except 'images' & VirtualPlant*:
-        for fs in tqdm(fs_ids, unit='fileset'):
-            logger.info(f"Deleting '{fs}' fileset...")
-            scan.delete_fileset(fs)
+        logger.info(f"Found {len(fs_ids)} filesets to cleanup (excluding 'images' & 'VirtualPlant')...")
+
+        # Cleanup all Filesets except 'images' & VirtualPlant*:
+        if len(fs_ids) != 0:
+            for fs in tqdm(fs_ids, unit='fileset'):
+                logger.info(f"Deleting '{fs}' fileset...")
+                scan.delete_fileset(fs)
+
         # Cleanup 'images' Filesets metadata:
         img_fs = scan.get_fileset('images')
         if img_fs is None:
