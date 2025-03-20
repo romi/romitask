@@ -330,8 +330,9 @@ def create_backup_cfg(path, cfgname, config):
     # The following parameters control Luigi scheduler behavior.
     # https://luigi.readthedocs.io/en/stable/configuration.html#scheduler
     config["scheduler"] = {
-        "retry_count": 1,
-        "retry_delay": 1,
+        "retry_count": 1,  # Number of times a task can fail within `disable_window` before the scheduler will automatically disable it.
+        "retry_delay": 1,  # Number of seconds to wait after a task failure to mark it pending again.
+        "disable_window": 3600,  # Number of seconds during which `retry_count` failures must occur in order for an automatic disable by the scheduler.
     }
 
     # The following return codes are the recommended exit codes for Luigi.
@@ -527,11 +528,11 @@ def run_task(dataset_path, task, config, **kwargs):
         env = {"LUIGI_CONFIG_PARSER": "toml", "LUIGI_CONFIG_PATH": file_path}
         env.update({'PYOPENCL_CTX': '0'})  # default choice
         # - Define the luigi command to run:
-        # "--DatabaseConfig-scan args.dataset_path" set the value of `scan` for the `DatabaseConfig` Config class
+        # "--ScanConfiguration-scan args.dataset_path" set the value of `scan` for the `ScanConfiguration` Config class
         # https://luigi.readthedocs.io/en/stable/parameters.html#setting-parameter-value-for-other-classes
         cmd = [luigicmd, "--logging-conf-file", logging_file_path,
                "--module", module, task,
-               "--DatabaseConfig-scan", dataset_path]
+               "--ScanConfiguration-scan", dataset_path]
         if kwargs.get('local_scheduler', False):
             cmd.append("--local-scheduler")
 
