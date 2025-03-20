@@ -76,10 +76,75 @@ from shutil import rmtree
 import luigi
 from tqdm import tqdm
 
+from plantdb.fsdb import FSDB
+from plantdb.fsdb import _is_fsdb
+from plantdb.io import read_json
+from plantdb.io import write_json
 from romitask.log import get_logger
 
 logger = get_logger(__name__)
 db = None
+
+
+class FSDBParameter(luigi.Parameter):
+    """A custom Luigi Parameter for handling FSDB objects.
+
+    This parameter class extends Luigi's basic Parameter to support passing FSDB
+    objects directly as parameters to Luigi tasks.
+    """
+
+    def parse(self, db_path):
+        """Parse the parameter value.
+
+        If the value is a string, attempt to reconstruct an FSDB object.
+        Otherwise, return the value directly.
+
+        Parameters
+        ----------
+        value : plantdb.fsdb.FSDB
+            The value to be parsed, either a string path or an FSDB object.
+
+        Returns
+        -------
+        plantdb.fsdb.FSDB
+            An FSDB object if the input was a string path to a valid FSDB,
+            otherwise the unmodified input value.
+        """
+        if db_path is None:
+            return None
+        if isinstance(db_path, str):
+            # Try to interpret the string as a path to an FSDB
+            db_path = Path(db_path)
+
+        if db_path.exists() and db_path.is_dir() and _is_fsdb(db_path):
+            db = FSDB(db_path)
+            db.connect(unsafe=True)
+            return db
+        else:
+            logger.error(f"Could not parse FSDB from string: {db_path}")
+
+        return db_path
+
+    def serialize(self, db):
+        """Serialize the parameter value to a string.
+
+        For FSDB objects, converts to a string representation of the base directory path.
+        For other values, uses the default string conversion.
+
+        Parameters
+        ----------
+        value : plantdb.fsdb.FSDB
+            The value to be serialized, preferably an FSDB object.
+
+        Returns
+        -------
+        str
+            String representation of the value, which for FSDB objects is the path.
+        """
+        if db is not None:
+            return str(db.path())
+        else:
+            return None
 
 
 class ScanParameter(luigi.Parameter):
@@ -153,8 +218,30 @@ class ScanParameter(luigi.Parameter):
         return str(db_path / scan_id)
 
 
-class DatabaseConfig(luigi.Config):
-    """Configuration for a ``plantdb.FSBD`` database.
+class FSDBConfiguration(luigi.Config):
+    """Configuration for a ``plantdb.fsdb.FSBD`` database.
+
+    Attributes
+    ----------
+    scan : plantdb.fsdb.FSBD
+        The database to use for configuration.
+
+    Examples
+    --------
+    >>> from romitask.task import FSDBConfiguration
+    >>> from plantdb.fsdb import dummy_db
+    >>> # - First, let's create a dummy FSDB database to play with:
+    >>> db = dummy_db()
+    >>> db.connect()
+    >>> db_cfg = FSDBConfiguration(db)
+    >>> type(db_cfg.db)
+    plantdb.fsdb.FSDB
+    """
+    db = FSDBParameter()
+
+
+class ScanConfiguration(luigi.Config):
+    """Configuration for a ``plantdb.fsdb.Scan`` scan dataset.
 
     Attributes
     ----------
@@ -163,15 +250,15 @@ class DatabaseConfig(luigi.Config):
 
     Examples
     --------
-    >>> from romitask.task import DatabaseConfig
-    >>> from plantdb import FSDB
+    >>> from romitask.task import ScanConfiguration
     >>> from plantdb.fsdb import dummy_db
     >>> # - First, let's create a dummy FSDB database to play with:
     >>> db = dummy_db()
     >>> db.connect()
     >>> scan = db.create_scan("007")  # Add a `Scan` named `007` to the `FSDB` instance
-    >>> db_cfg = DatabaseConfig(scan=scan)
-
+    >>> scan_cfg = ScanConfiguration(scan)
+    >>> type(scan_cfg.scan)
+    plantdb.fsdb.Scan
     """
     scan = ScanParameter()
 
@@ -315,6 +402,23 @@ class RomiTask(luigi.Task):
         """
         return self.upstream_task()
 
+    def input_file(self, file_id=None, suffix=None):
+        """Helper method to get a file from the input fileset.
+
+        Parameters
+        ----------
+        file_id : str, optional
+            Name of the input file. Defaults to ``None``.
+        suffix : str, optional
+            A suffix of the input file name. Defaults to ``None``.
+
+        Returns
+        -------
+        plantdb.db.File
+            The input file.
+        """
+        return self.upstream_task().output_file(file_id, suffix=suffix, create=False)
+
     def output(self):
         """Defines the returned ``Target``, for a ``RomiTask`` it is a ``FileSetTarget``.
 
@@ -335,16 +439,20 @@ class RomiTask(luigi.Task):
         # Can be overriding in inheriting class as for the `Visualization` task
         # This will be used as DIRECTORY NAME!
         fileset_id = self.task_id
-        if self.scan_id == "":
-            t = FilesetTarget(DatabaseConfig().scan, fileset_id)
+
+        if str(self.scan_id) == "":
+            fs_target = FilesetTarget(ScanConfiguration().scan, fileset_id)
         else:
-            t = FilesetTarget(db.get_scan(self.scan_id), fileset_id)
-        fs = t.get()  # get the fileset
+            fs_target = FilesetTarget(db.get_scan(self.scan_id), fileset_id)
+
+        fs = fs_target.get()  # get the fileset
         # Export all the task parameters as a dictionary:
         params = dict(self.to_str_params(only_significant=False, only_public=False))
+
         # Try to fix empty "scan_id":
         if params["scan_id"] == "":
             params["scan_id"] = fs.get_scan().get_id()
+
         # Check if it needs JSON parsing:
         for k in params.keys():
             try:
@@ -353,28 +461,12 @@ class RomiTask(luigi.Task):
                 continue
             except JSONDecodeError:
                 continue
+
         # Save the task parameter as fileset metadata under "task_params":
         fs.set_metadata("task_params", params)
         # Save the task name as fileset metadata under "task_name":
         fs.set_metadata("task_name", self.get_task_name())
-        return t
-
-    def input_file(self, file_id=None, suffix=None):
-        """Helper method to get a file from the input fileset.
-
-        Parameters
-        ----------
-        file_id : str, optional
-            Name of the input file. Defaults to ``None``.
-        suffix : str, optional
-            A suffix of the input file name. Defaults to ``None``.
-
-        Returns
-        -------
-        plantdb.db.File
-            The input file.
-        """
-        return self.pose_task().output_file(file_id, suffix=suffix, create=False)
+        return fs_target
 
     def output_file(self, file_id=None, suffix=None, create=True):
         """Helper method to create & get a file from the output fileset.
@@ -390,7 +482,7 @@ class RomiTask(luigi.Task):
 
         Returns
         -------
-        plantdb.db.File
+        plantdb.fsdb.File
             The (created) output file.
         """
         if file_id is None:
@@ -447,7 +539,7 @@ class DatasetExists(RomiTask):
         OSError
             If the `scan_id` does not exist.
         """
-        db = DatabaseConfig().scan.db
+        db = ScanConfiguration().scan.db
         if db.get_scan(self.scan_id) is None:
             raise OSError(f"Scan {self.scan_id} does not exist!")
         return
@@ -650,7 +742,7 @@ class VirtualPlantObj(FileExists):
     def output(self):
         """Return the fileset containing the model files."""
         if self.scan_id == "":
-            scan = DatabaseConfig().scan
+            scan = ScanConfiguration().scan
         else:
             scan = db.get_scan(self.scan_id)
 
@@ -791,6 +883,9 @@ class DummyTask(RomiTask):
 
     def run(self):
         """Do nothing."""
+        logger.info("Dummy task started.")
+        logger.info(f"Got a scan named '{self.scan_id}'...")
+        logger.info("Dummy task done.")
         return
 
 
@@ -825,7 +920,6 @@ class Clean(RomiTask):
     romitask.task.IMAGES_MD
     """
     upstream_task = None  # override default attribute from ``RomiTask``
-    pose_task = None
     no_confirm = luigi.BoolParameter(default=False)
     keep_metadata = luigi.ListParameter(default=[])
 
@@ -852,7 +946,7 @@ class Clean(RomiTask):
 
     def run(self):
         """Run the task."""
-        scan = DatabaseConfig().scan
+        scan = ScanConfiguration().scan
         logger.info(f"Cleaning task got a scan named '{scan.id}'...")
 
         # - Create the list of metadata to keep (retain) to a set and add the ones defined in `IMAGES_MD`
@@ -935,3 +1029,66 @@ class Clean(RomiTask):
             logger.info("No backup pipeline config found!")
 
         return
+
+
+class RetryTracker(RomiTask):
+    """Tracks retry counts for tasks by storing them in a JSON file.
+
+    This class extends RomiTask to provide tracking of retry attempts for other tasks.
+    It maintains a JSON file that maps task IDs to their retry counts, allowing the system
+    to keep track of how many times a task has been attempted.
+
+    Parameters
+    ----------
+    task_id : str
+        Identifier of the task for which to track retry attempts.
+    retry_count : int
+        The current retry attempt number for the specified task.
+
+    Attributes
+    ----------
+    task_id : luigi.Parameter
+        The parameter storing the identifier of the task being tracked.
+    retry_count : luigi.IntParameter
+        The parameter storing the number of retry attempts for the task.
+
+    Notes
+    -----
+    The retry information is stored in a JSON file named 'retry_tracker.json' in the
+    output directory assigned to this task. If the file exists, it is read and updated;
+    if not, a new tracking dictionary is created.
+    """
+    upstream_task = None
+    task_id = luigi.Parameter()
+    retry_count = luigi.IntParameter()
+
+    def requires(self):
+        """Nothing required."""
+        return []
+
+    def output(self):
+        """Define the output target for the retry tracker file."""
+        self.task_id = self.__class__.__name__  # name the task using the class's name
+        return super().output()
+
+    def run(self):
+        """Execute the retry tracking operation.
+
+        Creates or updates a JSON file with information about task retries.
+        Maps the task_id to its retry count in a dictionary stored as JSON.
+        """
+        # Get the path for retry tracker file or create it if it doesn't exist
+        outfile = self.output_file(f'retry_tracker', create=True)
+
+        try:
+            # Attempt to load existing retry tracking data
+            retry_dict = read_json(outfile)
+        except:
+            # If file doesn't exist or isn't valid JSON, initialize empty dictionary
+            retry_dict = {}
+
+        # Update the retry count for the current task
+        retry_dict[self.task_id] = self.retry_count
+        # Save the updated tracking dictionary back to the JSON file
+        write_json(outfile, retry_dict)
+        logger.info(f"Tracked retry {self.retry_count} for {self.task_id}.")
