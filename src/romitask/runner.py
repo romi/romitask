@@ -133,7 +133,7 @@ class DBRunner(object):
         db_config['worker'] = {
             "no_install_shutdown_handler": True,
         }
-        db_config['DatabaseConfig'] = {
+        db_config['ScanConfiguration'] = {
             'db': self.db,
             'scan_id': scan,
         }

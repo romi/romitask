@@ -3,7 +3,7 @@
 
 from romitask.task import RomiTask
 from romitask.task import FilesetTarget
-from romitask.task import DatabaseConfig
+from romitask.task import ScanConfiguration
 
 #: Name of the object configuration file:
 OBJECT_TOML = "object.toml"
