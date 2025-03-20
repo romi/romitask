@@ -1058,8 +1058,7 @@ Else, the dataset directory should exist as an existing fileset will be processe
 
             <details class="quote">
               <summary>Source code in <code>romitask/cli/romi_run_task.py</code></summary>
-              <div class="codehilite"><table class="codehilitetable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">352</span>
-<span class="normal">353</span>
+              <div class="codehilite"><table class="codehilitetable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">353</span>
 <span class="normal">354</span>
 <span class="normal">355</span>
 <span class="normal">356</span>
@@ -1104,7 +1103,8 @@ Else, the dataset directory should exist as an existing fileset will be processe
 <span class="normal">395</span>
 <span class="normal">396</span>
 <span class="normal">397</span>
-<span class="normal">398</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">check_dataset_directory</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="n">task</span><span class="p">,</span> <span class="n">logger</span><span class="p">):</span>
+<span class="normal">398</span>
+<span class="normal">399</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">check_dataset_directory</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="n">task</span><span class="p">,</span> <span class="n">logger</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Check the dataset directory is correctly defined depending on the `task` to execute.</span>
 
 <span class="sd">    Parameters</span>
@@ -1314,7 +1314,8 @@ Else, the dataset directory should exist as an existing fileset will be processe
 <span class="normal">346</span>
 <span class="normal">347</span>
 <span class="normal">348</span>
-<span class="normal">349</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">create_backup_cfg</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="n">cfgname</span><span class="p">,</span> <span class="n">config</span><span class="p">):</span>
+<span class="normal">349</span>
+<span class="normal">350</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">create_backup_cfg</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="n">cfgname</span><span class="p">,</span> <span class="n">config</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Create the backup configuration file used by luigi.</span>
 
 <span class="sd">    Parameters</span>
@@ -1348,8 +1349,9 @@ Else, the dataset directory should exist as an existing fileset will be processe
     <span class="c1"># The following parameters control Luigi scheduler behavior.</span>
     <span class="c1"># https://luigi.readthedocs.io/en/stable/configuration.html#scheduler</span>
     <span class="n">config</span><span class="p">[</span><span class="s2">&quot;scheduler&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span>
-        <span class="s2">&quot;retry_count&quot;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span>
-        <span class="s2">&quot;retry_delay&quot;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span>
+        <span class="s2">&quot;retry_count&quot;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span>  <span class="c1"># Number of times a task can fail within `disable_window` before the scheduler will automatically disable it.</span>
+        <span class="s2">&quot;retry_delay&quot;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span>  <span class="c1"># Number of seconds to wait after a task failure to mark it pending again.</span>
+        <span class="s2">&quot;disable_window&quot;</span><span class="p">:</span> <span class="mi">3600</span><span class="p">,</span>  <span class="c1"># Number of seconds during which `retry_count` failures must occur in order for an automatic disable by the scheduler.</span>
     <span class="p">}</span>
 
     <span class="c1"># The following return codes are the recommended exit codes for Luigi.</span>
@@ -2376,8 +2378,7 @@ romitask.log.get_log_filename</p>
 
             <details class="quote">
               <summary>Source code in <code>romitask/cli/romi_run_task.py</code></summary>
-              <div class="codehilite"><table class="codehilitetable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">430</span>
-<span class="normal">431</span>
+              <div class="codehilite"><table class="codehilitetable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">431</span>
 <span class="normal">432</span>
 <span class="normal">433</span>
 <span class="normal">434</span>
@@ -2497,7 +2498,8 @@ romitask.log.get_log_filename</p>
 <span class="normal">548</span>
 <span class="normal">549</span>
 <span class="normal">550</span>
-<span class="normal">551</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">run_task</span><span class="p">(</span><span class="n">dataset_path</span><span class="p">,</span> <span class="n">task</span><span class="p">,</span> <span class="n">config</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+<span class="normal">551</span>
+<span class="normal">552</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">run_task</span><span class="p">(</span><span class="n">dataset_path</span><span class="p">,</span> <span class="n">task</span><span class="p">,</span> <span class="n">config</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Load the configuration to use and call the luigi command to run the selected task.</span>
 
 <span class="sd">    Parameters</span>
@@ -2597,11 +2599,11 @@ romitask.log.get_log_filename</p>
         <span class="n">env</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;LUIGI_CONFIG_PARSER&quot;</span><span class="p">:</span> <span class="s2">&quot;toml&quot;</span><span class="p">,</span> <span class="s2">&quot;LUIGI_CONFIG_PATH&quot;</span><span class="p">:</span> <span class="n">file_path</span><span class="p">}</span>
         <span class="n">env</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="s1">&#39;PYOPENCL_CTX&#39;</span><span class="p">:</span> <span class="s1">&#39;0&#39;</span><span class="p">})</span>  <span class="c1"># default choice</span>
         <span class="c1"># - Define the luigi command to run:</span>
-        <span class="c1"># &quot;--DatabaseConfig-scan args.dataset_path&quot; set the value of `scan` for the `DatabaseConfig` Config class</span>
+        <span class="c1"># &quot;--ScanConfiguration-scan args.dataset_path&quot; set the value of `scan` for the `ScanConfiguration` Config class</span>
         <span class="c1"># https://luigi.readthedocs.io/en/stable/parameters.html#setting-parameter-value-for-other-classes</span>
         <span class="n">cmd</span> <span class="o">=</span> <span class="p">[</span><span class="n">luigicmd</span><span class="p">,</span> <span class="s2">&quot;--logging-conf-file&quot;</span><span class="p">,</span> <span class="n">logging_file_path</span><span class="p">,</span>
                <span class="s2">&quot;--module&quot;</span><span class="p">,</span> <span class="n">module</span><span class="p">,</span> <span class="n">task</span><span class="p">,</span>
-               <span class="s2">&quot;--DatabaseConfig-scan&quot;</span><span class="p">,</span> <span class="n">dataset_path</span><span class="p">]</span>
+               <span class="s2">&quot;--ScanConfiguration-scan&quot;</span><span class="p">,</span> <span class="n">dataset_path</span><span class="p">]</span>
         <span class="k">if</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;local_scheduler&#39;</span><span class="p">,</span> <span class="kc">False</span><span class="p">):</span>
             <span class="n">cmd</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;--local-scheduler&quot;</span><span class="p">)</span>
 
@@ -2716,8 +2718,7 @@ romitask.log.get_log_filename</p>
 
             <details class="quote">
               <summary>Source code in <code>romitask/cli/romi_run_task.py</code></summary>
-              <div class="codehilite"><table class="codehilitetable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">401</span>
-<span class="normal">402</span>
+              <div class="codehilite"><table class="codehilitetable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">402</span>
 <span class="normal">403</span>
 <span class="normal">404</span>
 <span class="normal">405</span>
@@ -2742,7 +2743,8 @@ romitask.log.get_log_filename</p>
 <span class="normal">424</span>
 <span class="normal">425</span>
 <span class="normal">426</span>
-<span class="normal">427</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">update_config</span><span class="p">(</span><span class="n">config</span><span class="p">,</span> <span class="n">update</span><span class="p">):</span>
+<span class="normal">427</span>
+<span class="normal">428</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">update_config</span><span class="p">(</span><span class="n">config</span><span class="p">,</span> <span class="n">update</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Update a configuration dictionary.</span>
 
 <span class="sd">    Parameters</span>
