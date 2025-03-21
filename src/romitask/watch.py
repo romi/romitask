@@ -54,7 +54,7 @@ Usage Examples
 
 import time
 
-from plantdb.db import DBBusyError
+from plantdb.commons.db import DBBusyError
 from watchdog.events import DirCreatedEvent
 from watchdog.events import FileSystemEventHandler
 from watchdog.observers import Observer
@@ -71,7 +71,7 @@ class FSDBWatcher():
 
     Parameters
     ----------
-    db : plantdb.fsdb.FSDB
+    db : plantdb.commons.fsdb.FSDB
         The target database instance to monitor for changes.
     tasks : list of RomiTask
         List of tasks to execute when changes are detected in the database.
@@ -91,7 +91,7 @@ class FSDBWatcher():
 
     Examples
     --------
-    >>> from plantdb.fsdb import FSDB
+    >>> from plantdb.commons.fsdb import FSDB
     >>> db = FSDB("path/to/database")
     >>> tasks = [MyTask1(), MyTask2()]
     >>> config = {"param1": "value1", "param2": "value2"}
@@ -112,7 +112,7 @@ class FSDBWatcher():
 
         Parameters
         ----------
-        db : plantdb.fsdb.FSDB
+        db : plantdb.commons.fsdb.FSDB
             The target database.
         tasks : list of RomiTask
             The list of tasks to do on change.
@@ -185,7 +185,7 @@ class FSDBEventHandler(FileSystemEventHandler):
 
     Examples
     --------
-    >>> from plantdb.fsdb import FSDB
+    >>> from plantdb.commons.fsdb import FSDB
     >>> from romitask.task import DummyTask
     >>>
     >>> # Create database and handler
@@ -213,7 +213,7 @@ class FSDBEventHandler(FileSystemEventHandler):
 
         Parameters
         ----------
-        db : plantdb.fsdb.FSDB
+        db : plantdb.commons.fsdb.FSDB
             The target plant database to monitor and process.
         tasks : list of RomiTask
             List of processing tasks to execute when changes are detected.

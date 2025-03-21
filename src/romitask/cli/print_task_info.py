@@ -108,7 +108,7 @@ def curve_skeleton_info(task, task_id, db_path):
 
 def pointcloud_info(task, task_id, db_path):
     """Print info about PointCloud task output."""
-    from plantdb.io import read_point_cloud
+    from plantdb.commons.io import read_point_cloud
     ply_f = os.path.join(db_path, task_id, f"{task}.ply")
     ply = read_point_cloud(ply_f)
     if ply.is_empty():
@@ -121,7 +121,7 @@ def pointcloud_info(task, task_id, db_path):
 
 def segmented_pointcloud_info(task, task_id, db_path):
     """Print info about SegmentedPointCloud task output."""
-    from plantdb.io import read_point_cloud
+    from plantdb.commons.io import read_point_cloud
     ply_f = os.path.join(db_path, task_id, f"{task}.ply")
     ply = read_point_cloud(ply_f)
     if ply.is_empty():
@@ -135,7 +135,7 @@ def segmented_pointcloud_info(task, task_id, db_path):
 
 def triangle_mesh_info(task, task_id, db_path):
     """Print info about TriangleMesh task output."""
-    from plantdb.io import read_triangle_mesh
+    from plantdb.commons.io import read_triangle_mesh
     ply_f = os.path.join(db_path, task_id, f"{task}.ply")
     ply = read_triangle_mesh(ply_f)
     if ply.is_empty():
@@ -168,7 +168,7 @@ def segmentation2d_info(task, task_id, db_path):
 
 def clustered_mesh_info(task, task_id, db_path):
     """Print info about ClusteredMesh task output."""
-    from plantdb.io import read_triangle_mesh
+    from plantdb.commons.io import read_triangle_mesh
     out_dir = os.path.join(db_path, task_id)
     files = os.listdir(out_dir)
     ply_files = [f for f in files if f.endswith('.ply')]

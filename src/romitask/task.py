@@ -76,10 +76,10 @@ from shutil import rmtree
 import luigi
 from tqdm import tqdm
 
-from plantdb.fsdb import FSDB
-from plantdb.fsdb import _is_fsdb
-from plantdb.io import read_json
-from plantdb.io import write_json
+from plantdb.commons.fsdb import FSDB
+from plantdb.commons.fsdb.validation import _is_fsdb
+from plantdb.commons.io import read_json
+from plantdb.commons.io import write_json
 from romitask.log import get_logger
 
 logger = get_logger(__name__)
@@ -101,12 +101,12 @@ class FSDBParameter(luigi.Parameter):
 
         Parameters
         ----------
-        value : plantdb.fsdb.FSDB
+        db_path : plantdb.commons.fsdb.FSDB
             The value to be parsed, either a string path or an FSDB object.
 
         Returns
         -------
-        plantdb.fsdb.FSDB
+        plantdb.commons.fsdb.FSDB
             An FSDB object if the input was a string path to a valid FSDB,
             otherwise the unmodified input value.
         """
@@ -133,7 +133,7 @@ class FSDBParameter(luigi.Parameter):
 
         Parameters
         ----------
-        value : plantdb.fsdb.FSDB
+        db : plantdb.commons.fsdb.FSDB
             The value to be serialized, preferably an FSDB object.
 
         Returns
@@ -148,28 +148,28 @@ class FSDBParameter(luigi.Parameter):
 
 
 class ScanParameter(luigi.Parameter):
-    """Register a ``luigi.Parameter`` object to access `plantdb.fsdb.Scan` class.
+    """Register a ``luigi.Parameter`` object to access `plantdb.commons.fsdb.Scan` class.
 
     Override the default implementation methods ``parse`` & ``serialize``.
 
     Notes
     -----
-    The ``parse`` method connect to the given path to a ``plantdb.fsdb.FSDB`` database.
+    The ``parse`` method connect to the given path to a ``plantdb.commons.fsdb.FSDB`` database.
     """
 
     def parse(self, scan_path):
-        """Convert the scan path to a ``plantdb.fsdb.Scan`` object.
+        """Convert the scan path to a ``plantdb.commons.fsdb.Scan`` object.
 
         Override the default implementation method for specialized parsing.
 
         Parameters
         ----------
         scan_path : str
-            The value to parse, here the path to an ``plantdb.fsdb.Scan`` dataset.
+            The value to parse, here the path to an ``plantdb.commons.fsdb.Scan`` dataset.
 
         Returns
         -------
-        plantdb.fsdb.Scan
+        plantdb.commons.fsdb.Scan
             The object corresponding to given path.
 
         Notes
@@ -180,7 +180,7 @@ class ScanParameter(luigi.Parameter):
 
         If the given scan dataset id does not exist, it is created.
         """
-        from plantdb import FSDB
+        from plantdb.commons.fsdb import FSDB
         global db
         path = scan_path.rstrip('/')
         path = path.split('/')
@@ -199,19 +199,19 @@ class ScanParameter(luigi.Parameter):
         return scan
 
     def serialize(self, scan):
-        """Converts ``plantdb.fsdb.Scan`` in its path.
+        """Converts ``plantdb.commons.fsdb.Scan`` in its path.
 
         Opposite of ``parse()``.
 
         Parameters
         ----------
-        scan : plantdb.fsdb.Scan
-            The value to serialize, here a ``plantdb.fsdb.Scan`` object.
+        scan : plantdb.commons.fsdb.Scan
+            The value to serialize, here a ``plantdb.commons.fsdb.Scan`` object.
 
         Returns
         -------
         str
-            The path to the corresponding ``plantdb.fsdb.Scan`` object.
+            The path to the corresponding ``plantdb.commons.fsdb.Scan`` object.
         """
         db_path = scan.db.basedir
         scan_id = scan.id
@@ -219,52 +219,52 @@ class ScanParameter(luigi.Parameter):
 
 
 class FSDBConfiguration(luigi.Config):
-    """Configuration for a ``plantdb.fsdb.FSBD`` database.
+    """Configuration for a ``plantdb.commons.fsdb.FSBD`` database.
 
     Attributes
     ----------
-    scan : plantdb.fsdb.FSBD
+    scan : plantdb.commons.fsdb.FSBD
         The database to use for configuration.
 
     Examples
     --------
     >>> from romitask.task import FSDBConfiguration
-    >>> from plantdb.fsdb import dummy_db
+    >>> from plantdb.commons.fsdb import dummy_db
     >>> # - First, let's create a dummy FSDB database to play with:
     >>> db = dummy_db()
     >>> db.connect()
     >>> db_cfg = FSDBConfiguration(db)
     >>> type(db_cfg.db)
-    plantdb.fsdb.FSDB
+    plantdb.commons.fsdb.FSDB
     """
     db = FSDBParameter()
 
 
 class ScanConfiguration(luigi.Config):
-    """Configuration for a ``plantdb.fsdb.Scan`` scan dataset.
+    """Configuration for a ``plantdb.commons.fsdb.Scan`` scan dataset.
 
     Attributes
     ----------
-    scan : plantdb.fsdb.Scan
+    scan : plantdb.commons.fsdb.Scan
         The scan dataset to use for configuration.
 
     Examples
     --------
     >>> from romitask.task import ScanConfiguration
-    >>> from plantdb.fsdb import dummy_db
+    >>> from plantdb.commons.fsdb import dummy_db
     >>> # - First, let's create a dummy FSDB database to play with:
     >>> db = dummy_db()
     >>> db.connect()
     >>> scan = db.create_scan("007")  # Add a `Scan` named `007` to the `FSDB` instance
     >>> scan_cfg = ScanConfiguration(scan)
     >>> type(scan_cfg.scan)
-    plantdb.fsdb.Scan
+    plantdb.commons.fsdb.Scan
     """
     scan = ScanParameter()
 
 
 class FilesetTarget(luigi.Target):
-    """Subclass ``luigi.Target`` for ``Fileset`` as defined in romitask ``plantdb.fsdb.FSDB`` API.
+    """Subclass ``luigi.Target`` for ``Fileset`` as defined in romitask ``plantdb.commons.fsdb.FSDB`` API.
 
     A ``FilesetTarget`` is used by ``luigi.Task`` (or subclass) methods:
      * ``requires`` to assert the existence of the ``Fileset`` prior to starting the task;
@@ -272,9 +272,9 @@ class FilesetTarget(luigi.Target):
 
     Attributes
     ----------
-    db : plantdb.fsdb.FSDB
+    db : plantdb.commons.fsdb.FSDB
         An ``FSDB`` database instance.
-    scan : plantdb.fsdb.Scan
+    scan : plantdb.commons.fsdb.Scan
         A ``Scan`` dataset instance within ``db``.
     fileset_id : str
         Name of the target ``Fileset`` instance within ``scan``.
@@ -286,8 +286,8 @@ class FilesetTarget(luigi.Target):
     Examples
     --------
     >>> from romitask.task import FilesetTarget
-    >>> from plantdb import FSDB
-    >>> from plantdb.fsdb import dummy_db
+    >>> from plantdb.commons.fsdb import FSDB
+    >>> from plantdb.commons.fsdb import dummy_db
     >>> # - First, let's create a dummy FSDB database to play with:
     >>> db = dummy_db()
     >>> db.connect()
@@ -308,7 +308,7 @@ class FilesetTarget(luigi.Target):
     >>> out_fst = FilesetTarget(scan, "output_fs")
     >>> out_fs = out_fst.create()
     >>> type(out_fs)
-    plantdb.fsdb.Fileset
+    plantdb.commons.fsdb.Fileset
     >>> print(out_fs.id)
     'output_fs'
 
@@ -319,7 +319,7 @@ class FilesetTarget(luigi.Target):
 
         Parameters
         ----------
-        scan : plantdb.fsdb.Scan
+        scan : plantdb.commons.fsdb.Scan
             The ``Scan`` dataset instance where to find/create the ``Fileset``.
         fileset_id : str
             Name of the target ``Fileset``.
@@ -336,7 +336,7 @@ class FilesetTarget(luigi.Target):
 
         Returns
         -------
-        plantdb.fsdb.Fileset
+        plantdb.commons.fsdb.Fileset
             The created `Fileset` instance.
         """
         return self.scan.create_fileset(self.fileset_id)
@@ -364,7 +364,7 @@ class FilesetTarget(luigi.Target):
 
         Returns
         -------
-        plantdb.fsdb.Fileset
+        plantdb.commons.fsdb.Fileset
             The fetched/created ``Fileset`` instance.
         """
         return self.scan.get_fileset(self.fileset_id, create=create)
@@ -482,7 +482,7 @@ class RomiTask(luigi.Task):
 
         Returns
         -------
-        plantdb.fsdb.File
+        plantdb.commons.fsdb.File
             The (created) output file.
         """
         if file_id is None:
@@ -809,14 +809,14 @@ class FileByFileTask(RomiTask):
 
         Parameters
         ----------
-        f: plantdb.fsdb.FSDB.File
+        f: plantdb.commons.fsdb.FSDB.File
             Input file.
-        outfs: plantdb.fsdb.FSDB.Fileset
+        outfs: plantdb.commons.fsdb.FSDB.Fileset
             Output fileset.
 
         Returns
         -------
-        plantdb.fsdb.FSDB.File
+        plantdb.commons.fsdb.FSDB.File
             Tis file must be created in `outfs`.
         """
         raise NotImplementedError
