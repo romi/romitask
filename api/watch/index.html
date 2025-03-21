@@ -1018,7 +1018,7 @@ database tasks while handling database busy states through retries.</p>
       <tbody>
           <tr class="doc-section-item">
             <td>
-                  <code><span title="plantdb.db.DBBusyError">DBBusyError</span></code>
+                  <code><span title="plantdb.commons.db.DBBusyError">DBBusyError</span></code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -1040,7 +1040,7 @@ database tasks while handling database busy states through retries.</p>
 </details>
 
 <p><span class="doc-section-title">Examples:</span></p>
-    <div class="codehilite"><pre><span></span><code><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">plantdb.fsdb</span><span class="w"> </span><span class="kn">import</span> <span class="n">FSDB</span>
+    <div class="codehilite"><pre><span></span><code><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">plantdb.commons.fsdb</span><span class="w"> </span><span class="kn">import</span> <span class="n">FSDB</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">romitask.task</span><span class="w"> </span><span class="kn">import</span> <span class="n">DummyTask</span>
 <span class="gp">&gt;&gt;&gt;</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="c1"># Create database and handler</span>
@@ -1083,7 +1083,7 @@ FileSystemEventHandler : Base class for file system event handlers</p>
                 <code>db</code>
             </td>
             <td>
-                  <code><span title="plantdb.fsdb.FSDB">FSDB</span></code>
+                  <code><span title="plantdb.commons.fsdb.FSDB">FSDB</span></code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -1155,7 +1155,7 @@ FileSystemEventHandler : Base class for file system event handlers</p>
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
-<span class="sd">    db : plantdb.fsdb.FSDB</span>
+<span class="sd">    db : plantdb.commons.fsdb.FSDB</span>
 <span class="sd">        The target plant database to monitor and process.</span>
 <span class="sd">    tasks : list of RomiTask</span>
 <span class="sd">        List of processing tasks to execute when changes are detected.</span>
@@ -1277,7 +1277,7 @@ with a 1-second delay between attempts.</p>
       <tbody>
           <tr class="doc-section-item">
             <td>
-                  <code><span title="plantdb.db.DBBusyError">DBBusyError</span></code>
+                  <code><span title="plantdb.commons.db.DBBusyError">DBBusyError</span></code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -1451,7 +1451,7 @@ to monitor filesystem events.</p>
                 <code>db</code>
             </td>
             <td>
-                  <code><span title="plantdb.fsdb.FSDB">FSDB</span></code>
+                  <code><span title="plantdb.commons.fsdb.FSDB">FSDB</span></code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -1531,7 +1531,7 @@ watch subdirectories (recursive=False).</p>
 </details>
 
 <p><span class="doc-section-title">Examples:</span></p>
-    <div class="codehilite"><pre><span></span><code><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">plantdb.fsdb</span><span class="w"> </span><span class="kn">import</span> <span class="n">FSDB</span>
+    <div class="codehilite"><pre><span></span><code><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">plantdb.commons.fsdb</span><span class="w"> </span><span class="kn">import</span> <span class="n">FSDB</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">db</span> <span class="o">=</span> <span class="n">FSDB</span><span class="p">(</span><span class="s2">&quot;path/to/database&quot;</span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">tasks</span> <span class="o">=</span> <span class="p">[</span><span class="n">MyTask1</span><span class="p">(),</span> <span class="n">MyTask2</span><span class="p">()]</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">config</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;param1&quot;</span><span class="p">:</span> <span class="s2">&quot;value1&quot;</span><span class="p">,</span> <span class="s2">&quot;param2&quot;</span><span class="p">:</span> <span class="s2">&quot;value2&quot;</span><span class="p">}</span>
@@ -1567,7 +1567,7 @@ watchdog.observers.Observer : The underlying observer class</p>
                 <code>db</code>
             </td>
             <td>
-                  <code><span title="plantdb.fsdb.FSDB">FSDB</span></code>
+                  <code><span title="plantdb.commons.fsdb.FSDB">FSDB</span></code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -1640,7 +1640,7 @@ watchdog.observers.Observer : The underlying observer class</p>
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
-<span class="sd">    db : plantdb.fsdb.FSDB</span>
+<span class="sd">    db : plantdb.commons.fsdb.FSDB</span>
 <span class="sd">        The target database.</span>
 <span class="sd">    tasks : list of RomiTask</span>
 <span class="sd">        The list of tasks to do on change.</span>

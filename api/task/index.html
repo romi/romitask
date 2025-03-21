@@ -2774,7 +2774,7 @@ romitask.task.IMAGES_MD</p>
               Bases: <code><span title="luigi.Config">Config</span></code></p>
 
 
-        <p>Configuration for a <code>plantdb.fsdb.FSBD</code> database.</p>
+        <p>Configuration for a <code>plantdb.commons.fsdb.FSBD</code> database.</p>
 
 
 <p><span class="doc-section-title">Attributes:</span></p>
@@ -2790,7 +2790,7 @@ romitask.task.IMAGES_MD</p>
           <tr class="doc-section-item">
             <td><code><span title="romitask.task.FSDBConfiguration.scan">scan</span></code></td>
             <td>
-                  <code><span title="plantdb.fsdb.FSBD">FSBD</span></code>
+                  <code><span title="plantdb.commons.fsdb.FSBD">FSBD</span></code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -2804,13 +2804,13 @@ romitask.task.IMAGES_MD</p>
 
 <p><span class="doc-section-title">Examples:</span></p>
     <div class="codehilite"><pre><span></span><code><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">romitask.task</span><span class="w"> </span><span class="kn">import</span> <span class="n">FSDBConfiguration</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">plantdb.fsdb</span><span class="w"> </span><span class="kn">import</span> <span class="n">dummy_db</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">plantdb.commons.fsdb</span><span class="w"> </span><span class="kn">import</span> <span class="n">dummy_db</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="c1"># - First, let&#39;s create a dummy FSDB database to play with:</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">db</span> <span class="o">=</span> <span class="n">dummy_db</span><span class="p">()</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">db</span><span class="o">.</span><span class="n">connect</span><span class="p">()</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">db_cfg</span> <span class="o">=</span> <span class="n">FSDBConfiguration</span><span class="p">(</span><span class="n">db</span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="nb">type</span><span class="p">(</span><span class="n">db_cfg</span><span class="o">.</span><span class="n">db</span><span class="p">)</span>
-<span class="go">plantdb.fsdb.FSDB</span>
+<span class="go">plantdb.commons.fsdb.FSDB</span>
 </code></pre></div>
 
 
@@ -2908,10 +2908,10 @@ Otherwise, return the value directly.</p>
       <tbody>
           <tr class="doc-section-item">
             <td>
-                <code>value</code>
+                <code>db_path</code>
             </td>
             <td>
-                  <code><span title="plantdb.fsdb.FSDB">FSDB</span></code>
+                  <code><span title="plantdb.commons.fsdb.FSDB">FSDB</span></code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -2937,7 +2937,7 @@ Otherwise, return the value directly.</p>
       <tbody>
           <tr class="doc-section-item">
             <td>
-                  <code><span title="plantdb.fsdb.FSDB">FSDB</span></code>
+                  <code><span title="plantdb.commons.fsdb.FSDB">FSDB</span></code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -2990,12 +2990,12 @@ otherwise the unmodified input value.</p>
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
-<span class="sd">    value : plantdb.fsdb.FSDB</span>
+<span class="sd">    db_path : plantdb.commons.fsdb.FSDB</span>
 <span class="sd">        The value to be parsed, either a string path or an FSDB object.</span>
 
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
-<span class="sd">    plantdb.fsdb.FSDB</span>
+<span class="sd">    plantdb.commons.fsdb.FSDB</span>
 <span class="sd">        An FSDB object if the input was a string path to a valid FSDB,</span>
 <span class="sd">        otherwise the unmodified input value.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
@@ -3048,10 +3048,10 @@ For other values, uses the default string conversion.</p>
       <tbody>
           <tr class="doc-section-item">
             <td>
-                <code>value</code>
+                <code>db</code>
             </td>
             <td>
-                  <code><span title="plantdb.fsdb.FSDB">FSDB</span></code>
+                  <code><span title="plantdb.commons.fsdb.FSDB">FSDB</span></code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -3118,7 +3118,7 @@ For other values, uses the default string conversion.</p>
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
-<span class="sd">    value : plantdb.fsdb.FSDB</span>
+<span class="sd">    db : plantdb.commons.fsdb.FSDB</span>
 <span class="sd">        The value to be serialized, preferably an FSDB object.</span>
 
 <span class="sd">    Returns</span>
@@ -3339,7 +3339,7 @@ By default, no filtering is performed, all inputs are used.</p>
       <tbody>
           <tr class="doc-section-item">
             <td>
-                  <code><span title="plantdb.fsdb.FSDB.File">File</span></code>
+                  <code><span title="plantdb.commons.fsdb.FSDB.File">File</span></code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -3373,14 +3373,14 @@ By default, no filtering is performed, all inputs are used.</p>
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
-<span class="sd">    f: plantdb.fsdb.FSDB.File</span>
+<span class="sd">    f: plantdb.commons.fsdb.FSDB.File</span>
 <span class="sd">        Input file.</span>
-<span class="sd">    outfs: plantdb.fsdb.FSDB.Fileset</span>
+<span class="sd">    outfs: plantdb.commons.fsdb.FSDB.Fileset</span>
 <span class="sd">        Output fileset.</span>
 
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
-<span class="sd">    plantdb.fsdb.FSDB.File</span>
+<span class="sd">    plantdb.commons.fsdb.FSDB.File</span>
 <span class="sd">        Tis file must be created in `outfs`.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">raise</span> <span class="ne">NotImplementedError</span>
@@ -3966,7 +3966,7 @@ By default, no filtering is performed, all inputs are used.</p>
               Bases: <code><span title="luigi.Target">Target</span></code></p>
 
 
-        <p>Subclass <code>luigi.Target</code> for <code>Fileset</code> as defined in romitask <code>plantdb.fsdb.FSDB</code> API.</p>
+        <p>Subclass <code>luigi.Target</code> for <code>Fileset</code> as defined in romitask <code>plantdb.commons.fsdb.FSDB</code> API.</p>
 <p>A <code>FilesetTarget</code> is used by <code>luigi.Task</code> (or subclass) methods:
  * <code>requires</code> to assert the existence of the <code>Fileset</code> prior to starting the task;
  * <code>output</code> to create a <code>Fileset</code> after running a task.</p>
@@ -3985,7 +3985,7 @@ By default, no filtering is performed, all inputs are used.</p>
           <tr class="doc-section-item">
             <td><code><span title="romitask.task.FilesetTarget.db">db</span></code></td>
             <td>
-                  <code><span title="plantdb.fsdb.FSDB">FSDB</span></code>
+                  <code><span title="plantdb.commons.fsdb.FSDB">FSDB</span></code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -3996,7 +3996,7 @@ By default, no filtering is performed, all inputs are used.</p>
           <tr class="doc-section-item">
             <td><code><span title="romitask.task.FilesetTarget.scan">scan</span></code></td>
             <td>
-                  <code><span title="plantdb.fsdb.Scan">Scan</span></code>
+                  <code><span title="plantdb.commons.fsdb.Scan">Scan</span></code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -4026,8 +4026,8 @@ By default, no filtering is performed, all inputs are used.</p>
 
 <p><span class="doc-section-title">Examples:</span></p>
     <div class="codehilite"><pre><span></span><code><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">romitask.task</span><span class="w"> </span><span class="kn">import</span> <span class="n">FilesetTarget</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">plantdb</span><span class="w"> </span><span class="kn">import</span> <span class="n">FSDB</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">plantdb.fsdb</span><span class="w"> </span><span class="kn">import</span> <span class="n">dummy_db</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">plantdb.commons.fsdb</span><span class="w"> </span><span class="kn">import</span> <span class="n">FSDB</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">plantdb.commons.fsdb</span><span class="w"> </span><span class="kn">import</span> <span class="n">dummy_db</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="c1"># - First, let&#39;s create a dummy FSDB database to play with:</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">db</span> <span class="o">=</span> <span class="n">dummy_db</span><span class="p">()</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">db</span><span class="o">.</span><span class="n">connect</span><span class="p">()</span>
@@ -4048,7 +4048,7 @@ By default, no filtering is performed, all inputs are used.</p>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">out_fst</span> <span class="o">=</span> <span class="n">FilesetTarget</span><span class="p">(</span><span class="n">scan</span><span class="p">,</span> <span class="s2">&quot;output_fs&quot;</span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">out_fs</span> <span class="o">=</span> <span class="n">out_fst</span><span class="o">.</span><span class="n">create</span><span class="p">()</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="nb">type</span><span class="p">(</span><span class="n">out_fs</span><span class="p">)</span>
-<span class="go">plantdb.fsdb.Fileset</span>
+<span class="go">plantdb.commons.fsdb.Fileset</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">out_fs</span><span class="o">.</span><span class="n">id</span><span class="p">)</span>
 <span class="go">&#39;output_fs&#39;</span>
 </code></pre></div>
@@ -4072,7 +4072,7 @@ By default, no filtering is performed, all inputs are used.</p>
                 <code>scan</code>
             </td>
             <td>
-                  <code><span title="plantdb.fsdb.Scan">Scan</span></code>
+                  <code><span title="plantdb.commons.fsdb.Scan">Scan</span></code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -4128,7 +4128,7 @@ By default, no filtering is performed, all inputs are used.</p>
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
-<span class="sd">    scan : plantdb.fsdb.Scan</span>
+<span class="sd">    scan : plantdb.commons.fsdb.Scan</span>
 <span class="sd">        The ``Scan`` dataset instance where to find/create the ``Fileset``.</span>
 <span class="sd">    fileset_id : str</span>
 <span class="sd">        Name of the target ``Fileset``.</span>
@@ -4178,7 +4178,7 @@ By default, no filtering is performed, all inputs are used.</p>
       <tbody>
           <tr class="doc-section-item">
             <td>
-                  <code><span title="plantdb.fsdb.Fileset">Fileset</span></code>
+                  <code><span title="plantdb.commons.fsdb.Fileset">Fileset</span></code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -4209,7 +4209,7 @@ By default, no filtering is performed, all inputs are used.</p>
 
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
-<span class="sd">    plantdb.fsdb.Fileset</span>
+<span class="sd">    plantdb.commons.fsdb.Fileset</span>
 <span class="sd">        The created `Fileset` instance.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">scan</span><span class="o">.</span><span class="n">create_fileset</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">fileset_id</span><span class="p">)</span>
@@ -4344,7 +4344,7 @@ By default, no filtering is performed, all inputs are used.</p>
       <tbody>
           <tr class="doc-section-item">
             <td>
-                  <code><span title="plantdb.fsdb.Fileset">Fileset</span></code>
+                  <code><span title="plantdb.commons.fsdb.Fileset">Fileset</span></code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -4381,7 +4381,7 @@ By default, no filtering is performed, all inputs are used.</p>
 
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
-<span class="sd">    plantdb.fsdb.Fileset</span>
+<span class="sd">    plantdb.commons.fsdb.Fileset</span>
 <span class="sd">        The fetched/created ``Fileset`` instance.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">scan</span><span class="o">.</span><span class="n">get_fileset</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">fileset_id</span><span class="p">,</span> <span class="n">create</span><span class="o">=</span><span class="n">create</span><span class="p">)</span>
@@ -5344,7 +5344,7 @@ If unspecified (default), the current active scan will be used.</p>
       <tbody>
           <tr class="doc-section-item">
             <td>
-                  <code><span title="plantdb.fsdb.File">File</span></code>
+                  <code><span title="plantdb.commons.fsdb.File">File</span></code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -5393,7 +5393,7 @@ If unspecified (default), the current active scan will be used.</p>
 
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
-<span class="sd">    plantdb.fsdb.File</span>
+<span class="sd">    plantdb.commons.fsdb.File</span>
 <span class="sd">        The (created) output file.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">if</span> <span class="n">file_id</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
@@ -5498,7 +5498,7 @@ If unspecified (default), the current active scan will be used.</p>
               Bases: <code><span title="luigi.Config">Config</span></code></p>
 
 
-        <p>Configuration for a <code>plantdb.fsdb.Scan</code> scan dataset.</p>
+        <p>Configuration for a <code>plantdb.commons.fsdb.Scan</code> scan dataset.</p>
 
 
 <p><span class="doc-section-title">Attributes:</span></p>
@@ -5514,7 +5514,7 @@ If unspecified (default), the current active scan will be used.</p>
           <tr class="doc-section-item">
             <td><code><span title="romitask.task.ScanConfiguration.scan">scan</span></code></td>
             <td>
-                  <code><span title="plantdb.fsdb.Scan">Scan</span></code>
+                  <code><span title="plantdb.commons.fsdb.Scan">Scan</span></code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -5528,14 +5528,14 @@ If unspecified (default), the current active scan will be used.</p>
 
 <p><span class="doc-section-title">Examples:</span></p>
     <div class="codehilite"><pre><span></span><code><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">romitask.task</span><span class="w"> </span><span class="kn">import</span> <span class="n">ScanConfiguration</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">plantdb.fsdb</span><span class="w"> </span><span class="kn">import</span> <span class="n">dummy_db</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">plantdb.commons.fsdb</span><span class="w"> </span><span class="kn">import</span> <span class="n">dummy_db</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="c1"># - First, let&#39;s create a dummy FSDB database to play with:</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">db</span> <span class="o">=</span> <span class="n">dummy_db</span><span class="p">()</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">db</span><span class="o">.</span><span class="n">connect</span><span class="p">()</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">scan</span> <span class="o">=</span> <span class="n">db</span><span class="o">.</span><span class="n">create_scan</span><span class="p">(</span><span class="s2">&quot;007&quot;</span><span class="p">)</span>  <span class="c1"># Add a `Scan` named `007` to the `FSDB` instance</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">scan_cfg</span> <span class="o">=</span> <span class="n">ScanConfiguration</span><span class="p">(</span><span class="n">scan</span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="nb">type</span><span class="p">(</span><span class="n">scan_cfg</span><span class="o">.</span><span class="n">scan</span><span class="p">)</span>
-<span class="go">plantdb.fsdb.Scan</span>
+<span class="go">plantdb.commons.fsdb.Scan</span>
 </code></pre></div>
 
 
@@ -5581,13 +5581,13 @@ If unspecified (default), the current active scan will be used.</p>
               Bases: <code><span title="luigi.Parameter">Parameter</span></code></p>
 
 
-        <p>Register a <code>luigi.Parameter</code> object to access <code>plantdb.fsdb.Scan</code> class.</p>
+        <p>Register a <code>luigi.Parameter</code> object to access <code>plantdb.commons.fsdb.Scan</code> class.</p>
 <p>Override the default implementation methods <code>parse</code> &amp; <code>serialize</code>.</p>
 
 
 <details class="note" open>
   <summary>Notes</summary>
-  <p>The <code>parse</code> method connect to the given path to a <code>plantdb.fsdb.FSDB</code> database.</p>
+  <p>The <code>parse</code> method connect to the given path to a <code>plantdb.commons.fsdb.FSDB</code> database.</p>
 </details>
 
 
@@ -5619,7 +5619,7 @@ If unspecified (default), the current active scan will be used.</p>
 
     <div class="doc doc-contents ">
 
-        <p>Convert the scan path to a <code>plantdb.fsdb.Scan</code> object.</p>
+        <p>Convert the scan path to a <code>plantdb.commons.fsdb.Scan</code> object.</p>
 <p>Override the default implementation method for specialized parsing.</p>
 
 
@@ -5643,7 +5643,7 @@ If unspecified (default), the current active scan will be used.</p>
             </td>
             <td>
               <div class="doc-md-description">
-                <p>The value to parse, here the path to an <code>plantdb.fsdb.Scan</code> dataset.</p>
+                <p>The value to parse, here the path to an <code>plantdb.commons.fsdb.Scan</code> dataset.</p>
               </div>
             </td>
             <td>
@@ -5665,7 +5665,7 @@ If unspecified (default), the current active scan will be used.</p>
       <tbody>
           <tr class="doc-section-item">
             <td>
-                  <code><span title="plantdb.fsdb.Scan">Scan</span></code>
+                  <code><span title="plantdb.commons.fsdb.Scan">Scan</span></code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -5727,18 +5727,18 @@ If unspecified (default), the current active scan will be used.</p>
 <span class="normal">197</span>
 <span class="normal">198</span>
 <span class="normal">199</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">parse</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">scan_path</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Convert the scan path to a ``plantdb.fsdb.Scan`` object.</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Convert the scan path to a ``plantdb.commons.fsdb.Scan`` object.</span>
 
 <span class="sd">    Override the default implementation method for specialized parsing.</span>
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
 <span class="sd">    scan_path : str</span>
-<span class="sd">        The value to parse, here the path to an ``plantdb.fsdb.Scan`` dataset.</span>
+<span class="sd">        The value to parse, here the path to an ``plantdb.commons.fsdb.Scan`` dataset.</span>
 
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
-<span class="sd">    plantdb.fsdb.Scan</span>
+<span class="sd">    plantdb.commons.fsdb.Scan</span>
 <span class="sd">        The object corresponding to given path.</span>
 
 <span class="sd">    Notes</span>
@@ -5749,7 +5749,7 @@ If unspecified (default), the current active scan will be used.</p>
 
 <span class="sd">    If the given scan dataset id does not exist, it is created.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="kn">from</span><span class="w"> </span><span class="nn">plantdb</span><span class="w"> </span><span class="kn">import</span> <span class="n">FSDB</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">plantdb.commons.fsdb</span><span class="w"> </span><span class="kn">import</span> <span class="n">FSDB</span>
     <span class="k">global</span> <span class="n">db</span>
     <span class="n">path</span> <span class="o">=</span> <span class="n">scan_path</span><span class="o">.</span><span class="n">rstrip</span><span class="p">(</span><span class="s1">&#39;/&#39;</span><span class="p">)</span>
     <span class="n">path</span> <span class="o">=</span> <span class="n">path</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;/&#39;</span><span class="p">)</span>
@@ -5783,7 +5783,7 @@ If unspecified (default), the current active scan will be used.</p>
 
     <div class="doc doc-contents ">
 
-        <p>Converts <code>plantdb.fsdb.Scan</code> in its path.</p>
+        <p>Converts <code>plantdb.commons.fsdb.Scan</code> in its path.</p>
 <p>Opposite of <code>parse()</code>.</p>
 
 
@@ -5803,11 +5803,11 @@ If unspecified (default), the current active scan will be used.</p>
                 <code>scan</code>
             </td>
             <td>
-                  <code><span title="plantdb.fsdb.Scan">Scan</span></code>
+                  <code><span title="plantdb.commons.fsdb.Scan">Scan</span></code>
             </td>
             <td>
               <div class="doc-md-description">
-                <p>The value to serialize, here a <code>plantdb.fsdb.Scan</code> object.</p>
+                <p>The value to serialize, here a <code>plantdb.commons.fsdb.Scan</code> object.</p>
               </div>
             </td>
             <td>
@@ -5833,7 +5833,7 @@ If unspecified (default), the current active scan will be used.</p>
             </td>
             <td>
               <div class="doc-md-description">
-                <p>The path to the corresponding <code>plantdb.fsdb.Scan</code> object.</p>
+                <p>The path to the corresponding <code>plantdb.commons.fsdb.Scan</code> object.</p>
               </div>
             </td>
           </tr>
@@ -5861,19 +5861,19 @@ If unspecified (default), the current active scan will be used.</p>
 <span class="normal">216</span>
 <span class="normal">217</span>
 <span class="normal">218</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">serialize</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">scan</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Converts ``plantdb.fsdb.Scan`` in its path.</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Converts ``plantdb.commons.fsdb.Scan`` in its path.</span>
 
 <span class="sd">    Opposite of ``parse()``.</span>
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
-<span class="sd">    scan : plantdb.fsdb.Scan</span>
-<span class="sd">        The value to serialize, here a ``plantdb.fsdb.Scan`` object.</span>
+<span class="sd">    scan : plantdb.commons.fsdb.Scan</span>
+<span class="sd">        The value to serialize, here a ``plantdb.commons.fsdb.Scan`` object.</span>
 
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
 <span class="sd">    str</span>
-<span class="sd">        The path to the corresponding ``plantdb.fsdb.Scan`` object.</span>
+<span class="sd">        The path to the corresponding ``plantdb.commons.fsdb.Scan`` object.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">db_path</span> <span class="o">=</span> <span class="n">scan</span><span class="o">.</span><span class="n">db</span><span class="o">.</span><span class="n">basedir</span>
     <span class="n">scan_id</span> <span class="o">=</span> <span class="n">scan</span><span class="o">.</span><span class="n">id</span>
