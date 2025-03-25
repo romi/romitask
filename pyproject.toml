@@ -25,9 +25,6 @@ authors = [
 maintainers = [
     { name = "Jonathan Legrand", email = "jonathan.legrand@ens-lyon.fr" }
 ]
-maintainers = [
-    { name = "Jonathan Legrand", email = "jonathan.legrand@ens-lyon.fr" }
-]
 keywords = [
     "Robotics for Microfarms",
     "ROMI",
