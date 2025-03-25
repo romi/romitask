@@ -371,7 +371,7 @@ class FilesetTarget(luigi.Target):
 
 
 class RomiTask(luigi.Task):
-    """ROMI implementation of a ``luigi.Task``, working with the ``plantdb.db.DB`` API.
+    """ROMI implementation of a ``luigi.Task``, working with the ``plantdb.commons.db.DB`` API.
 
     Attributes
     ----------
@@ -414,7 +414,7 @@ class RomiTask(luigi.Task):
 
         Returns
         -------
-        plantdb.db.File
+        plantdb.commons.db.File
             The input file.
         """
         return self.upstream_task().output_file(file_id, suffix=suffix, create=False)

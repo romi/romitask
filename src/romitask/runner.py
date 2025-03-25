@@ -70,7 +70,7 @@ class DBRunner(object):
 
     Attributes
     ----------
-    db : plantdb.db.DB
+    db : plantdb.commons.db.DB
         The database instance being used.
     tasks : list of RomiTask
         List of task classes to be executed.
@@ -97,7 +97,7 @@ class DBRunner(object):
 
         Parameters
         ----------
-        db : plantdb.db.DB
+        db : plantdb.commons.db.DB
             The target database instance to run tasks on.
         tasks : RomiTask or list of RomiTask
             Single task or list of tasks to execute. Each task must be a Luigi task class
@@ -117,7 +117,7 @@ class DBRunner(object):
 
         Parameters
         ----------
-        scan : plantdb.db.Scan
+        scan : plantdb.commons.db.Scan
             The scan instance to process.
 
         Notes
