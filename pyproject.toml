@@ -16,7 +16,7 @@ dependencies = [
 description = "The ROMI task runner, a luigi based task pipeline."
 readme = "README.md"
 requires-python = ">=3.8"
-license = { name = "LGPL-3.0-or-later", file = "LICENSE" }
+license = { 'text' = "LGPL-3.0-or-later" }  # to replace by "LGPL-3.0-or-later" only in next release, pending deprecation
 authors = [
     { name = "Peter Hanappe", email = "peter.hanappe@sony.com" },
     { name = "Timothée Wintz", email = "timothee@timwin.fr" },
