@@ -996,7 +996,7 @@ class Clean(RomiTask):
         metadata_path = Path.resolve(Path(scan.path()) / 'metadata')
         # Clean orphan metadata JSON files
         fs_metadata = glob.glob(str(metadata_path) + '/*.json')
-        fs_metadata = [f for f in fs_metadata if f.split('/')[-1] != 'images.json']
+        fs_metadata = [f for f in fs_metadata if f.split('/')[-1] not in ['images.json', 'metadata.json']]
         if len(fs_metadata) != 0:
             logger.info(f"Found {len(fs_metadata)} orphan metadata JSON files!")
         for f in fs_metadata:
