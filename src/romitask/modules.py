@@ -59,7 +59,7 @@ MODULES = {
     "Colmap": "plant3dvision.tasks.colmap",
     "Undistort": "plant3dvision.tasks.proc2d",
     "Masks": "plant3dvision.tasks.proc2d",
-    "Voxels": "plant3dvision.tasks.cl",
+    "Voxels": "plant3dvision.tasks.voxel_reconstruction",
     "PointCloud": "plant3dvision.tasks.proc3d",
     "TriangleMesh": "plant3dvision.tasks.proc3d",
     "CurveSkeleton": "plant3dvision.tasks.proc3d",
