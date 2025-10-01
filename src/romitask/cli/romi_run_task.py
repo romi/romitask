@@ -51,6 +51,7 @@ References
 """
 
 import argparse
+import copy
 import glob
 import os
 import shutil
@@ -140,12 +141,12 @@ def load_backup_scan_cfg(path):
     return bak_scan_config
 
 
-def load_backup_pipe_cfg(path, task, logger):
+def load_backup_pipe_cfg(dataset_path, task, logger):
     """Try to load ``PIPE_TOML`` configuration from path.
 
     Parameters
     ----------
-    path : str
+    dataset_path : pathlib.Path
         Where the ``PIPE_TOML`` configuration file should be.
     task : str
         Name of the task to perform.
@@ -157,13 +158,13 @@ def load_backup_pipe_cfg(path, task, logger):
     dict
         The configuration dictionary, if loaded from backup file.
     """
-    bak_pipe_path = os.path.join(path, PIPE_TOML)
+    bak_pipe_path = dataset_path / PIPE_TOML
     bak_pipe_config = {}
     if os.path.isfile(bak_pipe_path):
         # Raise an IOError when task 'Scan' is required in a folder with a backup of a processing pipeline
         # This probably means that you are trying to use a dataset that is NOT EMPTY!
         if "Scan" in task:
-            logger.critical(f"Task '{task}' was called with dataset '{path}'!")
+            logger.critical(f"Task '{task}' was called with dataset '{dataset_path}'!")
             logger.critical(f"It contains a processing pipeline configuration backup file!")
             sys.exit(f"Requested {task} task in non-empty folder, clean it up or change location!")
         bak_pipe_config = toml.load(bak_pipe_path)
@@ -467,6 +468,7 @@ def run_task(dataset_path, task, config, **kwargs):
     log_level = kwargs.get("log_level", "INFO")
     luigicmd = kwargs.get("luigicmd", LUIGI_CMD)
 
+    dataset_path = Path(dataset_path)
     # - Try to load PIPELINE backup TOML configuration:
     bak_pipe_config = load_backup_pipe_cfg(dataset_path, task, logger=logger)
 
@@ -488,7 +490,7 @@ def run_task(dataset_path, task, config, **kwargs):
             logger.info("Using a PREVIOUS pipeline configuration!")
 
     # - Look for "local" PIPELINE configuration file(s) to load:
-    local_path = Path(dataset_path)
+    local_path = copy.copy(dataset_path)
     local_toml = list(local_path.glob('*.toml'))
     local_toml = [f for f in local_toml if f.name != SCAN_TOML]  # exclude SCAN backup TOML config
     local_toml = [f for f in local_toml if f.name != PIPE_TOML]  # exclude PIPELINE backup TOML config
