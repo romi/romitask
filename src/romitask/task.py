@@ -193,8 +193,9 @@ class ScanParameter(luigi.Parameter):
             db = FSDB(db_path)
             db.connect()
         # Get the scan dataset object or create one & return it
-        scan = db.get_scan(scan_id)
-        if scan is None:
+        if db.scan_exists(scan_id):
+            scan = db.get_scan(scan_id)
+        else:
             scan = db.create_scan(scan_id)
         return scan
 
@@ -351,8 +352,7 @@ class FilesetTarget(luigi.Target):
         bool
             ``True`` if the target exists, else ``False``.
         """
-        fs = self.scan.get_fileset(self.fileset_id)
-        return fs is not None and len(fs.get_files()) > 0
+        return self.scan.fileset_exists(self.fileset_id)
 
     def get(self, create=True):
         """Returns the target ``Fileset`` instance, can be created.
