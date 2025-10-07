@@ -345,14 +345,12 @@ class FilesetTarget(luigi.Target):
     def exists(self):
         """Assert the target ``Fileset`` exists.
 
-        A target exists if the associated fileset exists and is not empty.
-
         Returns
         -------
         bool
-            ``True`` if the target exists, else ``False``.
+            ``True`` if the target fileset exists and is not empty, else ``False``.
         """
-        return self.scan.fileset_exists(self.fileset_id)
+        return self.scan.fileset_exists(self.fileset_id) and len(self.scan.get_fileset(self.fileset_id).get_files()) > 0
 
     def get(self, create=True):
         """Returns the target ``Fileset`` instance, can be created.
