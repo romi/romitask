@@ -71,6 +71,7 @@ MODULES = {
     # Quantification module:
     "TreeGraph": "plant3dvision.tasks.arabidopsis",
     "AnglesAndInternodes": "plant3dvision.tasks.arabidopsis",
+    "PlantMetrics": "plant3dvision.tasks.arabidopsis",
     # Evaluation module:
     "VoxelsGroundTruth": "plant3dvision.tasks.evaluation",
     "VoxelsEvaluation": "plant3dvision.tasks.evaluation",
