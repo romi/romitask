@@ -352,20 +352,15 @@ class FilesetTarget(luigi.Target):
         """
         return self.scan.fileset_exists(self.fileset_id) and len(self.scan.get_fileset(self.fileset_id).get_files()) > 0
 
-    def get(self, create=True):
-        """Returns the target ``Fileset`` instance, can be created.
-
-        Parameters
-        ----------
-        create : bool, optional
-            If ``True`` (default), create the fileset if it does not exist in the database.
+    def get(self):
+        """Returns the target ``Fileset`` instance.
 
         Returns
         -------
         plantdb.commons.fsdb.Fileset
-            The fetched/created ``Fileset`` instance.
+            The fetched ``Fileset`` instance.
         """
-        return self.scan.get_fileset(self.fileset_id, create=create)
+        return self.scan.get_fileset(self.fileset_id)
 
 
 class RomiTask(luigi.Task):
@@ -443,7 +438,10 @@ class RomiTask(luigi.Task):
         else:
             fs_target = FilesetTarget(db.get_scan(self.scan_id), fileset_id)
 
-        fs = fs_target.get()  # get the fileset
+        try:
+            fs = fs_target.create()  # create the fileset
+        except ValueError:
+            fs = fs_target.get()  # get the fileset
         # Export all the task parameters as a dictionary:
         params = dict(self.to_str_params(only_significant=False, only_public=False))
 
@@ -487,7 +485,12 @@ class RomiTask(luigi.Task):
             file_id = self.get_task_name()
         if suffix is not None:
             file_id += suffix
-        return self.output().get().get_file(file_id, create)
+
+        try:
+            f = self.output().get().create_file(file_id)
+        except IOError:
+            f = self.output().get().get_file(file_id)
+        return f
 
     def get_task_name(self):
         """Helper method to get the name of the current task.
