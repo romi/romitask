@@ -2,38 +2,38 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
     <url>
          <loc>https://docs.romi-project.eu/</loc>
-         <lastmod>2025-11-13</lastmod>
+         <lastmod>2025-12-15</lastmod>
     </url>
     <url>
          <loc>https://docs.romi-project.eu/api/modules/</loc>
-         <lastmod>2025-11-13</lastmod>
+         <lastmod>2025-12-15</lastmod>
     </url>
     <url>
          <loc>https://docs.romi-project.eu/api/runner/</loc>
-         <lastmod>2025-11-13</lastmod>
+         <lastmod>2025-12-15</lastmod>
     </url>
     <url>
          <loc>https://docs.romi-project.eu/api/task/</loc>
-         <lastmod>2025-11-13</lastmod>
+         <lastmod>2025-12-15</lastmod>
     </url>
     <url>
          <loc>https://docs.romi-project.eu/api/watch/</loc>
-         <lastmod>2025-11-13</lastmod>
+         <lastmod>2025-12-15</lastmod>
     </url>
     <url>
          <loc>https://docs.romi-project.eu/cli/print_task_info/</loc>
-         <lastmod>2025-11-13</lastmod>
+         <lastmod>2025-12-15</lastmod>
     </url>
     <url>
          <loc>https://docs.romi-project.eu/cli/romi_run_task/</loc>
-         <lastmod>2025-11-13</lastmod>
+         <lastmod>2025-12-15</lastmod>
     </url>
     <url>
          <loc>https://docs.romi-project.eu/examples/print_task_info/</loc>
-         <lastmod>2025-11-13</lastmod>
+         <lastmod>2025-12-15</lastmod>
     </url>
     <url>
          <loc>https://docs.romi-project.eu/examples/romi_run_task/</loc>
-         <lastmod>2025-11-13</lastmod>
+         <lastmod>2025-12-15</lastmod>
     </url>
 </urlset>
