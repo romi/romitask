@@ -180,7 +180,7 @@ class ScanParameter(luigi.Parameter):
 
         If the given scan dataset id does not exist, it is created.
         """
-        from plantdb.commons.fsdb import FSDB
+        from plantdb.commons.fsdb.core import FSDB
         global db
         path = scan_path.rstrip('/')
         path = path.split('/')
@@ -192,6 +192,13 @@ class ScanParameter(luigi.Parameter):
         if db is None:  # TODO: cannot change DB during run...
             db = FSDB(db_path)
             db.connect()
+            # Attempt login if credentials are provided in environment variables
+            db_user = os.environ.get('ROMI_DB_USER')
+            db_pass = os.environ.get('ROMI_DB_PASSWORD')
+            if db_user and db_pass:
+                logger.info(f"Logging in to FSDB as user '{db_user}'...")
+                db.login(db_user, db_pass)
+
         # Get the scan dataset object or create one & return it
         if db.scan_exists(scan_id):
             scan = db.get_scan(scan_id)
