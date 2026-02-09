@@ -74,6 +74,7 @@ from pathlib import Path
 from shutil import rmtree
 
 import luigi
+from plantdb.commons.fsdb.exceptions import FilesetExistsError
 from tqdm import tqdm
 
 from plantdb.commons.fsdb.core import FSDB
@@ -447,7 +448,7 @@ class RomiTask(luigi.Task):
 
         try:
             fs = fs_target.create()  # create the fileset
-        except ValueError:
+        except FilesetExistsError:
             fs = fs_target.get()  # get the fileset
         # Export all the task parameters as a dictionary:
         params = dict(self.to_str_params(only_significant=False, only_public=False))
