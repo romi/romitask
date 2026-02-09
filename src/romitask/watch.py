@@ -39,7 +39,7 @@ Key Features
 Usage Examples
 --------------
 >>> from romitask.watch import FSDBWatch
->>> from plantdb.commons.fsdb import FSDB
+>>> from plantdb.commons.fsdb.core import FSDB
 >>> from my_tasks import ProcessingTask
 
 >>> # Initialize database and watch
@@ -91,7 +91,7 @@ class FSDBWatcher():
 
     Examples
     --------
-    >>> from plantdb.commons.fsdb import FSDB
+    >>> from plantdb.commons.fsdb.core import FSDB
     >>> db = FSDB("path/to/database")
     >>> tasks = [MyTask1(), MyTask2()]
     >>> config = {"param1": "value1", "param2": "value2"}
@@ -185,7 +185,7 @@ class FSDBEventHandler(FileSystemEventHandler):
 
     Examples
     --------
-    >>> from plantdb.commons.fsdb import FSDB
+    >>> from plantdb.commons.fsdb.core import FSDB
     >>> from romitask.task import DummyTask
     >>>
     >>> # Create database and handler

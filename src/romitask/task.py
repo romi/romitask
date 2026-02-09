@@ -76,7 +76,7 @@ from shutil import rmtree
 import luigi
 from tqdm import tqdm
 
-from plantdb.commons.fsdb import FSDB
+from plantdb.commons.fsdb.core import FSDB
 from plantdb.commons.fsdb.validation import _is_fsdb
 from plantdb.commons.io import read_json
 from plantdb.commons.io import write_json
@@ -237,7 +237,7 @@ class FSDBConfiguration(luigi.Config):
     Examples
     --------
     >>> from romitask.task import FSDBConfiguration
-    >>> from plantdb.commons.fsdb import dummy_db
+    >>> from plantdb.commons.test_database import dummy_db
     >>> # - First, let's create a dummy FSDB database to play with:
     >>> db = dummy_db()
     >>> db.connect()
@@ -259,7 +259,7 @@ class ScanConfiguration(luigi.Config):
     Examples
     --------
     >>> from romitask.task import ScanConfiguration
-    >>> from plantdb.commons.fsdb import dummy_db
+    >>> from plantdb.commons.test_database import dummy_db
     >>> # - First, let's create a dummy FSDB database to play with:
     >>> db = dummy_db()
     >>> db.connect()
@@ -294,8 +294,8 @@ class FilesetTarget(luigi.Target):
     Examples
     --------
     >>> from romitask.task import FilesetTarget
-    >>> from plantdb.commons.fsdb import FSDB
-    >>> from plantdb.commons.fsdb import dummy_db
+    >>> from plantdb.commons.fsdb.core import FSDB
+    >>> from plantdb.commons.test_database import dummy_db
     >>> # - First, let's create a dummy FSDB database to play with:
     >>> db = dummy_db()
     >>> db.connect()
