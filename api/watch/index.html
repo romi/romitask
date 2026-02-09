@@ -1064,7 +1064,7 @@ This module enables real-time processing of plant data by watching file system e
 <blockquote>
 <blockquote>
 <p>from romitask.watch import FSDBWatch
-from plantdb.commons.fsdb import FSDB
+from plantdb.commons.fsdb.core import FSDB
 from my_tasks import ProcessingTask</p>
 <h2 id="romitask.watch--initialize-database-and-watch">Initialize database and watch<a class="headerlink" href="#romitask.watch--initialize-database-and-watch" title="Permanent link">Link</a></h2>
 <p>db = FSDB('/path/to/database')
@@ -1185,7 +1185,7 @@ database tasks while handling database busy states through retries.</p>
 </details>
 
 <p><span class="doc-section-title">Examples:</span></p>
-    <div class="codehilite"><pre><span></span><code><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">plantdb.commons.fsdb</span><span class="w"> </span><span class="kn">import</span> <span class="n">FSDB</span>
+    <div class="codehilite"><pre><span></span><code><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">plantdb.commons.fsdb.core</span><span class="w"> </span><span class="kn">import</span> <span class="n">FSDB</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">romitask.task</span><span class="w"> </span><span class="kn">import</span> <span class="n">DummyTask</span>
 <span class="gp">&gt;&gt;&gt;</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="c1"># Create database and handler</span>
@@ -1678,7 +1678,7 @@ watch subdirectories (recursive=False).</p>
 </details>
 
 <p><span class="doc-section-title">Examples:</span></p>
-    <div class="codehilite"><pre><span></span><code><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">plantdb.commons.fsdb</span><span class="w"> </span><span class="kn">import</span> <span class="n">FSDB</span>
+    <div class="codehilite"><pre><span></span><code><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">plantdb.commons.fsdb.core</span><span class="w"> </span><span class="kn">import</span> <span class="n">FSDB</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">db</span> <span class="o">=</span> <span class="n">FSDB</span><span class="p">(</span><span class="s2">&quot;path/to/database&quot;</span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">tasks</span> <span class="o">=</span> <span class="p">[</span><span class="n">MyTask1</span><span class="p">(),</span> <span class="n">MyTask2</span><span class="p">()]</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">config</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;param1&quot;</span><span class="p">:</span> <span class="s2">&quot;value1&quot;</span><span class="p">,</span> <span class="s2">&quot;param2&quot;</span><span class="p">:</span> <span class="s2">&quot;value2&quot;</span><span class="p">}</span>

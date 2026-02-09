@@ -3147,7 +3147,7 @@ romitask.task.IMAGES_MD</p>
 
 <p><span class="doc-section-title">Examples:</span></p>
     <div class="codehilite"><pre><span></span><code><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">romitask.task</span><span class="w"> </span><span class="kn">import</span> <span class="n">FSDBConfiguration</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">plantdb.commons.fsdb</span><span class="w"> </span><span class="kn">import</span> <span class="n">dummy_db</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">plantdb.commons.test_database</span><span class="w"> </span><span class="kn">import</span> <span class="n">dummy_db</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="c1"># - First, let&#39;s create a dummy FSDB database to play with:</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">db</span> <span class="o">=</span> <span class="n">dummy_db</span><span class="p">()</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">db</span><span class="o">.</span><span class="n">connect</span><span class="p">()</span>
@@ -4379,8 +4379,8 @@ By default, no filtering is performed, all inputs are used.</p>
 
 <p><span class="doc-section-title">Examples:</span></p>
     <div class="codehilite"><pre><span></span><code><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">romitask.task</span><span class="w"> </span><span class="kn">import</span> <span class="n">FilesetTarget</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">plantdb.commons.fsdb</span><span class="w"> </span><span class="kn">import</span> <span class="n">FSDB</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">plantdb.commons.fsdb</span><span class="w"> </span><span class="kn">import</span> <span class="n">dummy_db</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">plantdb.commons.fsdb.core</span><span class="w"> </span><span class="kn">import</span> <span class="n">FSDB</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">plantdb.commons.test_database</span><span class="w"> </span><span class="kn">import</span> <span class="n">dummy_db</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="c1"># - First, let&#39;s create a dummy FSDB database to play with:</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">db</span> <span class="o">=</span> <span class="n">dummy_db</span><span class="p">()</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">db</span><span class="o">.</span><span class="n">connect</span><span class="p">()</span>
@@ -5859,7 +5859,7 @@ If unspecified (default), the current active scan will be used.</p>
 
 <p><span class="doc-section-title">Examples:</span></p>
     <div class="codehilite"><pre><span></span><code><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">romitask.task</span><span class="w"> </span><span class="kn">import</span> <span class="n">ScanConfiguration</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">plantdb.commons.fsdb</span><span class="w"> </span><span class="kn">import</span> <span class="n">dummy_db</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">plantdb.commons.test_database</span><span class="w"> </span><span class="kn">import</span> <span class="n">dummy_db</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="c1"># - First, let&#39;s create a dummy FSDB database to play with:</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">db</span> <span class="o">=</span> <span class="n">dummy_db</span><span class="p">()</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">db</span><span class="o">.</span><span class="n">connect</span><span class="p">()</span>
