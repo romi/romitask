@@ -119,7 +119,7 @@ class FSDBParameter(luigi.Parameter):
 
         if db_path.exists() and db_path.is_dir() and _is_fsdb(db_path):
             db = FSDB(db_path)
-            db.connect(unsafe=True)
+            db.connect()
             return db
         else:
             logger.error(f"Could not parse FSDB from string: {db_path}")
