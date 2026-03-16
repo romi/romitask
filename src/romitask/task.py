@@ -74,10 +74,10 @@ from pathlib import Path
 from shutil import rmtree
 
 import luigi
-from plantdb.commons.fsdb.exceptions import FilesetExistsError
 from tqdm import tqdm
 
 from plantdb.commons.fsdb.core import FSDB
+from plantdb.commons.fsdb.exceptions import FilesetExistsError
 from plantdb.commons.fsdb.validation import _is_fsdb
 from plantdb.commons.io import read_json
 from plantdb.commons.io import write_json
@@ -193,13 +193,7 @@ class ScanParameter(luigi.Parameter):
         if db is None:  # TODO: cannot change DB during run...
             db = FSDB(db_path)
             db.connect()
-            # Attempt login if credentials are provided in environment variables
-            db_user = os.environ.get('ROMI_DB_USER')
-            db_pass = os.environ.get('ROMI_DB_PASSWORD')
-            if db_user and db_pass:
-                logger.info(f"Logging in to FSDB as user '{db_user}'...")
-                db.login(db_user, db_pass)
-
+            db.login(username=os.getenv("ROMI_DB_USER"), password=os.getenv("ROMI_DB_PASSWORD"))
         # Get the scan dataset object or create one & return it
         if db.scan_exists(scan_id):
             scan = db.get_scan(scan_id)
@@ -238,7 +232,7 @@ class FSDBConfiguration(luigi.Config):
     Examples
     --------
     >>> from romitask.task import FSDBConfiguration
-    >>> from plantdb.commons.test_database import dummy_db
+    >>> from plantdb.commons.fsdb import dummy_db
     >>> # - First, let's create a dummy FSDB database to play with:
     >>> db = dummy_db()
     >>> db.connect()
@@ -260,7 +254,7 @@ class ScanConfiguration(luigi.Config):
     Examples
     --------
     >>> from romitask.task import ScanConfiguration
-    >>> from plantdb.commons.test_database import dummy_db
+    >>> from plantdb.commons.fsdb import dummy_db
     >>> # - First, let's create a dummy FSDB database to play with:
     >>> db = dummy_db()
     >>> db.connect()
@@ -295,8 +289,8 @@ class FilesetTarget(luigi.Target):
     Examples
     --------
     >>> from romitask.task import FilesetTarget
-    >>> from plantdb.commons.fsdb.core import FSDB
-    >>> from plantdb.commons.test_database import dummy_db
+    >>> from plantdb.commons.fsdb import FSDB
+    >>> from plantdb.commons.fsdb import dummy_db
     >>> # - First, let's create a dummy FSDB database to play with:
     >>> db = dummy_db()
     >>> db.connect()
