@@ -135,3 +135,24 @@ def parse_kbdi(kbdi, default='n'):
         return valid[default]
     else:
         return valid[kbdi]
+
+def ask_confirmation(prompt: str, default: str = "n") -> bool:
+    """Prompt the user for a yes/no answer.
+
+    Parameters
+    ----------
+    prompt: str
+        Message displayed to the user.
+    default: str
+        Default answer when the user just hits *Enter* (``"y"`` or ``"n"``).
+
+    Returns
+    -------
+    bool
+        ``True`` if the answer is affirmative, ``False`` otherwise.
+    """
+    valid = {"yes": True, "y": True, "ye": True, "no": False, "n": False}
+    answer = input(prompt).strip().lower()
+    if answer == "":
+        answer = default
+    return valid.get(answer, False)
