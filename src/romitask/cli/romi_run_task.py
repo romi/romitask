@@ -64,12 +64,11 @@ from logging import getLogger
 from pathlib import Path
 
 import toml
-
 from romitask import PIPE_TOML
 from romitask import SCAN_TOML
 from romitask.log import LOG_LEVELS
-from romitask.log import get_logger
 from romitask.log import get_log_filename
+from romitask.log import get_logger
 from romitask.log import get_logging_config
 from romitask.modules import DATA_CREATION_TASK
 from romitask.modules import MODULES
@@ -110,6 +109,12 @@ def parsing():
                         help="Level of message logging, defaults to 'INFO'.")
     parser.add_argument('--dry-run', dest='dry_run', action="store_true",
                         help="Use this to test the command-line by doing everything except calling the task(s).")
+
+    # DB Authentication
+    parser.add_argument('--db-user', dest='db_user', type=str, default=None,
+                        help="Username for FSDB login.")
+    parser.add_argument('--db-password', dest='db_password', type=str, default=None,
+                        help="Password for FSDB login.")
 
     # Luigi related arguments:
     luigi = parser.add_argument_group("luigi options")
@@ -331,9 +336,11 @@ def create_backup_cfg(path, cfgname, config):
     # The following parameters control Luigi scheduler behavior.
     # https://luigi.readthedocs.io/en/stable/configuration.html#scheduler
     config["scheduler"] = {
-        "retry_count": 1,  # Number of times a task can fail within `disable_window` before the scheduler will automatically disable it.
+        "retry_count": 1,
+        # Number of times a task can fail within `disable_window` before the scheduler will automatically disable it.
         "retry_delay": 1,  # Number of seconds to wait after a task failure to mark it pending again.
-        "disable_window": 3600,  # Number of seconds during which `retry_count` failures must occur in order for an automatic disable by the scheduler.
+        "disable_window": 3600,
+        # Number of seconds during which `retry_count` failures must occur in order for an automatic disable by the scheduler.
     }
 
     # The following return codes are the recommended exit codes for Luigi.
@@ -529,6 +536,12 @@ def run_task(dataset_path, task, config, **kwargs):
         # - Define environment variables to provide the logging TOML file path to `luigi`:
         env = {"LUIGI_CONFIG_PARSER": "toml", "LUIGI_CONFIG_PATH": file_path}
         env.update({'PYOPENCL_CTX': '0'})  # default choice
+
+        # Add database credentials to environment if provided
+        if kwargs.get('db_user') and kwargs.get('db_password'):
+            env['ROMI_DB_USER'] = kwargs['db_user']
+            env['ROMI_DB_PASSWORD'] = kwargs['db_password']
+
         # - Define the luigi command to run:
         # "--ScanConfiguration-scan args.dataset_path" set the value of `scan` for the `ScanConfiguration` Config class
         # https://luigi.readthedocs.io/en/stable/parameters.html#setting-parameter-value-for-other-classes
@@ -624,14 +637,16 @@ def main():
             try:
                 run_task(dataset_path, args.task, args.config,
                          log_level=args.log_level, luigicmd=args.luigicmd, module=args.module,
-                         local_scheduler=args.ls, dry_run=args.dry_run)
+                         local_scheduler=args.ls, dry_run=args.dry_run,
+                         db_user=args.db_user, db_password=args.db_password)
             except Exception as e:
                 print(e)
     else:
         ## For the folder:
         run_task(folders, args.task, args.config,
                  log_level=args.log_level, luigicmd=args.luigicmd, module=args.module,
-                 local_scheduler=args.ls, dry_run=args.dry_run)
+                 local_scheduler=args.ls, dry_run=args.dry_run,
+                 db_user=args.db_user, db_password=args.db_password)
 
 
 if __name__ == '__main__':

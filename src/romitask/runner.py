@@ -39,7 +39,7 @@ Key Features
 
 Usage Examples
 --------------
->>> from plantdb.commons.fsdb import FSDB
+>>> from plantdb.commons.fsdb.core import FSDB
 >>> from romitask.runner import DBRunner
 >>> from romitask.task import DummyTask
 >>> db = FSDB('path/to/database')
@@ -77,7 +77,7 @@ class DBRunner(object):
 
     Examples
     --------
-    >>> from plantdb.commons.fsdb import FSDB
+    >>> from plantdb.commons.fsdb.core import FSDB
     >>> from romitask.runner import DBRunner
     >>> from romitask.task import DummyTask
     >>> db = FSDB('path/to/database')
