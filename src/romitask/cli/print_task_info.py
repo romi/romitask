@@ -288,14 +288,14 @@ def main():
     md_path = os.path.join(args.db_path, 'metadata')
     json_list = [f for f in os.listdir(md_path) if f.startswith(args.task) and f.endswith('.json')]
     if json_list == []:
-        raise IOError("Could not find the JSON metadata file associated to task '{}' in dataset '{}'!".format(args.task,
+        raise IOError("Could not find the JSON metadata file associated with task '{}' in dataset '{}'!".format(args.task,
                                                                                                               args.db_path))
     elif len(json_list) == 1:
         md_json = json_list[0]
-        print("Found a JSON metadata file associated to task '{}' in dataset '{}'!".format(args.task, args.db_path))
+        print("Found a JSON metadata file associated with task '{}' in dataset '{}'!".format(args.task, args.db_path))
         md_json = os.path.join(md_path, md_json)
     else:
-        print("Found more than one JSON metadata file associated to task '{}' in dataset '{}':".format(args.task,
+        print("Found more than one JSON metadata file associated with task '{}' in dataset '{}':".format(args.task,
                                                                                                        args.db_path))
         [print(" - {}".format(json_f)) for json_f in json_list]
         md_json = max([os.path.join(md_path, json_f) for json_f in json_list], key=os.path.getctime)
