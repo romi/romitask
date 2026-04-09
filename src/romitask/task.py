@@ -234,7 +234,7 @@ class FSDBConfiguration(luigi.Config):
     Examples
     --------
     >>> from romitask.task import FSDBConfiguration
-    >>> from plantdb.commons.fsdb import dummy_db
+    >>> from plantdb.commons.test_database import dummy_db
     >>> # - First, let's create a dummy FSDB database to play with:
     >>> db = dummy_db()
     >>> db.connect()
@@ -256,7 +256,7 @@ class ScanConfiguration(luigi.Config):
     Examples
     --------
     >>> from romitask.task import ScanConfiguration
-    >>> from plantdb.commons.fsdb import dummy_db
+    >>> from plantdb.commons.test_database import dummy_db
     >>> # - First, let's create a dummy FSDB database to play with:
     >>> db = dummy_db()
     >>> db.connect()
@@ -292,7 +292,7 @@ class FilesetTarget(luigi.Target):
     --------
     >>> from romitask.task import FilesetTarget
     >>> from plantdb.commons.fsdb import FSDB
-    >>> from plantdb.commons.fsdb import dummy_db
+    >>> from plantdb.commons.test_database import dummy_db
     >>> # - First, let's create a dummy FSDB database to play with:
     >>> db = dummy_db()
     >>> db.connect()
