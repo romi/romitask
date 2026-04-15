@@ -2466,9 +2466,9 @@ romitask.task.IMAGES_MD</p>
 
             <details class="quote">
               <summary>Source code in <code>romitask/task.py</code></summary>
-              <div class="codehilite"><table class="codehilitetable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1018</span>
-<span class="normal">1019</span>
-<span class="normal">1020</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">complete</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+              <div class="codehilite"><table class="codehilitetable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1020</span>
+<span class="normal">1021</span>
+<span class="normal">1022</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">complete</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Indicate the task as complete.&quot;&quot;&quot;</span>
     <span class="k">return</span> <span class="kc">False</span>  <span class="c1"># there is no output</span>
 </code></pre></div></td></tr></table></div>
@@ -2493,9 +2493,9 @@ romitask.task.IMAGES_MD</p>
 
             <details class="quote">
               <summary>Source code in <code>romitask/task.py</code></summary>
-              <div class="codehilite"><table class="codehilitetable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1014</span>
-<span class="normal">1015</span>
-<span class="normal">1016</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">output</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+              <div class="codehilite"><table class="codehilitetable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1016</span>
+<span class="normal">1017</span>
+<span class="normal">1018</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">output</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Override inherited method to avoid ``FilesetTarget``.&quot;&quot;&quot;</span>
     <span class="k">return</span> <span class="kc">None</span>  <span class="c1"># we do not want the cleaning task to add a Fileset!</span>
 </code></pre></div></td></tr></table></div>
@@ -2520,9 +2520,9 @@ romitask.task.IMAGES_MD</p>
 
             <details class="quote">
               <summary>Source code in <code>romitask/task.py</code></summary>
-              <div class="codehilite"><table class="codehilitetable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1010</span>
-<span class="normal">1011</span>
-<span class="normal">1012</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">requires</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+              <div class="codehilite"><table class="codehilitetable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1012</span>
+<span class="normal">1013</span>
+<span class="normal">1014</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">requires</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;No requirements here.&quot;&quot;&quot;</span>
     <span class="k">return</span> <span class="p">[]</span>
 </code></pre></div></td></tr></table></div>
@@ -2547,9 +2547,7 @@ romitask.task.IMAGES_MD</p>
 
             <details class="quote">
               <summary>Source code in <code>romitask/task.py</code></summary>
-              <div class="codehilite"><table class="codehilitetable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1168</span>
-<span class="normal">1169</span>
-<span class="normal">1170</span>
+              <div class="codehilite"><table class="codehilitetable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1170</span>
 <span class="normal">1171</span>
 <span class="normal">1172</span>
 <span class="normal">1173</span>
@@ -2587,7 +2585,9 @@ romitask.task.IMAGES_MD</p>
 <span class="normal">1205</span>
 <span class="normal">1206</span>
 <span class="normal">1207</span>
-<span class="normal">1208</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">run</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="normal">1208</span>
+<span class="normal">1209</span>
+<span class="normal">1210</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">run</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Execute the cleaning workflow.&quot;&quot;&quot;</span>
     <span class="n">scan</span> <span class="o">=</span> <span class="n">ScanConfiguration</span><span class="p">()</span><span class="o">.</span><span class="n">scan</span>
     <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Cleaning task started for scan &#39;</span><span class="si">{</span><span class="n">scan</span><span class="o">.</span><span class="n">id</span><span class="si">}</span><span class="s2">&#39;...&quot;</span><span class="p">)</span>
@@ -2976,9 +2976,9 @@ romitask.task.IMAGES_MD</p>
 
             <details class="quote">
               <summary>Source code in <code>romitask/task.py</code></summary>
-              <div class="codehilite"><table class="codehilitetable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">963</span>
-<span class="normal">964</span>
-<span class="normal">965</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">requires</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+              <div class="codehilite"><table class="codehilitetable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">965</span>
+<span class="normal">966</span>
+<span class="normal">967</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">requires</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Require nothing.&quot;&quot;&quot;</span>
     <span class="k">return</span> <span class="p">[]</span>
 </code></pre></div></td></tr></table></div>
@@ -3003,12 +3003,12 @@ romitask.task.IMAGES_MD</p>
 
             <details class="quote">
               <summary>Source code in <code>romitask/task.py</code></summary>
-              <div class="codehilite"><table class="codehilitetable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">967</span>
-<span class="normal">968</span>
-<span class="normal">969</span>
+              <div class="codehilite"><table class="codehilitetable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">969</span>
 <span class="normal">970</span>
 <span class="normal">971</span>
-<span class="normal">972</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">run</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="normal">972</span>
+<span class="normal">973</span>
+<span class="normal">974</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">run</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Do nothing.&quot;&quot;&quot;</span>
     <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Dummy task started.&quot;</span><span class="p">)</span>
     <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Got a scan named &#39;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">scan_id</span><span class="si">}</span><span class="s2">&#39;...&quot;</span><span class="p">)</span>
@@ -4896,7 +4896,7 @@ By default, no filtering is performed, all inputs are used.</p>
             <td>
               <div class="doc-md-description">
                 <p>Number of worker threads to use for parallel processing. 
-Defaults to None, which uses the default ThreadPoolExecutor behavior.</p>
+Defaults to <code>-1</code>, which uses the default <code>ThreadPoolExecutor</code> behavior.</p>
               </div>
             </td>
           </tr>
@@ -4908,7 +4908,7 @@ Defaults to None, which uses the default ThreadPoolExecutor behavior.</p>
             <td>
               <div class="doc-md-description">
                 <p>Flag to enable/disable parallel processing. 
-Defaults to True.</p>
+Defaults to <code>True</code>.</p>
               </div>
             </td>
           </tr>
@@ -4919,7 +4919,7 @@ Defaults to True.</p>
 <details class="note" open>
   <summary>Notes</summary>
   <p>Input <code>File</code>s metadata are copied to the target/output <code>File</code>s metadata.
-This task runs the processing in parallel using ThreadPoolExecutor.</p>
+This task runs the processing in parallel using <code>ThreadPoolExecutor</code>.</p>
 </details>
 
 
@@ -5105,7 +5105,9 @@ This task runs the processing in parallel using ThreadPoolExecutor.</p>
 <span class="normal">920</span>
 <span class="normal">921</span>
 <span class="normal">922</span>
-<span class="normal">923</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">run</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">input_fileset</span><span class="p">,</span> <span class="n">output_fileset</span><span class="p">):</span>
+<span class="normal">923</span>
+<span class="normal">924</span>
+<span class="normal">925</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">run</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">input_fileset</span><span class="p">,</span> <span class="n">output_fileset</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Run the task on every `File`s from a `Fileset` that fulfill the ``query`` in parallel.&quot;&quot;&quot;</span>
     <span class="n">in_files</span> <span class="o">=</span> <span class="n">input_fileset</span><span class="o">.</span><span class="n">get_files</span><span class="p">(</span><span class="n">query</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">query</span><span class="p">)</span>
     <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Got </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">in_files</span><span class="p">)</span><span class="si">}</span><span class="s2"> input files:&quot;</span><span class="p">)</span>
@@ -5121,6 +5123,8 @@ This task runs the processing in parallel using ThreadPoolExecutor.</p>
             <span class="n">outfi</span><span class="o">.</span><span class="n">set_metadata</span><span class="p">({</span><span class="o">**</span><span class="n">m</span><span class="p">,</span> <span class="o">**</span><span class="n">outm</span><span class="p">})</span>
         <span class="k">return</span> <span class="n">outfi</span>
 
+    <span class="bp">self</span><span class="o">.</span><span class="n">n_workers</span> <span class="o">=</span> <span class="kc">None</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_workers</span> <span class="o">==</span> <span class="o">-</span><span class="mi">1</span> <span class="k">else</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_workers</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">parallel</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_workers</span> <span class="o">!=</span> <span class="mi">1</span>
     <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">parallel</span><span class="p">:</span>
         <span class="c1"># Sequential processing when parallel is disabled</span>
         <span class="k">for</span> <span class="n">fi</span> <span class="ow">in</span> <span class="n">tqdm</span><span class="p">(</span><span class="n">in_files</span><span class="p">,</span> <span class="n">unit</span><span class="o">=</span><span class="s2">&quot;file&quot;</span><span class="p">):</span>
@@ -5294,10 +5298,10 @@ if not, a new tracking dictionary is created.</p>
 
             <details class="quote">
               <summary>Source code in <code>romitask/task.py</code></summary>
-              <div class="codehilite"><table class="codehilitetable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1246</span>
-<span class="normal">1247</span>
-<span class="normal">1248</span>
-<span class="normal">1249</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">output</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+              <div class="codehilite"><table class="codehilitetable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1248</span>
+<span class="normal">1249</span>
+<span class="normal">1250</span>
+<span class="normal">1251</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">output</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Define the output target for the retry tracker file.&quot;&quot;&quot;</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">task_id</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span>  <span class="c1"># name the task using the class&#39;s name</span>
     <span class="k">return</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">output</span><span class="p">()</span>
@@ -5323,9 +5327,9 @@ if not, a new tracking dictionary is created.</p>
 
             <details class="quote">
               <summary>Source code in <code>romitask/task.py</code></summary>
-              <div class="codehilite"><table class="codehilitetable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1242</span>
-<span class="normal">1243</span>
-<span class="normal">1244</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">requires</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+              <div class="codehilite"><table class="codehilitetable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1244</span>
+<span class="normal">1245</span>
+<span class="normal">1246</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">requires</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Nothing required.&quot;&quot;&quot;</span>
     <span class="k">return</span> <span class="p">[]</span>
 </code></pre></div></td></tr></table></div>
@@ -5352,9 +5356,7 @@ Maps the task_id to its retry count in a dictionary stored as JSON.</p>
 
             <details class="quote">
               <summary>Source code in <code>romitask/task.py</code></summary>
-              <div class="codehilite"><table class="codehilitetable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1251</span>
-<span class="normal">1252</span>
-<span class="normal">1253</span>
+              <div class="codehilite"><table class="codehilitetable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1253</span>
 <span class="normal">1254</span>
 <span class="normal">1255</span>
 <span class="normal">1256</span>
@@ -5372,7 +5374,9 @@ Maps the task_id to its retry count in a dictionary stored as JSON.</p>
 <span class="normal">1268</span>
 <span class="normal">1269</span>
 <span class="normal">1270</span>
-<span class="normal">1271</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">run</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="normal">1271</span>
+<span class="normal">1272</span>
+<span class="normal">1273</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">run</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Execute the retry tracking operation.</span>
 
 <span class="sd">    Creates or updates a JSON file with information about task retries.</span>
@@ -6865,9 +6869,7 @@ Defaults to "VirtualPlant".</p>
 
             <details class="quote">
               <summary>Source code in <code>romitask/task.py</code></summary>
-              <div class="codehilite"><table class="codehilitetable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">926</span>
-<span class="normal">927</span>
-<span class="normal">928</span>
+              <div class="codehilite"><table class="codehilitetable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">928</span>
 <span class="normal">929</span>
 <span class="normal">930</span>
 <span class="normal">931</span>
@@ -6877,7 +6879,9 @@ Defaults to "VirtualPlant".</p>
 <span class="normal">935</span>
 <span class="normal">936</span>
 <span class="normal">937</span>
-<span class="normal">938</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@RomiTask</span><span class="o">.</span><span class="n">event_handler</span><span class="p">(</span><span class="n">luigi</span><span class="o">.</span><span class="n">Event</span><span class="o">.</span><span class="n">FAILURE</span><span class="p">)</span>
+<span class="normal">938</span>
+<span class="normal">939</span>
+<span class="normal">940</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@RomiTask</span><span class="o">.</span><span class="n">event_handler</span><span class="p">(</span><span class="n">luigi</span><span class="o">.</span><span class="n">Event</span><span class="o">.</span><span class="n">FAILURE</span><span class="p">)</span>
 <span class="k">def</span><span class="w"> </span><span class="nf">mourn_failure</span><span class="p">(</span><span class="n">task</span><span class="p">,</span> <span class="n">exception</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;In the case of failure of a task, remove the corresponding fileset from the database.</span>
 
