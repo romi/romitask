@@ -193,9 +193,11 @@ class ScanParameter(luigi.Parameter):
         scan_id = path[-1]
         # create & connect to `db` if not defined:
         if db is None:  # TODO: cannot change DB during run...
-            db = FSDB(db_path)
+            no_auth = os.getenv("ROMI_DB_NOAUTH")=='1' or False
+            db = FSDB(db_path, no_auth=no_auth)
             db.connect()
-            db.login(username=os.getenv("ROMI_DB_USER"), password=os.getenv("ROMI_DB_PASSWORD"))
+            if not no_auth:
+                db.login(username=os.getenv("ROMI_DB_USER"), password=os.getenv("ROMI_DB_PASSWORD"))
         # Get the scan dataset object or create one & return it
         if db.scan_exists(scan_id):
             scan = db.get_scan(scan_id)
