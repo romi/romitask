@@ -656,7 +656,7 @@ def main():
                 run_task(dataset_path, args.task, args.config,
                          log_level=args.log_level, luigicmd=args.luigicmd, module=args.module,
                          local_scheduler=args.ls, dry_run=args.dry_run,
-                         db_user=args.db_user, db_password=args.db_password)
+                         no_auth=args.no_auth, db_user=args.db_user, db_password=args.db_password)
             except Exception as e:
                 print(e)
     else:
