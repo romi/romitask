@@ -2778,7 +2778,7 @@ romitask.log.get_log_filename</p>
         <span class="c1"># Get any value defined :</span>
         <span class="n">env</span> <span class="o">=</span> <span class="n">dotenv_values</span><span class="p">(</span><span class="n">dataset_path</span> <span class="o">/</span> <span class="s2">&quot;.env&quot;</span><span class="p">)</span>
         <span class="c1"># Set the logging TOML file path to `luigi`:</span>
-        <span class="n">env</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="s2">&quot;LUIGI_CONFIG_PARSER&quot;</span><span class="p">:</span> <span class="s2">&quot;toml&quot;</span><span class="p">,</span> <span class="s2">&quot;LUIGI_CONFIG_PATH&quot;</span><span class="p">:</span> <span class="n">file_path</span><span class="p">})</span>
+        <span class="n">env</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="s2">&quot;LUIGI_CONFIG_PARSER&quot;</span><span class="p">:</span> <span class="s2">&quot;toml&quot;</span><span class="p">,</span> <span class="s2">&quot;LUIGI_CONFIG_PATH&quot;</span><span class="p">:</span> <span class="n">file_path</span><span class="p">,</span> <span class="s2">&quot;MPLBACKEND&quot;</span><span class="p">:</span> <span class="s2">&quot;Agg&quot;</span><span class="p">})</span>
         <span class="c1"># Set the default choice for PyOpenCL context:</span>
         <span class="n">env</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="s1">&#39;PYOPENCL_CTX&#39;</span><span class="p">:</span> <span class="s1">&#39;0&#39;</span><span class="p">})</span>
         <span class="c1"># Set the database in &quot;no authentication&quot; mode</span>
