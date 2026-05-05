@@ -541,7 +541,7 @@ def run_task(dataset_path, task, config, **kwargs):
         # Get any value defined :
         env = dotenv_values(dataset_path / ".env")
         # Set the logging TOML file path to `luigi`:
-        env.update({"LUIGI_CONFIG_PARSER": "toml", "LUIGI_CONFIG_PATH": file_path})
+        env.update({"LUIGI_CONFIG_PARSER": "toml", "LUIGI_CONFIG_PATH": file_path, "MPLBACKEND": "Agg"})
         # Set the default choice for PyOpenCL context:
         env.update({'PYOPENCL_CTX': '0'})
         # Set the database in "no authentication" mode
