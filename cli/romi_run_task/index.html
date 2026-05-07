@@ -1211,7 +1211,11 @@ Else, the dataset directory should exist as an existing fileset will be processe
 
             <details class="quote">
               <summary>Source code in <code>romitask/cli/romi_run_task.py</code></summary>
-              <div class="codehilite"><table class="codehilitetable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">365</span>
+              <div class="codehilite"><table class="codehilitetable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">361</span>
+<span class="normal">362</span>
+<span class="normal">363</span>
+<span class="normal">364</span>
+<span class="normal">365</span>
 <span class="normal">366</span>
 <span class="normal">367</span>
 <span class="normal">368</span>
@@ -1253,11 +1257,7 @@ Else, the dataset directory should exist as an existing fileset will be processe
 <span class="normal">404</span>
 <span class="normal">405</span>
 <span class="normal">406</span>
-<span class="normal">407</span>
-<span class="normal">408</span>
-<span class="normal">409</span>
-<span class="normal">410</span>
-<span class="normal">411</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">check_dataset_directory</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="n">task</span><span class="p">,</span> <span class="n">logger</span><span class="p">):</span>
+<span class="normal">407</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">check_dataset_directory</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="n">task</span><span class="p">,</span> <span class="n">logger</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Check the dataset directory is correctly defined depending on the `task` to execute.</span>
 
 <span class="sd">    Parameters</span>
@@ -1417,7 +1417,11 @@ Else, the dataset directory should exist as an existing fileset will be processe
 
             <details class="quote">
               <summary>Source code in <code>romitask/cli/romi_run_task.py</code></summary>
-              <div class="codehilite"><table class="codehilitetable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">309</span>
+              <div class="codehilite"><table class="codehilitetable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">305</span>
+<span class="normal">306</span>
+<span class="normal">307</span>
+<span class="normal">308</span>
+<span class="normal">309</span>
 <span class="normal">310</span>
 <span class="normal">311</span>
 <span class="normal">312</span>
@@ -1466,11 +1470,7 @@ Else, the dataset directory should exist as an existing fileset will be processe
 <span class="normal">355</span>
 <span class="normal">356</span>
 <span class="normal">357</span>
-<span class="normal">358</span>
-<span class="normal">359</span>
-<span class="normal">360</span>
-<span class="normal">361</span>
-<span class="normal">362</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">create_backup_cfg</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="n">cfgname</span><span class="p">,</span> <span class="n">config</span><span class="p">):</span>
+<span class="normal">358</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">create_backup_cfg</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="n">cfgname</span><span class="p">,</span> <span class="n">config</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Create the backup configuration file used by luigi.</span>
 
 <span class="sd">    Parameters</span>
@@ -1633,7 +1633,11 @@ If <code>module</code> is not <code>None</code>, check it exists.</p>
 
             <details class="quote">
               <summary>Source code in <code>romitask/cli/romi_run_task.py</code></summary>
-              <div class="codehilite"><table class="codehilitetable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">263</span>
+              <div class="codehilite"><table class="codehilitetable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">259</span>
+<span class="normal">260</span>
+<span class="normal">261</span>
+<span class="normal">262</span>
+<span class="normal">263</span>
 <span class="normal">264</span>
 <span class="normal">265</span>
 <span class="normal">266</span>
@@ -1658,11 +1662,7 @@ If <code>module</code> is not <code>None</code>, check it exists.</p>
 <span class="normal">285</span>
 <span class="normal">286</span>
 <span class="normal">287</span>
-<span class="normal">288</span>
-<span class="normal">289</span>
-<span class="normal">290</span>
-<span class="normal">291</span>
-<span class="normal">292</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">get_task_module</span><span class="p">(</span><span class="n">task</span><span class="p">,</span> <span class="n">logger</span><span class="p">,</span> <span class="n">module</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="normal">288</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">get_task_module</span><span class="p">(</span><span class="n">task</span><span class="p">,</span> <span class="n">logger</span><span class="p">,</span> <span class="n">module</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Set the name of the `module` to be loaded for the selected `task`.</span>
 
 <span class="sd">    Parameters</span>
@@ -1714,18 +1714,18 @@ If <code>module</code> is not <code>None</code>, check it exists.</p>
 
             <details class="quote">
               <summary>Source code in <code>romitask/cli/romi_run_task.py</code></summary>
-              <div class="codehilite"><table class="codehilitetable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">295</span>
+              <div class="codehilite"><table class="codehilitetable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">291</span>
+<span class="normal">292</span>
+<span class="normal">293</span>
+<span class="normal">294</span>
+<span class="normal">295</span>
 <span class="normal">296</span>
 <span class="normal">297</span>
 <span class="normal">298</span>
 <span class="normal">299</span>
 <span class="normal">300</span>
 <span class="normal">301</span>
-<span class="normal">302</span>
-<span class="normal">303</span>
-<span class="normal">304</span>
-<span class="normal">305</span>
-<span class="normal">306</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">get_task_predefined_module</span><span class="p">(</span><span class="n">task</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">logger</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="normal">302</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">get_task_predefined_module</span><span class="p">(</span><span class="n">task</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">logger</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Try to get the task from the pre-defined ``MODULES`` dictionary.&quot;&quot;&quot;</span>
     <span class="k">try</span><span class="p">:</span>
         <span class="n">module</span> <span class="o">=</span> <span class="n">MODULES</span><span class="p">[</span><span class="n">task</span><span class="p">]</span>
@@ -1845,7 +1845,11 @@ If <code>module</code> is not <code>None</code>, check it exists.</p>
 
             <details class="quote">
               <summary>Source code in <code>romitask/cli/romi_run_task.py</code></summary>
-              <div class="codehilite"><table class="codehilitetable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">153</span>
+              <div class="codehilite"><table class="codehilitetable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">149</span>
+<span class="normal">150</span>
+<span class="normal">151</span>
+<span class="normal">152</span>
+<span class="normal">153</span>
 <span class="normal">154</span>
 <span class="normal">155</span>
 <span class="normal">156</span>
@@ -1869,11 +1873,7 @@ If <code>module</code> is not <code>None</code>, check it exists.</p>
 <span class="normal">174</span>
 <span class="normal">175</span>
 <span class="normal">176</span>
-<span class="normal">177</span>
-<span class="normal">178</span>
-<span class="normal">179</span>
-<span class="normal">180</span>
-<span class="normal">181</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">load_backup_pipe_cfg</span><span class="p">(</span><span class="n">dataset_path</span><span class="p">,</span> <span class="n">task</span><span class="p">,</span> <span class="n">logger</span><span class="p">):</span>
+<span class="normal">177</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">load_backup_pipe_cfg</span><span class="p">(</span><span class="n">dataset_path</span><span class="p">,</span> <span class="n">task</span><span class="p">,</span> <span class="n">logger</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Try to load ``PIPE_TOML`` configuration from path.</span>
 
 <span class="sd">    Parameters</span>
@@ -1978,7 +1978,11 @@ If <code>module</code> is not <code>None</code>, check it exists.</p>
 
             <details class="quote">
               <summary>Source code in <code>romitask/cli/romi_run_task.py</code></summary>
-              <div class="codehilite"><table class="codehilitetable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">132</span>
+              <div class="codehilite"><table class="codehilitetable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">128</span>
+<span class="normal">129</span>
+<span class="normal">130</span>
+<span class="normal">131</span>
+<span class="normal">132</span>
 <span class="normal">133</span>
 <span class="normal">134</span>
 <span class="normal">135</span>
@@ -1992,11 +1996,7 @@ If <code>module</code> is not <code>None</code>, check it exists.</p>
 <span class="normal">143</span>
 <span class="normal">144</span>
 <span class="normal">145</span>
-<span class="normal">146</span>
-<span class="normal">147</span>
-<span class="normal">148</span>
-<span class="normal">149</span>
-<span class="normal">150</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">load_backup_scan_cfg</span><span class="p">(</span><span class="n">path</span><span class="p">):</span>
+<span class="normal">146</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">load_backup_scan_cfg</span><span class="p">(</span><span class="n">path</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Try to load ``SCAN_TOML`` configuration from path.</span>
 
 <span class="sd">    Parameters</span>
@@ -2112,7 +2112,11 @@ If <code>module</code> is not <code>None</code>, check it exists.</p>
 
             <details class="quote">
               <summary>Source code in <code>romitask/cli/romi_run_task.py</code></summary>
-              <div class="codehilite"><table class="codehilitetable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">184</span>
+              <div class="codehilite"><table class="codehilitetable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">180</span>
+<span class="normal">181</span>
+<span class="normal">182</span>
+<span class="normal">183</span>
+<span class="normal">184</span>
 <span class="normal">185</span>
 <span class="normal">186</span>
 <span class="normal">187</span>
@@ -2149,11 +2153,7 @@ If <code>module</code> is not <code>None</code>, check it exists.</p>
 <span class="normal">218</span>
 <span class="normal">219</span>
 <span class="normal">220</span>
-<span class="normal">221</span>
-<span class="normal">222</span>
-<span class="normal">223</span>
-<span class="normal">224</span>
-<span class="normal">225</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">load_config_from_directory</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="n">logger</span><span class="p">):</span>
+<span class="normal">221</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">load_config_from_directory</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="n">logger</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Load TOML &amp; JSON configuration files from path.</span>
 
 <span class="sd">    Parameters</span>
@@ -2287,7 +2287,11 @@ If <code>module</code> is not <code>None</code>, check it exists.</p>
 
             <details class="quote">
               <summary>Source code in <code>romitask/cli/romi_run_task.py</code></summary>
-              <div class="codehilite"><table class="codehilitetable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">228</span>
+              <div class="codehilite"><table class="codehilitetable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">224</span>
+<span class="normal">225</span>
+<span class="normal">226</span>
+<span class="normal">227</span>
+<span class="normal">228</span>
 <span class="normal">229</span>
 <span class="normal">230</span>
 <span class="normal">231</span>
@@ -2315,11 +2319,7 @@ If <code>module</code> is not <code>None</code>, check it exists.</p>
 <span class="normal">253</span>
 <span class="normal">254</span>
 <span class="normal">255</span>
-<span class="normal">256</span>
-<span class="normal">257</span>
-<span class="normal">258</span>
-<span class="normal">259</span>
-<span class="normal">260</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">load_config_from_file</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="n">logger</span><span class="p">):</span>
+<span class="normal">256</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">load_config_from_file</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="n">logger</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Load TOML configuration file from path.</span>
 
 <span class="sd">    Parameters</span>
@@ -2535,7 +2535,11 @@ romitask.log.get_log_filename</p>
 
             <details class="quote">
               <summary>Source code in <code>romitask/cli/romi_run_task.py</code></summary>
-              <div class="codehilite"><table class="codehilitetable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">443</span>
+              <div class="codehilite"><table class="codehilitetable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">439</span>
+<span class="normal">440</span>
+<span class="normal">441</span>
+<span class="normal">442</span>
+<span class="normal">443</span>
 <span class="normal">444</span>
 <span class="normal">445</span>
 <span class="normal">446</span>
@@ -2659,25 +2663,7 @@ romitask.log.get_log_filename</p>
 <span class="normal">564</span>
 <span class="normal">565</span>
 <span class="normal">566</span>
-<span class="normal">567</span>
-<span class="normal">568</span>
-<span class="normal">569</span>
-<span class="normal">570</span>
-<span class="normal">571</span>
-<span class="normal">572</span>
-<span class="normal">573</span>
-<span class="normal">574</span>
-<span class="normal">575</span>
-<span class="normal">576</span>
-<span class="normal">577</span>
-<span class="normal">578</span>
-<span class="normal">579</span>
-<span class="normal">580</span>
-<span class="normal">581</span>
-<span class="normal">582</span>
-<span class="normal">583</span>
-<span class="normal">584</span>
-<span class="normal">585</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">run_task</span><span class="p">(</span><span class="n">dataset_path</span><span class="p">,</span> <span class="n">task</span><span class="p">,</span> <span class="n">config</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+<span class="normal">567</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">run_task</span><span class="p">(</span><span class="n">dataset_path</span><span class="p">,</span> <span class="n">task</span><span class="p">,</span> <span class="n">config</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Load the configuration to use and call the luigi command to run the selected task.</span>
 
 <span class="sd">    Parameters</span>
@@ -2774,23 +2760,10 @@ romitask.log.get_log_filename</p>
         <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">logging_file_path</span><span class="p">,</span> <span class="s1">&#39;w&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
             <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">logging_config</span><span class="p">)</span>
 
-        <span class="c1"># - Define a custom environment variables dictionary</span>
-        <span class="c1"># Get any value defined :</span>
-        <span class="n">env</span> <span class="o">=</span> <span class="n">dotenv_values</span><span class="p">(</span><span class="n">dataset_path</span> <span class="o">/</span> <span class="s2">&quot;.env&quot;</span><span class="p">)</span>
-        <span class="c1"># Set the logging TOML file path to `luigi`:</span>
-        <span class="n">env</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="s2">&quot;LUIGI_CONFIG_PARSER&quot;</span><span class="p">:</span> <span class="s2">&quot;toml&quot;</span><span class="p">,</span> <span class="s2">&quot;LUIGI_CONFIG_PATH&quot;</span><span class="p">:</span> <span class="n">file_path</span><span class="p">,</span> <span class="s2">&quot;MPLBACKEND&quot;</span><span class="p">:</span> <span class="s2">&quot;Agg&quot;</span><span class="p">})</span>
-        <span class="c1"># Set the default choice for PyOpenCL context:</span>
-        <span class="n">env</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="s1">&#39;PYOPENCL_CTX&#39;</span><span class="p">:</span> <span class="s1">&#39;0&#39;</span><span class="p">})</span>
-        <span class="c1"># Set the database in &quot;no authentication&quot; mode</span>
-        <span class="k">if</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;no_auth&#39;</span><span class="p">):</span>
-            <span class="c1"># Enable the &quot;no authentication&quot; session manager if not forbidden</span>
-            <span class="c1"># 1. by a &#39;ROMI_DB_NOAUTH&#39; defined in as environment variable</span>
-            <span class="c1"># 2. by a &#39;ROMI_DB_NOAUTH&#39; defined in the dotenv file at the root of the DB</span>
-            <span class="n">env</span><span class="p">[</span><span class="s1">&#39;ROMI_DB_NOAUTH&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">getenv</span><span class="p">(</span><span class="s1">&#39;ROMI_DB_NOAUTH&#39;</span><span class="p">)</span> <span class="ow">or</span> <span class="n">env</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;ROMI_DB_NOAUTH&#39;</span><span class="p">,</span> <span class="kc">None</span><span class="p">))</span> <span class="ow">or</span> <span class="s2">&quot;1&quot;</span>
-            <span class="k">if</span> <span class="n">env</span><span class="p">[</span><span class="s1">&#39;ROMI_DB_NOAUTH&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;0&quot;</span><span class="p">:</span>
-                <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Disabling authentication on this database if forbidden.&quot;</span><span class="p">)</span>
-                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Use `--db-user` and `--db-password` to pass your credentials to the CLI.&quot;</span><span class="p">)</span>
-                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Credentials required&quot;</span><span class="p">)</span>
+        <span class="c1"># - Define environment variables to provide the logging TOML file path to `luigi`:</span>
+        <span class="n">env</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;LUIGI_CONFIG_PARSER&quot;</span><span class="p">:</span> <span class="s2">&quot;toml&quot;</span><span class="p">,</span> <span class="s2">&quot;LUIGI_CONFIG_PATH&quot;</span><span class="p">:</span> <span class="n">file_path</span><span class="p">}</span>
+        <span class="n">env</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="s1">&#39;PYOPENCL_CTX&#39;</span><span class="p">:</span> <span class="s1">&#39;0&#39;</span><span class="p">})</span>  <span class="c1"># default choice</span>
+
         <span class="c1"># Add database credentials to environment if provided</span>
         <span class="k">if</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;db_user&#39;</span><span class="p">)</span> <span class="ow">and</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;db_password&#39;</span><span class="p">):</span>
             <span class="n">env</span><span class="p">[</span><span class="s1">&#39;ROMI_DB_USER&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;db_user&#39;</span><span class="p">]</span>
@@ -2805,13 +2778,12 @@ romitask.log.get_log_filename</p>
         <span class="k">if</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;local_scheduler&#39;</span><span class="p">,</span> <span class="kc">False</span><span class="p">):</span>
             <span class="n">cmd</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;--local-scheduler&quot;</span><span class="p">)</span>
 
-        <span class="c1"># - Print or Start the configured pipeline:</span>
         <span class="k">if</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;dry_run&#39;</span><span class="p">,</span> <span class="kc">False</span><span class="p">):</span>
             <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Luigi command to call is:</span><span class="se">\n</span><span class="si">{</span><span class="n">cmd</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">t_start</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
-            <span class="c1"># System‑wide variables (`os.environ`) overwrite any duplicate keys from the custom `env` dict</span>
-            <span class="n">p</span> <span class="o">=</span> <span class="n">subprocess</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">cmd</span><span class="p">,</span> <span class="n">env</span><span class="o">=</span><span class="p">{</span><span class="o">**</span><span class="n">env</span><span class="p">,</span> <span class="o">**</span><span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="p">},</span> <span class="n">check</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+            <span class="c1"># - Start the configured pipeline:</span>
+            <span class="n">p</span> <span class="o">=</span> <span class="n">subprocess</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">cmd</span><span class="p">,</span> <span class="n">env</span><span class="o">=</span><span class="p">{</span><span class="o">**</span><span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="p">,</span> <span class="o">**</span><span class="n">env</span><span class="p">},</span> <span class="n">check</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
             <span class="n">delta</span> <span class="o">=</span> <span class="n">timedelta</span><span class="p">(</span><span class="n">seconds</span><span class="o">=</span><span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span> <span class="o">-</span> <span class="n">t_start</span><span class="p">)</span>
             <span class="n">delta</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">delta</span><span class="p">)</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;.&#39;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>  <span class="c1"># to get HH:MM:SS</span>
             <span class="k">if</span> <span class="n">p</span><span class="o">.</span><span class="n">returncode</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
@@ -2917,7 +2889,11 @@ romitask.log.get_log_filename</p>
 
             <details class="quote">
               <summary>Source code in <code>romitask/cli/romi_run_task.py</code></summary>
-              <div class="codehilite"><table class="codehilitetable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">414</span>
+              <div class="codehilite"><table class="codehilitetable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">410</span>
+<span class="normal">411</span>
+<span class="normal">412</span>
+<span class="normal">413</span>
+<span class="normal">414</span>
 <span class="normal">415</span>
 <span class="normal">416</span>
 <span class="normal">417</span>
@@ -2939,11 +2915,7 @@ romitask.log.get_log_filename</p>
 <span class="normal">433</span>
 <span class="normal">434</span>
 <span class="normal">435</span>
-<span class="normal">436</span>
-<span class="normal">437</span>
-<span class="normal">438</span>
-<span class="normal">439</span>
-<span class="normal">440</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">update_config</span><span class="p">(</span><span class="n">config</span><span class="p">,</span> <span class="n">update</span><span class="p">):</span>
+<span class="normal">436</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">update_config</span><span class="p">(</span><span class="n">config</span><span class="p">,</span> <span class="n">update</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Update a configuration dictionary.</span>
 
 <span class="sd">    Parameters</span>
