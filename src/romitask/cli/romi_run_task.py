@@ -64,6 +64,8 @@ from logging import getLogger
 from pathlib import Path
 
 import toml
+from dotenv import dotenv_values
+
 from romitask import PIPE_TOML
 from romitask import SCAN_TOML
 from romitask.log import LOG_LEVELS
@@ -115,6 +117,8 @@ def parsing():
                         help="Username for FSDB login.")
     parser.add_argument('--db-password', dest='db_password', type=str, default=None,
                         help="Password for FSDB login.")
+    parser.add_argument('--no-auth', dest='no_auth', action="store_true",
+                        help="Use a database with automatic 'admin' user log in, for testing purposes only.")
 
     # Luigi related arguments:
     luigi = parser.add_argument_group("luigi options")
@@ -533,10 +537,23 @@ def run_task(dataset_path, task, config, **kwargs):
         with open(logging_file_path, 'w') as f:
             f.write(logging_config)
 
-        # - Define environment variables to provide the logging TOML file path to `luigi`:
-        env = {"LUIGI_CONFIG_PARSER": "toml", "LUIGI_CONFIG_PATH": file_path}
-        env.update({'PYOPENCL_CTX': '0'})  # default choice
-
+        # - Define a custom environment variables dictionary
+        # Get any value defined :
+        env = dotenv_values(dataset_path / ".env")
+        # Set the logging TOML file path to `luigi`:
+        env.update({"LUIGI_CONFIG_PARSER": "toml", "LUIGI_CONFIG_PATH": file_path, "MPLBACKEND": "Agg"})
+        # Set the default choice for PyOpenCL context:
+        env.update({'PYOPENCL_CTX': '0'})
+        # Set the database in "no authentication" mode
+        if kwargs.get('no_auth'):
+            # Enable the "no authentication" session manager if not forbidden
+            # 1. by a 'ROMI_DB_NOAUTH' defined in as environment variable
+            # 2. by a 'ROMI_DB_NOAUTH' defined in the dotenv file at the root of the DB
+            env['ROMI_DB_NOAUTH'] = (os.getenv('ROMI_DB_NOAUTH') or env.get('ROMI_DB_NOAUTH', None)) or "1"
+            if env['ROMI_DB_NOAUTH'] == "0":
+                logger.error(f"Disabling authentication on this database if forbidden.")
+                logger.info(f"Use `--db-user` and `--db-password` to pass your credentials to the CLI.")
+                raise ValueError("Credentials required")
         # Add database credentials to environment if provided
         if kwargs.get('db_user') and kwargs.get('db_password'):
             env['ROMI_DB_USER'] = kwargs['db_user']
@@ -551,12 +568,13 @@ def run_task(dataset_path, task, config, **kwargs):
         if kwargs.get('local_scheduler', False):
             cmd.append("--local-scheduler")
 
+        # - Print or Start the configured pipeline:
         if kwargs.get('dry_run', False):
             logger.info(f"Luigi command to call is:\n{cmd}")
         else:
             t_start = time.time()
-            # - Start the configured pipeline:
-            p = subprocess.run(cmd, env={**os.environ, **env}, check=True)
+            # System‑wide variables (`os.environ`) overwrite any duplicate keys from the custom `env` dict
+            p = subprocess.run(cmd, env={**env, **os.environ}, check=True)
             delta = timedelta(seconds=time.time() - t_start)
             delta = str(delta).split('.')[0]  # to get HH:MM:SS
             if p.returncode == 0:
@@ -638,7 +656,7 @@ def main():
                 run_task(dataset_path, args.task, args.config,
                          log_level=args.log_level, luigicmd=args.luigicmd, module=args.module,
                          local_scheduler=args.ls, dry_run=args.dry_run,
-                         db_user=args.db_user, db_password=args.db_password)
+                         no_auth=args.no_auth, db_user=args.db_user, db_password=args.db_password)
             except Exception as e:
                 print(e)
     else:
@@ -646,7 +664,7 @@ def main():
         run_task(folders, args.task, args.config,
                  log_level=args.log_level, luigicmd=args.luigicmd, module=args.module,
                  local_scheduler=args.ls, dry_run=args.dry_run,
-                 db_user=args.db_user, db_password=args.db_password)
+                 no_auth=args.no_auth, db_user=args.db_user, db_password=args.db_password)
 
 
 if __name__ == '__main__':
