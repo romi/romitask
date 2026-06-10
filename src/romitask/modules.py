@@ -57,6 +57,7 @@ MODULES = {
     "IntrinsicCalibration": "plant3dvision.tasks.calibration",
     # Geometric reconstruction module:
     "Colmap": "plant3dvision.tasks.colmap",
+    "CropWithBoundingBox": "plant3dvision.tasks.proc2d",
     "Undistort": "plant3dvision.tasks.proc2d",
     "Masks": "plant3dvision.tasks.proc2d",
     "Voxels": "plant3dvision.tasks.voxel_reconstruction",
