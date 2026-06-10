@@ -1047,7 +1047,7 @@ class Clean(RomiTask):
         Parameters
         ----------
         scan:
-            The active :class:`plantdb.commons.fsdb.Scan` instance.
+            The active `plantdb.commons.fsdb.Scan` instance.
         exclude:
             Set of fileset IDs that must be kept (e.g. ``{"images"}``).
 
