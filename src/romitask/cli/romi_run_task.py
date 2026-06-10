@@ -388,18 +388,14 @@ def check_dataset_directory(path, task, logger):
         cfgname = SCAN_TOML
     elif task in DATA_CREATION_TASK:
         try:
-            path.mkdir(exist_ok=False)
-        except FileExistsError:
-            if not list(path.iterdir()) == []:
-                logger.critical(f"Given dataset directory '{path}' exists and is not empty!")
-                delete = parse_kbdi(input("Do you want ro remove the previous dataset? [y/N]"))
-                if delete:
-                    shutil.rmtree(path)
-                    path.mkdir(exist_ok=False)
-                else:
-                    sys.exit("Non-empty dataset directory for data creation task.")
+            assert not path.is_dir()
+        except AssertionError:
+            logger.critical(f"Given dataset directory '{path}' exists and is not empty!")
+            delete = parse_kbdi(input("Do you want ro remove the previous dataset? [y/N]"))
+            if delete:
+                shutil.rmtree(path)
             else:
-                logger.info(f"Using existing empty dataset directory: {path}")
+                sys.exit("Non-empty dataset directory for data creation task.")
         cfgname = SCAN_TOML
     else:
         try:
@@ -523,25 +519,27 @@ def run_task(dataset_path, task, config, **kwargs):
     module = get_task_module(task, logger=logger, module=kwargs.get("module", None))
     # - Check the dataset directory is OK to use:
     cfgname = check_dataset_directory(dataset_path, task, logger=logger)
-    # - Create the "scan.toml" OR "pipeline.toml" (backup) config file used by luigi:
-    file_path = create_backup_cfg(dataset_path, cfgname, config)
-
-    # Get the log_file name, with the date & task name by default:
-    log_fname = kwargs.get('log_fname', get_log_filename(task))
-    # - Get logging configuration string for luigi, specifying the log file name :
-    logging_config = get_logging_config(log_level=log_level, logfile_path=str(local_path / log_fname))
 
     with tempfile.TemporaryDirectory() as tmpd:
+        # Get the log_file name, with the date & task name by default:
+        log_fname = kwargs.get('log_fname', get_log_filename(task))
+        # - Get logging configuration string for luigi, specifying the log file name :
+        logging_config = get_logging_config(log_level=log_level,
+                                            logfile_path=os.path.join(tmpd , log_fname))
         # - Create a "logging.cfg" file to be used by `luigi`:
         logging_file_path = os.path.join(tmpd, "logging.cfg")
         with open(logging_file_path, 'w') as f:
             f.write(logging_config)
+        # - Create the "scan.toml" OR "pipeline.toml" (backup) config file used by luigi:
+        cfg_file_path = create_backup_cfg(tmpd, cfgname, config)
 
         # - Define a custom environment variables dictionary
         # Get any value defined :
         env = dotenv_values(dataset_path / ".env")
         # Set the logging TOML file path to `luigi`:
-        env.update({"LUIGI_CONFIG_PARSER": "toml", "LUIGI_CONFIG_PATH": file_path, "MPLBACKEND": "Agg"})
+        env.update({"LUIGI_CONFIG_PARSER": "toml",
+                    "LUIGI_CONFIG_PATH": cfg_file_path,
+                    "MPLBACKEND": "Agg"})
         # Set the default choice for PyOpenCL context:
         env.update({'PYOPENCL_CTX': '0'})
         # Set the database in "no authentication" mode
@@ -581,7 +579,21 @@ def run_task(dataset_path, task, config, **kwargs):
                 logger.info(f"Done in {delta}s!")
             else:
                 logger.info(f"Failed after {delta}s!")
-
+            # -------------------------------------------------------------
+            # Move the temporary logging configuration and backup TOML file
+            # to the actual dataset directory after the task has created it.
+            # This must happen **after** the subprocess call because the
+            # dataset directory is created by the task itself.
+            try:
+                # Move logging.cfg
+                shutil.move(logging_file_path, Path(dataset_path) / log_fname)
+                # Move the backup configuration file (scan.toml or pipeline.toml)
+                shutil.move(cfg_file_path, Path(dataset_path))
+                logger.info(f"Moved temporary config files to dataset directory "
+                            f"'{Path(dataset_path)}'.")
+            except Exception as move_err:
+                logger.error(f"Failed to move temporary config files: {move_err}")
+            # -------------------------------------------------------------
     return
 
 
