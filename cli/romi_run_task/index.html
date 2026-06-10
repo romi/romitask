@@ -1253,11 +1253,7 @@ Else, the dataset directory should exist as an existing fileset will be processe
 <span class="normal">404</span>
 <span class="normal">405</span>
 <span class="normal">406</span>
-<span class="normal">407</span>
-<span class="normal">408</span>
-<span class="normal">409</span>
-<span class="normal">410</span>
-<span class="normal">411</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">check_dataset_directory</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="n">task</span><span class="p">,</span> <span class="n">logger</span><span class="p">):</span>
+<span class="normal">407</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">check_dataset_directory</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="n">task</span><span class="p">,</span> <span class="n">logger</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Check the dataset directory is correctly defined depending on the `task` to execute.</span>
 
 <span class="sd">    Parameters</span>
@@ -1283,18 +1279,14 @@ Else, the dataset directory should exist as an existing fileset will be processe
         <span class="n">cfgname</span> <span class="o">=</span> <span class="n">SCAN_TOML</span>
     <span class="k">elif</span> <span class="n">task</span> <span class="ow">in</span> <span class="n">DATA_CREATION_TASK</span><span class="p">:</span>
         <span class="k">try</span><span class="p">:</span>
-            <span class="n">path</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="n">exist_ok</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
-        <span class="k">except</span> <span class="ne">FileExistsError</span><span class="p">:</span>
-            <span class="k">if</span> <span class="ow">not</span> <span class="nb">list</span><span class="p">(</span><span class="n">path</span><span class="o">.</span><span class="n">iterdir</span><span class="p">())</span> <span class="o">==</span> <span class="p">[]:</span>
-                <span class="n">logger</span><span class="o">.</span><span class="n">critical</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Given dataset directory &#39;</span><span class="si">{</span><span class="n">path</span><span class="si">}</span><span class="s2">&#39; exists and is not empty!&quot;</span><span class="p">)</span>
-                <span class="n">delete</span> <span class="o">=</span> <span class="n">parse_kbdi</span><span class="p">(</span><span class="nb">input</span><span class="p">(</span><span class="s2">&quot;Do you want ro remove the previous dataset? [y/N]&quot;</span><span class="p">))</span>
-                <span class="k">if</span> <span class="n">delete</span><span class="p">:</span>
-                    <span class="n">shutil</span><span class="o">.</span><span class="n">rmtree</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
-                    <span class="n">path</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="n">exist_ok</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
-                <span class="k">else</span><span class="p">:</span>
-                    <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="s2">&quot;Non-empty dataset directory for data creation task.&quot;</span><span class="p">)</span>
+            <span class="k">assert</span> <span class="ow">not</span> <span class="n">path</span><span class="o">.</span><span class="n">is_dir</span><span class="p">()</span>
+        <span class="k">except</span> <span class="ne">AssertionError</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">critical</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Given dataset directory &#39;</span><span class="si">{</span><span class="n">path</span><span class="si">}</span><span class="s2">&#39; exists and is not empty!&quot;</span><span class="p">)</span>
+            <span class="n">delete</span> <span class="o">=</span> <span class="n">parse_kbdi</span><span class="p">(</span><span class="nb">input</span><span class="p">(</span><span class="s2">&quot;Do you want ro remove the previous dataset? [y/N]&quot;</span><span class="p">))</span>
+            <span class="k">if</span> <span class="n">delete</span><span class="p">:</span>
+                <span class="n">shutil</span><span class="o">.</span><span class="n">rmtree</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
             <span class="k">else</span><span class="p">:</span>
-                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Using existing empty dataset directory: </span><span class="si">{</span><span class="n">path</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+                <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="s2">&quot;Non-empty dataset directory for data creation task.&quot;</span><span class="p">)</span>
         <span class="n">cfgname</span> <span class="o">=</span> <span class="n">SCAN_TOML</span>
     <span class="k">else</span><span class="p">:</span>
         <span class="k">try</span><span class="p">:</span>
@@ -2535,7 +2527,11 @@ romitask.log.get_log_filename</p>
 
             <details class="quote">
               <summary>Source code in <code>romitask/cli/romi_run_task.py</code></summary>
-              <div class="codehilite"><table class="codehilitetable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">443</span>
+              <div class="codehilite"><table class="codehilitetable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">439</span>
+<span class="normal">440</span>
+<span class="normal">441</span>
+<span class="normal">442</span>
+<span class="normal">443</span>
 <span class="normal">444</span>
 <span class="normal">445</span>
 <span class="normal">446</span>
@@ -2677,7 +2673,19 @@ romitask.log.get_log_filename</p>
 <span class="normal">582</span>
 <span class="normal">583</span>
 <span class="normal">584</span>
-<span class="normal">585</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">run_task</span><span class="p">(</span><span class="n">dataset_path</span><span class="p">,</span> <span class="n">task</span><span class="p">,</span> <span class="n">config</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+<span class="normal">585</span>
+<span class="normal">586</span>
+<span class="normal">587</span>
+<span class="normal">588</span>
+<span class="normal">589</span>
+<span class="normal">590</span>
+<span class="normal">591</span>
+<span class="normal">592</span>
+<span class="normal">593</span>
+<span class="normal">594</span>
+<span class="normal">595</span>
+<span class="normal">596</span>
+<span class="normal">597</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">run_task</span><span class="p">(</span><span class="n">dataset_path</span><span class="p">,</span> <span class="n">task</span><span class="p">,</span> <span class="n">config</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Load the configuration to use and call the luigi command to run the selected task.</span>
 
 <span class="sd">    Parameters</span>
@@ -2760,25 +2768,27 @@ romitask.log.get_log_filename</p>
     <span class="n">module</span> <span class="o">=</span> <span class="n">get_task_module</span><span class="p">(</span><span class="n">task</span><span class="p">,</span> <span class="n">logger</span><span class="o">=</span><span class="n">logger</span><span class="p">,</span> <span class="n">module</span><span class="o">=</span><span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;module&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">))</span>
     <span class="c1"># - Check the dataset directory is OK to use:</span>
     <span class="n">cfgname</span> <span class="o">=</span> <span class="n">check_dataset_directory</span><span class="p">(</span><span class="n">dataset_path</span><span class="p">,</span> <span class="n">task</span><span class="p">,</span> <span class="n">logger</span><span class="o">=</span><span class="n">logger</span><span class="p">)</span>
-    <span class="c1"># - Create the &quot;scan.toml&quot; OR &quot;pipeline.toml&quot; (backup) config file used by luigi:</span>
-    <span class="n">file_path</span> <span class="o">=</span> <span class="n">create_backup_cfg</span><span class="p">(</span><span class="n">dataset_path</span><span class="p">,</span> <span class="n">cfgname</span><span class="p">,</span> <span class="n">config</span><span class="p">)</span>
-
-    <span class="c1"># Get the log_file name, with the date &amp; task name by default:</span>
-    <span class="n">log_fname</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;log_fname&#39;</span><span class="p">,</span> <span class="n">get_log_filename</span><span class="p">(</span><span class="n">task</span><span class="p">))</span>
-    <span class="c1"># - Get logging configuration string for luigi, specifying the log file name :</span>
-    <span class="n">logging_config</span> <span class="o">=</span> <span class="n">get_logging_config</span><span class="p">(</span><span class="n">log_level</span><span class="o">=</span><span class="n">log_level</span><span class="p">,</span> <span class="n">logfile_path</span><span class="o">=</span><span class="nb">str</span><span class="p">(</span><span class="n">local_path</span> <span class="o">/</span> <span class="n">log_fname</span><span class="p">))</span>
 
     <span class="k">with</span> <span class="n">tempfile</span><span class="o">.</span><span class="n">TemporaryDirectory</span><span class="p">()</span> <span class="k">as</span> <span class="n">tmpd</span><span class="p">:</span>
+        <span class="c1"># Get the log_file name, with the date &amp; task name by default:</span>
+        <span class="n">log_fname</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;log_fname&#39;</span><span class="p">,</span> <span class="n">get_log_filename</span><span class="p">(</span><span class="n">task</span><span class="p">))</span>
+        <span class="c1"># - Get logging configuration string for luigi, specifying the log file name :</span>
+        <span class="n">logging_config</span> <span class="o">=</span> <span class="n">get_logging_config</span><span class="p">(</span><span class="n">log_level</span><span class="o">=</span><span class="n">log_level</span><span class="p">,</span>
+                                            <span class="n">logfile_path</span><span class="o">=</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">tmpd</span> <span class="p">,</span> <span class="n">log_fname</span><span class="p">))</span>
         <span class="c1"># - Create a &quot;logging.cfg&quot; file to be used by `luigi`:</span>
         <span class="n">logging_file_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">tmpd</span><span class="p">,</span> <span class="s2">&quot;logging.cfg&quot;</span><span class="p">)</span>
         <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">logging_file_path</span><span class="p">,</span> <span class="s1">&#39;w&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
             <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">logging_config</span><span class="p">)</span>
+        <span class="c1"># - Create the &quot;scan.toml&quot; OR &quot;pipeline.toml&quot; (backup) config file used by luigi:</span>
+        <span class="n">cfg_file_path</span> <span class="o">=</span> <span class="n">create_backup_cfg</span><span class="p">(</span><span class="n">tmpd</span><span class="p">,</span> <span class="n">cfgname</span><span class="p">,</span> <span class="n">config</span><span class="p">)</span>
 
         <span class="c1"># - Define a custom environment variables dictionary</span>
         <span class="c1"># Get any value defined :</span>
         <span class="n">env</span> <span class="o">=</span> <span class="n">dotenv_values</span><span class="p">(</span><span class="n">dataset_path</span> <span class="o">/</span> <span class="s2">&quot;.env&quot;</span><span class="p">)</span>
         <span class="c1"># Set the logging TOML file path to `luigi`:</span>
-        <span class="n">env</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="s2">&quot;LUIGI_CONFIG_PARSER&quot;</span><span class="p">:</span> <span class="s2">&quot;toml&quot;</span><span class="p">,</span> <span class="s2">&quot;LUIGI_CONFIG_PATH&quot;</span><span class="p">:</span> <span class="n">file_path</span><span class="p">,</span> <span class="s2">&quot;MPLBACKEND&quot;</span><span class="p">:</span> <span class="s2">&quot;Agg&quot;</span><span class="p">})</span>
+        <span class="n">env</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="s2">&quot;LUIGI_CONFIG_PARSER&quot;</span><span class="p">:</span> <span class="s2">&quot;toml&quot;</span><span class="p">,</span>
+                    <span class="s2">&quot;LUIGI_CONFIG_PATH&quot;</span><span class="p">:</span> <span class="n">cfg_file_path</span><span class="p">,</span>
+                    <span class="s2">&quot;MPLBACKEND&quot;</span><span class="p">:</span> <span class="s2">&quot;Agg&quot;</span><span class="p">})</span>
         <span class="c1"># Set the default choice for PyOpenCL context:</span>
         <span class="n">env</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="s1">&#39;PYOPENCL_CTX&#39;</span><span class="p">:</span> <span class="s1">&#39;0&#39;</span><span class="p">})</span>
         <span class="c1"># Set the database in &quot;no authentication&quot; mode</span>
@@ -2818,7 +2828,21 @@ romitask.log.get_log_filename</p>
                 <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Done in </span><span class="si">{</span><span class="n">delta</span><span class="si">}</span><span class="s2">s!&quot;</span><span class="p">)</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Failed after </span><span class="si">{</span><span class="n">delta</span><span class="si">}</span><span class="s2">s!&quot;</span><span class="p">)</span>
-
+            <span class="c1"># -------------------------------------------------------------</span>
+            <span class="c1"># Move the temporary logging configuration and backup TOML file</span>
+            <span class="c1"># to the actual dataset directory after the task has created it.</span>
+            <span class="c1"># This must happen **after** the subprocess call because the</span>
+            <span class="c1"># dataset directory is created by the task itself.</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="c1"># Move logging.cfg</span>
+                <span class="n">shutil</span><span class="o">.</span><span class="n">move</span><span class="p">(</span><span class="n">logging_file_path</span><span class="p">,</span> <span class="n">Path</span><span class="p">(</span><span class="n">dataset_path</span><span class="p">)</span> <span class="o">/</span> <span class="n">log_fname</span><span class="p">)</span>
+                <span class="c1"># Move the backup configuration file (scan.toml or pipeline.toml)</span>
+                <span class="n">shutil</span><span class="o">.</span><span class="n">move</span><span class="p">(</span><span class="n">cfg_file_path</span><span class="p">,</span> <span class="n">Path</span><span class="p">(</span><span class="n">dataset_path</span><span class="p">))</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Moved temporary config files to dataset directory &quot;</span>
+                            <span class="sa">f</span><span class="s2">&quot;&#39;</span><span class="si">{</span><span class="n">Path</span><span class="p">(</span><span class="n">dataset_path</span><span class="p">)</span><span class="si">}</span><span class="s2">&#39;.&quot;</span><span class="p">)</span>
+            <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">move_err</span><span class="p">:</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Failed to move temporary config files: </span><span class="si">{</span><span class="n">move_err</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="c1"># -------------------------------------------------------------</span>
     <span class="k">return</span>
 </code></pre></div></td></tr></table></div>
             </details>
@@ -2917,7 +2941,11 @@ romitask.log.get_log_filename</p>
 
             <details class="quote">
               <summary>Source code in <code>romitask/cli/romi_run_task.py</code></summary>
-              <div class="codehilite"><table class="codehilitetable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">414</span>
+              <div class="codehilite"><table class="codehilitetable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">410</span>
+<span class="normal">411</span>
+<span class="normal">412</span>
+<span class="normal">413</span>
+<span class="normal">414</span>
 <span class="normal">415</span>
 <span class="normal">416</span>
 <span class="normal">417</span>
@@ -2939,11 +2967,7 @@ romitask.log.get_log_filename</p>
 <span class="normal">433</span>
 <span class="normal">434</span>
 <span class="normal">435</span>
-<span class="normal">436</span>
-<span class="normal">437</span>
-<span class="normal">438</span>
-<span class="normal">439</span>
-<span class="normal">440</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">update_config</span><span class="p">(</span><span class="n">config</span><span class="p">,</span> <span class="n">update</span><span class="p">):</span>
+<span class="normal">436</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">update_config</span><span class="p">(</span><span class="n">config</span><span class="p">,</span> <span class="n">update</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Update a configuration dictionary.</span>
 
 <span class="sd">    Parameters</span>
