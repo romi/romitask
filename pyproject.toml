@@ -8,6 +8,7 @@ version = "0.12.1"
 dependencies = [
     "numpy",
     "colorlog",
+    "dotenv",
     "luigi",
     "toml",
     "tqdm",
