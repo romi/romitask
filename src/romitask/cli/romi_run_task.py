@@ -591,9 +591,15 @@ def run_task(dataset_path, task, config, **kwargs):
                 # Move logging.cfg
                 shutil.move(logging_file_path, Path(dataset_path) / log_fname)
                 # Move the backup configuration file (scan.toml or pipeline.toml)
-                shutil.move(cfg_file_path, Path(dataset_path))
-                logger.info(f"Moved temporary config files to dataset directory "
-                            f"'{Path(dataset_path)}'.")
+                # Ensure the destination file is overwritten if it already exists.
+                dest_cfg_path = Path(dataset_path) / Path(cfg_file_path).name
+                if dest_cfg_path.exists():
+                    try:
+                        dest_cfg_path.unlink()  # Remove the existing file first
+                    except Exception as e_unlink:
+                        logger.error(f"Could not remove existing config file '{dest_cfg_path}': {e_unlink}")
+                        raise
+                shutil.move(cfg_file_path, dest_cfg_path)
             except Exception as move_err:
                 logger.error(f"Failed to move temporary config files: {move_err}")
             # -------------------------------------------------------------
