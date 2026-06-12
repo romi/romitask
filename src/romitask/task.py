@@ -975,15 +975,8 @@ class DummyTask(RomiTask):
         logger.info("Dummy task done.")
         return
 
-
-#: list of original image metadata (to keep in Clean task):
-#: * "pose" is added by the PlantImager or VirtualPlantImager
-#: * "approximate_pose" is added by the PlantImager
-#: * "channel" is added by the PlantImager or VirtualPlantImager
-#: * "shot_id" is added by the PlantImager or VirtualPlantImager
-#: * "camera" is added by the VirtualPlantImager and is used by `Voxels`
-IMAGES_MD = ["pose", "approximate_pose", "channel", "shot_id", "camera"]
-
+#: Metadata added by the Colmap task:
+COLMAP_MD = ["colmap_camera", "estimated_pose"]
 
 class Clean(RomiTask):
     """Cleanup a scan, keeping only the "images" fileset and removing all computed pipelines.
@@ -997,14 +990,11 @@ class Clean(RomiTask):
     no_confirm : luigi.BoolParameter
         Do not ask for confirmation of the cleaning in the command prompt.
         Default to ``False``.
-    keep_metadata : luigi.listParameter
-        list of metadata to keep (retain) in the `images` fileset metadata.
-        Default to ``IMAGES_MD``.
 
     See Also
     --------
     romitask.task.RomiTask
-    romitask.task.IMAGES_MD
+    romitask.task.COLMAP_MD : The list of metadata added by the Colmap task
     """
     upstream_task = None  # override default attribute from ``RomiTask``
     no_confirm = luigi.BoolParameter(default=False)
@@ -1022,23 +1012,6 @@ class Clean(RomiTask):
     def complete(self):
         """Indicate the task as complete."""
         return False  # there is no output
-
-    @staticmethod
-    def _merge_metadata_keep_list(user_keep: Iterable[str]) -> set[str]:
-        """Merge the user‑provided metadata keys with the default set required for image files.
-
-        Parameters
-        ----------
-        user_keep:
-            Iterable of metadata keys supplied via the ``keep_metadata`` task
-            parameter.
-
-        Returns
-        -------
-        set[str]
-            The union of ``user_keep`` and :data:`~romitask.task.IMAGES_MD`.
-        """
-        return set(user_keep).union(IMAGES_MD)
 
     @staticmethod
     def _filesets_to_remove(scan: "Scan", exclude: set[str]) -> list[str]:
@@ -1079,8 +1052,11 @@ class Clean(RomiTask):
             scan.delete_fileset(fs_id)
 
     @staticmethod
-    def _clean_images_metadata(images_fs: "Fileset", keep_keys: set[str]) -> None:
-        """Keep only the whitelisted metadata keys for every file in the ``images`` fileset.
+    def _clean_images_metadata(images_fs: "Fileset") -> None:
+        """Remove only the blacklisted metadata keys for every file in the ``images`` fileset.
+
+        The list of blacklisted metadata is defined by `COLMAP_MD`.
+        It is the list of metadata added by the Colmap task.
 
         Parameters
         ----------
@@ -1092,7 +1068,7 @@ class Clean(RomiTask):
         logger.info("Cleaning metadata of the 'images' fileset...")
         for file_ in tqdm(images_fs.get_files(), unit="file"):
             original_md = file_.get_metadata()
-            cleaned_md = {k: v for k, v in original_md.items() if k in keep_keys}
+            cleaned_md = {k: v for k, v in original_md.items() if k not in COLMAP_MD}
             # Clear existing metadata before writing the cleaned version
             file_.metadata = {}
             file_.set_metadata(cleaned_md)
@@ -1174,9 +1150,6 @@ class Clean(RomiTask):
         scan = ScanConfiguration().scan
         logger.info(f"Cleaning task started for scan '{scan.id}'...")
 
-        # - Create the list of metadata to keep (retain) to a set and add the ones defined in `IMAGES_MD`
-        metadata_whitelist = self._merge_metadata_keep_list(self.keep_metadata)
-
         # - Handle the necessity to confirm prior to dataset & metadata cleaning.
         if not self.no_confirm:
             del_msg = "This will delete all filesets and metadata except for the `images` & 'VirtualPlant' filesets."
@@ -1197,7 +1170,7 @@ class Clean(RomiTask):
         if images_fs is None:
             logger.critical("Could not locate the 'images' fileset in scan %s.", scan.id)
         else:
-            self._clean_images_metadata(images_fs, metadata_whitelist)
+            self._clean_images_metadata(images_fs)
 
         # - Clean orphan metadata files and directories.
         metadata_dir = Path(scan.path()) / "metadata"
