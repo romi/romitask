@@ -80,6 +80,7 @@ from tqdm import tqdm
 
 from plantdb.commons.fsdb.core import FSDB
 from plantdb.commons.fsdb.exceptions import FilesetExistsError
+from plantdb.commons.fsdb.exceptions import NotAnFSDBError
 from plantdb.commons.fsdb.validation import _is_fsdb
 from plantdb.commons.io import read_json
 from plantdb.commons.io import write_json
@@ -120,14 +121,16 @@ class FSDBParameter(luigi.Parameter):
             # Try to interpret the string as a path to an FSDB
             db_path = Path(db_path)
 
-        if db_path.exists() and db_path.is_dir() and _is_fsdb(db_path):
-            db = FSDB(db_path)
-            db.connect()
-            return db
-        else:
-            logger.error(f"Could not parse FSDB from string: {db_path}")
+        if not db_path.exists():
+            raise ValueError(f"Given path {db_path} does not exist")
+        if not db_path.is_dir():
+            raise NotADirectoryError(f"Given path {db_path} is not a directory")
+        if not _is_fsdb(db_path):
+            raise NotAnFSDBError(f"Given path {db_path} is not an FSDB")
 
-        return db_path
+        db = FSDB(db_path)
+        db.connect()
+        return db
 
     def serialize(self, db):
         """Serialize the parameter value to a string.
