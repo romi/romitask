@@ -69,7 +69,6 @@ DEBUG    [__main__] Debugging information
 INFO     [fsdb_rest_api] Debugging information
 """
 
-
 import logging
 import os
 import sys
