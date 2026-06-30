@@ -27,6 +27,13 @@
 A comprehensive logging utility module that provides flexible and configurable logging setup
 for Python applications, supporting both console and file-based logging with color formatting options.
 
+Environment Variable
+--------------------
+``ROMI_APP_LOGGER`` is an optional environment variable that can be used to override the default logger name.
+When ``ROMI_APP_LOGGER`` is defined, the ``get_logger`` function will use its value as the logger name instead
+of the module‑derived name. This allows a single logger configuration to be shared across multiple components
+of the ROMI application.
+
 Key Features
 ------------
 - Configurable log levels with sensible defaults
@@ -43,17 +50,29 @@ Usage Examples
 >>> from romitask.log import get_logger
 >>> logger = get_logger(__name__)
 >>> logger.info("Application started")
+INFO     [__main__] Application started
 >>> logger.error("An error occurred")
+ERROR    [__main__] An error occurred
 
 >>> # With custom configuration
->>> logger = get_logger(__name__, log_level="DEBUG", colored=True)
+>>> logger = get_logger(__name__, log_level="DEBUG")
 >>> logger.debug("Debugging information")
+DEBUG    [__main__] Debugging information
+
+>>> # With App logger
+>>> import os
+>>> logger = get_logger('MyApp', log_level="INFO")
+>>> os.environ.setdefault('ROMI_APP_LOGGER', 'fsdb_rest_api')
+>>> # Can be called by another module, the environment variable will override logger name
+>>> another_logger = get_logger('MyModule')
+>>> another_logger.info("Debugging information")
+INFO     [fsdb_rest_api] Debugging information
 """
 
 
 import logging
+import os
 import sys
-from datetime import datetime
 
 from colorlog import ColoredFormatter
 
@@ -65,17 +84,19 @@ LOG_LEVELS = set(logging._nameToLevel.keys()) - {"FATAL", "WARN"}
 DEFAULT_LOG_LEVEL = 'INFO'
 
 # Define the log message format for non-colored logs.
-# Includes the log level name, the logger name, the line number, and the log message itself.
-LOG_FMT = "%(levelname)-8s [%(name)s] l.%(lineno)d %(message)s"
+# Includes the log time, log level name, the logger name, the line number, and the log message itself.
+LOG_FMT = "{asctime} {levelname:<8} [{name}] l.{lineno} {message}"
 
 # Define the log message format for colored logs.
 # The color is dynamically applied using `log_color` and `bg_blue` and reset after styling.
-COLOR_LOG_FMT = "%(log_color)s%(levelname)-8s%(reset)s %(bg_blue)s[%(name)s]%(reset)s %(message)s"
+COLOR_LOG_FMT = "{log_color}{levelname:<8}{reset} {bg_blue}[{name}]{reset} {message}"
 
 # Create a standard logging formatter instance with the non-colored log format.
+# Uses Python's advanced `{}` string formatting style (specified by `style="{"`).
 FORMATTER = logging.Formatter(
     LOG_FMT,
-    style="%",
+    style="{",
+    datefmt='%Y-%m-%d_%H:%M:%S',
 )
 
 # Create a colored logging formatter instance for enhanced log readability in terminal outputs.
@@ -84,7 +105,7 @@ COLORED_FORMATTER = ColoredFormatter(
     COLOR_LOG_FMT,
     datefmt=None,  # No date is included in the log format.
     reset=True,  # Automatically reset styles applied to the log after each log message.
-    style='%',
+    style='{',  # Use the `{}` style of string formatting.
 )
 
 
@@ -157,7 +178,7 @@ def get_logger(logger_name, log_file=None, log_level=DEFAULT_LOG_LEVEL):
 
     Parameters
     ----------
-    name : str
+    logger_name : str
         A name to use for the logger.
         Typically derived from the module or component that generates the logs.
     log_file : str or pathlib.Path, optional
@@ -171,7 +192,8 @@ def get_logger(logger_name, log_file=None, log_level=DEFAULT_LOG_LEVEL):
     logging.Logger
         The configured logger instance ready to log messages with the specified settings.
     """
-    logger_name = logger_name.split(".")[-1]
+    name = logger_name.split(".")[-1]
+    logger_name = os.getenv('ROMI_APP_LOGGER', name)
     if not logging.getLogger(logger_name).hasHandlers():
         return _get_logger(logger_name, log_file=log_file, log_level=log_level)
     return logging.getLogger(logger_name)
@@ -210,99 +232,3 @@ def _get_logger(logger_name, log_file=None, log_level=DEFAULT_LOG_LEVEL):
     logger.propagate = False
 
     return logger
-
-
-def get_log_filename(task, date_fmt="%Y.%m.%d_%Hh%Mm%Ss"):
-    """Return a standardised log filename with the date and task name.
-
-    Parameters
-    ----------
-    task: str
-        The task name.
-    date_fmt: str
-        The date format string. Default is "%Y.%m.%d_%Hh%Mm%Ss".
-
-    Returns
-    -------
-    str
-        The standardised log filename.
-    """
-    now = datetime.now()
-    now_str = now.strftime(date_fmt)
-    # Get the log_file name, with the date & task name by default:
-    return f'{now_str}_{task.upper()}.log'
-
-
-DEFAULT_LOG_FILENAME = "romitask.log"
-DATE_FMT = "%Y-%m-%d %H:%M:%S"
-LOGGING_CFG = """
-[loggers]
-keys=root
-
-[logger_root]
-handlers=console,file
-qualname=root
-level={log_level}
-
-[handlers]
-keys=console,file
-
-[handler_file]
-class=logging.FileHandler
-formatter=simple
-level={log_level}
-args=('{logfile_path}','w')
-
-[handler_console]
-class=logging.StreamHandler
-formatter=color
-level={log_level}
-stream : ext://sys.stdout
-
-[formatters]
-keys=simple,color
-
-[formatter_simple]
-class=logging.Formatter
-format={simple_fmt}
-datefmt={date_fmt}
-
-[formatter_color]
-class=colorlog.ColoredFormatter
-format={colored_fmt}
-datefmt={date_fmt}
-"""
-
-
-def get_logging_config(**kwargs):
-    """Return the logging configuration.
-
-    Other Parameters
-    ----------------
-    log_level : {"DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"}
-        A valid logging level. Defaults to `DEFAULT_LOG_LEVEL`.
-    logfile_path : str
-        Path to the logging file to write. Defaults to `DEFAULT_LOG_FILENAME`.
-    date_fmt : str
-        String formatting for dates. Defaults to `DATE_FMT`.
-    colored_fmt : str
-        String formatting for console log messages. Defaults to `COLORED_FMT`.
-    simple_fmt : str
-        String formatting for file log messages. Defaults to `SIMPLE_FMT`.
-
-    Returns
-    -------
-    str
-        The logging configuration in configparser format.
-
-    Examples
-    --------
-    >>> from romitask.log import get_logging_config
-    >>> print(get_logging_config())
-    """
-    kwargs['log_level'] = kwargs.get('log_level', DEFAULT_LOG_LEVEL)
-    kwargs['logfile_path'] = kwargs.get('logfile_path', DEFAULT_LOG_FILENAME)
-    kwargs['date_fmt'] = kwargs.get('date_fmt', DATE_FMT)
-    kwargs['colored_fmt'] = kwargs.get('colored_fmt', COLOR_LOG_FMT)
-    kwargs['simple_fmt'] = kwargs.get('simple_fmt', LOG_FMT)
-    return LOGGING_CFG.format(**kwargs)
