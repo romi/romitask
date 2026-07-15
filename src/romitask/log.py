@@ -72,6 +72,7 @@ INFO     [fsdb_rest_api] Debugging information
 import logging
 import os
 import sys
+from datetime import datetime
 
 from colorlog import ColoredFormatter
 
@@ -231,3 +232,98 @@ def _get_logger(logger_name, log_file=None, log_level=DEFAULT_LOG_LEVEL):
     logger.propagate = False
 
     return logger
+
+def get_log_filename(task, date_fmt="%Y.%m.%d_%Hh%Mm%Ss"):
+    """Return a standardised log filename with the date and task name.
+
+    Parameters
+    ----------
+    task: str
+        The task name.
+    date_fmt: str
+        The date format string. Default is "%Y.%m.%d_%Hh%Mm%Ss".
+
+    Returns
+    -------
+    str
+        The standardised log filename.
+    """
+    now = datetime.now()
+    now_str = now.strftime(date_fmt)
+    # Get the log_file name, with the date & task name by default:
+    return f'{now_str}_{task.upper()}.log'
+
+
+DEFAULT_LOG_FILENAME = "romitask.log"
+DATE_FMT = "%Y-%m-%d %H:%M:%S"
+LOGGING_CFG = """
+[loggers]
+keys=root
+
+[logger_root]
+handlers=console,file
+qualname=root
+level={log_level}
+
+[handlers]
+keys=console,file
+
+[handler_file]
+class=logging.FileHandler
+formatter=simple
+level={log_level}
+args=('{logfile_path}','w')
+
+[handler_console]
+class=logging.StreamHandler
+formatter=color
+level={log_level}
+stream : ext://sys.stdout
+
+[formatters]
+keys=simple,color
+
+[formatter_simple]
+class=logging.Formatter
+format={simple_fmt}
+datefmt={date_fmt}
+
+[formatter_color]
+class=colorlog.ColoredFormatter
+format={colored_fmt}
+datefmt={date_fmt}
+"""
+
+
+def get_logging_config(**kwargs):
+    """Return the logging configuration.
+
+    Other Parameters
+    ----------------
+    log_level : {"DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"}
+        A valid logging level. Defaults to `DEFAULT_LOG_LEVEL`.
+    logfile_path : str
+        Path to the logging file to write. Defaults to `DEFAULT_LOG_FILENAME`.
+    date_fmt : str
+        String formatting for dates. Defaults to `DATE_FMT`.
+    colored_fmt : str
+        String formatting for console log messages. Defaults to `COLORED_FMT`.
+    simple_fmt : str
+        String formatting for file log messages. Defaults to `SIMPLE_FMT`.
+
+    Returns
+    -------
+    str
+        The logging configuration in configparser format.
+
+    Examples
+    --------
+    >>> from romitask.log import get_logging_config
+    >>> print(get_logging_config())
+    """
+    kwargs['log_level'] = kwargs.get('log_level', DEFAULT_LOG_LEVEL)
+    kwargs['logfile_path'] = kwargs.get('logfile_path', DEFAULT_LOG_FILENAME)
+    kwargs['date_fmt'] = kwargs.get('date_fmt', DATE_FMT)
+    kwargs['colored_fmt'] = kwargs.get('colored_fmt', COLOR_LOG_FMT)
+    kwargs['simple_fmt'] = kwargs.get('simple_fmt', LOG_FMT)
+    return LOGGING_CFG.format(**kwargs)
