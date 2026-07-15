@@ -255,9 +255,12 @@ def get_log_filename(task, date_fmt="%Y.%m.%d_%Hh%Mm%Ss"):
 
 
 DEFAULT_LOG_FILENAME = "romitask.log"
-# Define the log message format for non-colored logs.
+# Define the log message format for non-colored logs used by Luigi.
 # Includes the log time, log level name, the logger name, the line number, and the log message itself.
 LUIGI_LOG_FMT = "%(levelname)-8s [%(name)s] l.%(lineno)d %(message)s"
+# Define the log message format for colored logs used by Luigi.
+# The color is dynamically applied using `log_color` and `bg_blue` and reset after styling.
+LUIGI_COLOR_LOG_FMT = "{log_color}{levelname:<8}{reset} {bg_blue}[{name}]{reset} {message}"
 DATE_FMT = "%Y-%m-%d %H:%M:%S"
 LOGGING_CFG = """
 [loggers]
@@ -327,6 +330,6 @@ def get_logging_config(**kwargs):
     kwargs['log_level'] = kwargs.get('log_level', DEFAULT_LOG_LEVEL)
     kwargs['logfile_path'] = kwargs.get('logfile_path', DEFAULT_LOG_FILENAME)
     kwargs['date_fmt'] = kwargs.get('date_fmt', DATE_FMT)
-    kwargs['colored_fmt'] = kwargs.get('colored_fmt', COLOR_LOG_FMT)
+    kwargs['colored_fmt'] = kwargs.get('colored_fmt', LUIGI_COLOR_LOG_FMT)
     kwargs['simple_fmt'] = kwargs.get('simple_fmt', LUIGI_LOG_FMT)
     return LOGGING_CFG.format(**kwargs)
