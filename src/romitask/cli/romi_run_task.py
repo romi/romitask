@@ -571,6 +571,9 @@ def run_task(dataset_path, task, config, **kwargs):
             logger.info(f"Luigi command to call is:\n{cmd}")
         else:
             t_start = time.time()
+            logger.debug(f"Running luigi command: {cmd}")
+            logger.debug(f"Using locally defined varenv: {env}")
+            logger.debug(f"Using globally defined varenv: {os.environ}")
             # System‑wide variables (`os.environ`) overwrite any duplicate keys from the custom `env` dict
             p = subprocess.run(cmd, env={**env, **os.environ}, check=True)
             delta = timedelta(seconds=time.time() - t_start)
@@ -604,7 +607,7 @@ def main():
 
     # - Configure a logger from this application:
     global logger
-    logger = get_logger(LOGGER_NAME)
+    logger = get_logger(LOGGER_NAME, log_level=args.log_level)
 
     # - If only one path in the list, get the first one:
     if len(args.dataset_path) == 1:
