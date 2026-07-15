@@ -255,6 +255,9 @@ def get_log_filename(task, date_fmt="%Y.%m.%d_%Hh%Mm%Ss"):
 
 
 DEFAULT_LOG_FILENAME = "romitask.log"
+# Define the log message format for non-colored logs.
+# Includes the log time, log level name, the logger name, the line number, and the log message itself.
+LUIGI_LOG_FMT = "%(levelname)-8s [%(name)s] l.%(lineno)d %(message)s"
 DATE_FMT = "%Y-%m-%d %H:%M:%S"
 LOGGING_CFG = """
 [loggers]
@@ -325,5 +328,5 @@ def get_logging_config(**kwargs):
     kwargs['logfile_path'] = kwargs.get('logfile_path', DEFAULT_LOG_FILENAME)
     kwargs['date_fmt'] = kwargs.get('date_fmt', DATE_FMT)
     kwargs['colored_fmt'] = kwargs.get('colored_fmt', COLOR_LOG_FMT)
-    kwargs['simple_fmt'] = kwargs.get('simple_fmt', LOG_FMT)
+    kwargs['simple_fmt'] = kwargs.get('simple_fmt', LUIGI_LOG_FMT)
     return LOGGING_CFG.format(**kwargs)
