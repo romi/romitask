@@ -260,7 +260,7 @@ DEFAULT_LOG_FILENAME = "romitask.log"
 LUIGI_LOG_FMT = "%(levelname)-8s [%(name)s] l.%(lineno)d %(message)s"
 # Define the log message format for colored logs used by Luigi.
 # The color is dynamically applied using `log_color` and `bg_blue` and reset after styling.
-LUIGI_COLOR_LOG_FMT = "{log_color}{levelname:<8}{reset} {bg_blue}[{name}]{reset} {message}"
+LUIGI_COLOR_LOG_FMT = "%(log_color)s%(levelname)-8s%(reset)s %(bg_blue)s[%(name)s]%(reset)s %(message)s"
 DATE_FMT = "%Y-%m-%d %H:%M:%S"
 LOGGING_CFG = """
 [loggers]
