@@ -113,15 +113,16 @@ def parsing():
                         help="Use this to test the command-line by doing everything except calling the task(s).")
 
     # DB Authentication
-    parser.add_argument('--db-user', dest='db_user', type=str, default=None,
+    auth = parser.add_argument_group("Authentication options")
+    auth.add_argument('-u', '--user', dest='db_user', type=str, default=None,
                         help="Username for FSDB login.")
-    parser.add_argument('--db-password', dest='db_password', type=str, default=None,
+    auth.add_argument('-p', '--password', dest='db_password', type=str, default=None,
                         help="Password for FSDB login.")
-    parser.add_argument('--no-auth', dest='no_auth', action="store_true",
+    auth.add_argument('--no-auth', dest='no_auth', action="store_true",
                         help="Use a database with automatic 'admin' user log in, for testing purposes only.")
 
     # Luigi related arguments:
-    luigi = parser.add_argument_group("luigi options")
+    luigi = parser.add_argument_group("Luigi options")
     luigi.add_argument('--luigicmd', dest='luigicmd', type=str, default=LUIGI_CMD,
                        help=f"Luigi command, defaults to `{LUIGI_CMD}`.")
     luigi.add_argument('--local-scheduler', dest='ls', action="store_true", default=True,
