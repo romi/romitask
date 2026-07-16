@@ -50,7 +50,6 @@ References
 
 """
 
-import argparse
 import copy
 import glob
 import os
@@ -60,10 +59,13 @@ import sys
 import tempfile
 import time
 from datetime import timedelta
+from logging import Logger
 from logging import getLogger
 from pathlib import Path
 
+import click
 import toml
+from click_option_group import optgroup
 from dotenv import dotenv_values
 
 from romitask import PIPE_TOML
@@ -607,86 +609,152 @@ def run_task(dataset_path, task, config, **kwargs):
     return
 
 
-def main():
-    # - Parse the input arguments to variables:
-    parser = parsing()
-    args = parser.parse_args()
-
+@click.command(
+    context_settings=dict(help_option_names=['-h', '--help']),
+    help=f"Run a ROMI task on selected dataset.\n\n"
+         f"The list of pre-defined tasks is: {', '.join(TASKS)}.\n\n"
+         f"See {HELP_URL} for a detailed help with CLI."
+)
+@click.argument('task', type=str)
+@click.argument('dataset_path', nargs=-1, type=str)
+@click.option(
+    '--config',
+    default="",
+    help="Pipeline configuration file (TOML) or directory. "
+         "If a file, read the configuration from it. "
+         "If a directory, read & concatenate all configuration files in it. "
+         "By default, search a 'pipeline.toml' file in the selected dataset directory."
+)
+@click.option(
+    '--module',
+    default=None,
+    help="Library and module of the task. "
+         "Use it if not available or different than defined in `romitask.modules.MODULES`."
+)
+@click.option(
+    '--log-level',
+    type=click.Choice(LOG_LEVELS, case_sensitive=False),
+    default='INFO',
+    help="Level of message logging, defaults to 'INFO'."
+)
+@click.option(
+    '--dry-run',
+    is_flag=True,
+    help="Use this to test the command-line by doing everything except calling the task(s)."
+)
+@optgroup.group('Authentication options')
+@optgroup.option(
+    '-u', '--user',
+    'db_user',
+    default=None,
+    help="Username for FSDB login."
+)
+@optgroup.option(
+    '-p', '--password',
+    'db_password',
+    default=None,
+    help="Password for FSDB login."
+)
+@optgroup.option(
+    '--no-auth',
+    is_flag=True,
+    help="Use a database with automatic 'admin' user log in, for testing purposes only."
+)
+@optgroup.group('Luigi options')
+@optgroup.option(
+    '--luigicmd',
+    default=LUIGI_CMD,
+    help=f"Luigi command, defaults to `{LUIGI_CMD}`."
+)
+@optgroup.option(
+    '--local-scheduler',
+    'local_scheduler',
+    is_flag=True,
+    default=True,
+    help="Use the local luigi scheduler, defaults to `True`."
+)
+def main(task, dataset_path, config, module, log_level, dry_run,
+         db_user, db_password, no_auth, luigicmd, local_scheduler):
+    """Main CLI entry point."""
     # - Configure a logger from this application:
     global logger
-    logger = get_logger(LOGGER_NAME, log_level=args.log_level)
+    logger = get_logger(LOGGER_NAME, log_level=log_level)
 
-    # - If only one path in the list, get the first one:
-    if len(args.dataset_path) == 1:
-        args.dataset_path = args.dataset_path[0]
+    # Convert dataset_path tuple to appropriate format
+    if len(dataset_path) == 0:
+        dataset_path = ''
+    elif len(dataset_path) == 1:
+        dataset_path = dataset_path[0]
+    else:
+        dataset_path = list(dataset_path)
 
-    if args.task in DATA_CREATION_TASK:
+    if task in DATA_CREATION_TASK:
         # These are "data creation modules", we thus require a single path to dataset...
         try:
-            assert isinstance(args.dataset_path, str)
+            assert isinstance(dataset_path, str)
         except AssertionError:
-            logger.critical(f"Task '{args.task}' requires the `dataset_path` to be a string.")
-            logger.critical(f"Got '{args.dataset_path}'!")
-            sys.exit(f"Error with input dataset path for '{args.task}' module!")
+            logger.critical(f"Task '{task}' requires the `dataset_path` to be a string.")
+            logger.critical(f"Got '{dataset_path}'!")
+            sys.exit(f"Error with input dataset path for '{task}' module!")
         else:
-            folders = args.dataset_path
+            folders = dataset_path
     else:
         # Other modules are "data processing modules", they can accept multiple path to dataset...
-        if isinstance(args.dataset_path, str):
-            # Process the input string `args.dataset_path` with ``glob``:
+        if isinstance(dataset_path, str):
+            # Process the input string `dataset_path` with ``glob``:
             #   - check existence of path:
             #   - may contain UNIX matching symbols (like '*' or '?'):
-            folders = glob.glob(args.dataset_path)
+            folders = glob.glob(dataset_path)
             # Resolve path (make it absolute & normalize):
             folders = [Path(path).resolve() for path in folders]
             # Check that globed paths are directory (and exist, implied):
             folders = sorted([path for path in folders if path.is_dir()])
-        elif isinstance(args.dataset_path, list):
+        elif isinstance(dataset_path, list):
             # Resolve path (make it absolute & normalize):
-            folders = [Path(path).resolve() for path in args.dataset_path]
+            folders = [Path(path).resolve() for path in dataset_path]
             # Check that listed paths are directory (and exist, implied):
             folders = sorted([path for path in folders if path.is_dir()])
         else:
-            logger.critical(f"Can not understand input dataset path: '{args.dataset_path}'")
-            sys.exit(f"Error with input dataset path for '{args.task}' module!")
+            logger.critical(f"Can not understand input dataset path: '{dataset_path}'")
+            sys.exit(f"Error with input dataset path for '{task}' module!")
         # If only one element in list, make it a plain str:
         if len(folders) == 1:
             folders = folders[0]
 
-    def _dataset_path_error(args):
-        logger.critical(f"Could not obtain a valid path from input dataset path: '{args.dataset_path}'!")
-        sys.exit(f"Error with input dataset path for '{args.task}' module!")
+    def _dataset_path_error(dataset_path):
+        logger.critical(f"Could not obtain a valid path from input dataset path: '{dataset_path}'!")
+        sys.exit(f"Error with input dataset path for '{task}' module!")
 
     # Some tasks may accept to work without a dataset:
-    if args.task not in NO_DATASET_TASK:
+    if task not in NO_DATASET_TASK:
         # If a pathlib.Path instance, it should exist:
         if isinstance(folders, Path) and not folders.exists():
-            _dataset_path_error(args)
+            _dataset_path_error(dataset_path)
         # If a list instance, it should not be empty:
         if isinstance(folders, list) and len(folders) == 0:
-            _dataset_path_error(args)
+            _dataset_path_error(dataset_path)
 
     # Finally, we can call the main `run_task` method:
     if isinstance(folders, list):
         ## For each folder:
         dataset = [folder.name for folder in folders]
         logger.info(f"Got a list of {len(folders)} scan dataset to analyze: {', '.join(dataset)}")
-        for dataset_path in folders:
+        for dataset_path_item in folders:
             print("\n")  # to facilitate the search in the console by separating the datasets
-            logger.info(f"Processing dataset '{Path(dataset_path).name}'.")
+            logger.info(f"Processing dataset '{Path(dataset_path_item).name}'.")
             try:
-                run_task(dataset_path, args.task, args.config,
-                         log_level=args.log_level, luigicmd=args.luigicmd, module=args.module,
-                         local_scheduler=args.ls, dry_run=args.dry_run,
-                         no_auth=args.no_auth, db_user=args.db_user, db_password=args.db_password)
+                run_task(dataset_path_item, task, config,
+                         log_level=log_level, luigicmd=luigicmd, module=module,
+                         local_scheduler=local_scheduler, dry_run=dry_run,
+                         no_auth=no_auth, db_user=db_user, db_password=db_password)
             except Exception as e:
                 print(e)
     else:
         ## For the folder:
-        run_task(folders, args.task, args.config,
-                 log_level=args.log_level, luigicmd=args.luigicmd, module=args.module,
-                 local_scheduler=args.ls, dry_run=args.dry_run,
-                 no_auth=args.no_auth, db_user=args.db_user, db_password=args.db_password)
+        run_task(folders, task, config,
+                 log_level=log_level, luigicmd=luigicmd, module=module,
+                 local_scheduler=local_scheduler, dry_run=dry_run,
+                 no_auth=no_auth, db_user=db_user, db_password=db_password)
 
 
 if __name__ == '__main__':
