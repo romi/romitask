@@ -2542,7 +2542,9 @@ If <code>module</code> is not <code>None</code>, check it exists.</p>
 <span class="normal">726</span>
 <span class="normal">727</span>
 <span class="normal">728</span>
-<span class="normal">729</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@click</span><span class="o">.</span><span class="n">command</span><span class="p">(</span>
+<span class="normal">729</span>
+<span class="normal">730</span>
+<span class="normal">731</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@click</span><span class="o">.</span><span class="n">command</span><span class="p">(</span>
     <span class="n">context_settings</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span><span class="n">help_option_names</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;-h&#39;</span><span class="p">,</span> <span class="s1">&#39;--help&#39;</span><span class="p">]),</span>
     <span class="n">help</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;Run a ROMI task on selected dataset.</span><span class="se">\n\n</span><span class="s2">&quot;</span>
          <span class="sa">f</span><span class="s2">&quot;The list of pre-defined tasks is: </span><span class="si">{</span><span class="s1">&#39;, &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">TASKS</span><span class="p">)</span><span class="si">}</span><span class="s2">.</span><span class="se">\n\n</span><span class="s2">&quot;</span>
@@ -2578,11 +2580,13 @@ If <code>module</code> is not <code>None</code>, check it exists.</p>
 <span class="nd">@optgroup</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="s1">&#39;Authentication options&#39;</span><span class="p">)</span>
 <span class="nd">@optgroup</span><span class="o">.</span><span class="n">option</span><span class="p">(</span>
     <span class="s1">&#39;-u&#39;</span><span class="p">,</span> <span class="s1">&#39;--user&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;db_user&#39;</span><span class="p">,</span>
     <span class="n">default</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
     <span class="n">help</span><span class="o">=</span><span class="s2">&quot;Username for FSDB login.&quot;</span>
 <span class="p">)</span>
 <span class="nd">@optgroup</span><span class="o">.</span><span class="n">option</span><span class="p">(</span>
     <span class="s1">&#39;-p&#39;</span><span class="p">,</span> <span class="s1">&#39;--password&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;db_password&#39;</span><span class="p">,</span>
     <span class="n">default</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
     <span class="n">help</span><span class="o">=</span><span class="s2">&quot;Password for FSDB login.&quot;</span>
 <span class="p">)</span>
