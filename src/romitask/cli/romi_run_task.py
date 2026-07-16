@@ -608,11 +608,13 @@ def run_task(dataset_path: str | Path,
 @optgroup.group('Authentication options')
 @optgroup.option(
     '-u', '--user',
+    'db_user',
     default=None,
     help="Username for FSDB login."
 )
 @optgroup.option(
     '-p', '--password',
+    'db_password',
     default=None,
     help="Password for FSDB login."
 )
