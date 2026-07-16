@@ -62,6 +62,9 @@ from datetime import timedelta
 from logging import Logger
 from logging import getLogger
 from pathlib import Path
+from typing import Any
+from typing import Literal
+from typing import Optional
 
 import click
 import toml
@@ -85,59 +88,16 @@ LUIGI_CMD = "luigi"
 HELP_URL = "https://docs.romi-project.eu/plant_imager/tutorials/basics/"
 LOGGER_NAME = 'romi_run_task'
 
-
-def parsing():
-    parser = argparse.ArgumentParser(
-        description="Run a ROMI task on selected dataset.",
-        formatter_class=argparse.RawDescriptionHelpFormatter,
-        epilog=f"The list of pre-defined tasks is: {', '.join(TASKS)}.\n" + \
-               f"See {HELP_URL} for a detailed help with CLI.")
-
-    # Positional arguments:
-    parser.add_argument('task', metavar='task', type=str,
-                        help=f"Name of the ROMI task to run. See the list of pre-defined tasks below.")
-    parser.add_argument('dataset_path', type=str, default='', nargs='*',
-                        help="""Path to the dataset to process (directory).
-                        You may use Unix pattern matching with "*" and "?" to select a list of dataset.""")
-
-    # Optional arguments:
-    parser.add_argument('--config', dest='config', type=str, default="",
-                        help="""Pipeline configuration file (TOML) or directory.
-                        If a file, read the configuration from it.
-                        If a directory, read & concatenate all configuration files in it.
-                        By default, search a 'pipeline.toml' file in the selected dataset directory.""")
-    parser.add_argument('--module', dest='module', type=str, default=None,
-                        help="""Library and module of the task.
-                        Use it if not available or different than defined in `romitask.modules.MODULES`.""")
-    parser.add_argument('--log-level', dest='log_level', type=str, default='INFO', choices=LOG_LEVELS,
-                        help="Level of message logging, defaults to 'INFO'.")
-    parser.add_argument('--dry-run', dest='dry_run', action="store_true",
-                        help="Use this to test the command-line by doing everything except calling the task(s).")
-
-    # DB Authentication
-    auth = parser.add_argument_group("Authentication options")
-    auth.add_argument('-u', '--user', dest='db_user', type=str, default=None,
-                        help="Username for FSDB login.")
-    auth.add_argument('-p', '--password', dest='db_password', type=str, default=None,
-                        help="Password for FSDB login.")
-    auth.add_argument('--no-auth', dest='no_auth', action="store_true",
-                        help="Use a database with automatic 'admin' user log in, for testing purposes only.")
-
-    # Luigi related arguments:
-    luigi = parser.add_argument_group("Luigi options")
-    luigi.add_argument('--luigicmd', dest='luigicmd', type=str, default=LUIGI_CMD,
-                       help=f"Luigi command, defaults to `{LUIGI_CMD}`.")
-    luigi.add_argument('--local-scheduler', dest='ls', action="store_true", default=True,
-                       help="Use the local luigi scheduler, defaults to `True`.")
-    return parser
+# Type aliases for readability
+LogLevel = Literal["DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"]
 
 
-def load_backup_scan_cfg(path):
+def load_backup_scan_cfg(path: str | Path) -> dict:
     """Try to load ``SCAN_TOML`` configuration from path.
 
     Parameters
     ----------
-    path : str
+    path : str or pathlib.Path
         Where the ``SCAN_TOML`` configuration file should be.
 
     Returns
@@ -153,7 +113,7 @@ def load_backup_scan_cfg(path):
     return bak_scan_config
 
 
-def load_backup_pipe_cfg(dataset_path, task, logger):
+def load_backup_pipe_cfg(dataset_path: Path, task: str, logger: Logger) -> dict:
     """Try to load ``PIPE_TOML`` configuration from path.
 
     Parameters
@@ -184,13 +144,13 @@ def load_backup_pipe_cfg(dataset_path, task, logger):
     return bak_pipe_config
 
 
-def load_config_from_directory(path, logger):
+def load_config_from_directory(path: str | Path, logger: Logger) -> dict:
     """Load TOML & JSON configuration files from path.
 
     Parameters
     ----------
-    path : str
-        Path to where the configuration file(s) should be.
+    path : str or pathlib.Path
+        The path to where the configuration file(s) should be.
     logger : logging.Logger
         The logger to use with this method.
 
@@ -228,13 +188,13 @@ def load_config_from_directory(path, logger):
     return config
 
 
-def load_config_from_file(path, logger):
+def load_config_from_file(path: str | Path, logger: Logger) -> dict:
     """Load TOML configuration file from path.
 
     Parameters
     ----------
     path : str or pathlib.Path
-        Path to the configuration file to load.
+        The path to the configuration file to load.
     logger : logging.Logger
         The logger to use with this method.
 
@@ -263,7 +223,7 @@ def load_config_from_file(path, logger):
     return config
 
 
-def get_task_module(task, logger, module=None):
+def get_task_module(task: str, logger: Logger, module: Optional[str] = None) -> str:
     """Set the name of the `module` to be loaded for the selected `task`.
 
     Parameters
@@ -309,12 +269,12 @@ def get_task_predefined_module(task: str, logger) -> str:
     return module
 
 
-def create_backup_cfg(path, cfgname, config):
+def create_backup_cfg(path: str | Path, cfgname: str, config: dict) -> str:
     """Create the backup configuration file used by luigi.
 
     Parameters
     ----------
-    path : str
+    path : str or pathlib.Path
         Where to save the backup configuration file used by luigi.
     cfgname : str
         Name of the backup configuration file.
@@ -365,13 +325,13 @@ def create_backup_cfg(path, cfgname, config):
     return file_path
 
 
-def check_dataset_directory(path, task, logger):
+def check_dataset_directory(path: Path, task: str, logger: Logger) -> str:
     """Check the dataset directory is correctly defined depending on the `task` to execute.
 
     Parameters
     ----------
     path : pathlib.Path
-        Path to the dataset to check.
+        The path to the dataset to check.
     task : str
         Name of the task to execute by luigi.
     logger : logging.Logger
@@ -410,7 +370,7 @@ def check_dataset_directory(path, task, logger):
     return cfgname
 
 
-def update_config(config, update):
+def update_config(config: dict, update: dict) -> dict:
     """Update a configuration dictionary.
 
     Parameters
@@ -439,7 +399,10 @@ def update_config(config, update):
     return config
 
 
-def run_task(dataset_path, task, config, **kwargs):
+def run_task(dataset_path: str | Path,
+             task: str,
+             config: str | Path | dict,
+             **kwargs: Any) -> None:
     """Load the configuration to use and call the luigi command to run the selected task.
 
     Parameters
@@ -528,7 +491,7 @@ def run_task(dataset_path, task, config, **kwargs):
         log_fname = kwargs.get('log_fname', get_log_filename(task))
         # - Get logging configuration string for luigi, specifying the log file name :
         logging_config = get_logging_config(log_level=log_level,
-                                            logfile_path=os.path.join(tmpd , log_fname))
+                                            logfile_path=os.path.join(tmpd, log_fname))
         # - Create a "logging.cfg" file to be used by `luigi`:
         logging_file_path = os.path.join(tmpd, "logging.cfg")
         with open(logging_file_path, 'w') as f:
@@ -645,13 +608,11 @@ def run_task(dataset_path, task, config, **kwargs):
 @optgroup.group('Authentication options')
 @optgroup.option(
     '-u', '--user',
-    'db_user',
     default=None,
     help="Username for FSDB login."
 )
 @optgroup.option(
     '-p', '--password',
-    'db_password',
     default=None,
     help="Password for FSDB login."
 )
@@ -673,8 +634,19 @@ def run_task(dataset_path, task, config, **kwargs):
     default=True,
     help="Use the local luigi scheduler, defaults to `True`."
 )
-def main(task, dataset_path, config, module, log_level, dry_run,
-         db_user, db_password, no_auth, luigicmd, local_scheduler):
+def main(
+        task: str,
+        dataset_path: tuple[str, ...],
+        config: str,
+        module: Optional[str],
+        log_level: LogLevel,
+        dry_run: bool,
+        db_user: Optional[str],
+        db_password: Optional[str],
+        no_auth: bool,
+        luigicmd: str,
+        local_scheduler: bool
+):
     """Main CLI entry point."""
     # - Configure a logger from this application:
     global logger
