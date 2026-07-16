@@ -81,6 +81,7 @@ from romitask.modules import DATA_CREATION_TASK
 from romitask.modules import MODULES
 from romitask.modules import NO_DATASET_TASK
 from romitask.modules import TASKS
+from romitask.task_defaults import update_config_with_defaults
 from romitask.utils import get_version
 from romitask.utils import parse_kbdi
 
@@ -462,6 +463,9 @@ def run_task(dataset_path: str | Path,
             config = bak_pipe_config
             logger.info("Using a PREVIOUS pipeline configuration!")
 
+    # Update the loaded config undefined task values with default task values from classes implementation
+    config = update_config_with_defaults(config, MODULES)
+
     # - Look for "local" PIPELINE configuration file(s) to load:
     local_path = copy.copy(dataset_path)
     local_toml = list(local_path.glob('*.toml'))
@@ -585,7 +589,7 @@ def run_task(dataset_path: str | Path,
     default="",
     help="Pipeline configuration file (TOML) or directory. "
          "If a file, read the configuration from it. "
-         "If a directory, read & concatenate all configuration files in it. "
+         "If a directory, read & concatenate all TOML configuration files in it. "
          "By default, search a 'pipeline.toml' file in the selected dataset directory."
 )
 @click.option(
