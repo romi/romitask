@@ -143,6 +143,9 @@ def get_all_task_defaults(module_path: Path | str) -> dict[str, dict[str, Any]]:
     ``default`` keyword (or the first positional argument when ``default`` is not
     explicitly named).
 
+    The function also traverses the inheritance hierarchy and collects attributes
+    from parent classes, with child class attributes overriding parent class attributes.
+
     Parameters
     ----------
     module_path : pathlib.Path or str
@@ -175,12 +178,14 @@ def get_all_task_defaults(module_path: Path | str) -> dict[str, dict[str, Any]]:
       attribute is omitted.
     * The search includes all classes in the module, regardless of inheritance
       hierarchy.
+    * For classes with inheritance, attributes are collected from parent classes
+      first, then overridden by child class attributes. Parent classes may be
+      defined in different modules.
 
     See Also
     --------
     get_class_defaults : Extract defaults from a single class given source code.
-    merge_config_with_defaults : Combine a configuration dictionary with defaults
-        obtained from task classes.
+    merge_config_with_defaults : Combine a configuration dictionary with defaults obtained from task classes.
 
     Examples
     --------
@@ -199,7 +204,7 @@ def get_all_task_defaults(module_path: Path | str) -> dict[str, dict[str, Any]]:
     >>> print(defaults)
     {'Colmap': {'upstream_task': 'ImagesFilesetExists', 'query': {}, 'colmap_exe': 'roboticsmicrofarms/colmap', 'matcher': 'exhaustive', 'use_gpu': True, 'single_camera': True, 'compute_dense': False, 'alignment_max_error': 10, 'align_pcd': True, 'camera_model': 'SIMPLE_RADIAL', 'bounding_box': None, 'cli_args': {}, 'intrinsic_calibration_scan_id': '', 'extrinsic_calibration_scan_id': '', 'use_calibration_camera': True, 'qc_check': True, 'mad_factor': 3.0, 'metrics': ['xy', 'z', 'pan', 'roll'], 'distance_threshold': 3.0, 'fixed_distance_threshold': 1.0, 'angle_threshold': 5.0, 'fixed_angle_threshold': 3.5, 'max_blind_angle': 30.0, 'retry_count': 10, 'retry': 0}}
     """
-    # Resolve ``module_path`` which may be a file system path or a dotted module name.
+    # - Resolve ``module_path`` which may be a file system path or a dotted module name.
     if isinstance(module_path, Path):
         module_file = module_path
     else:
@@ -216,12 +221,12 @@ def get_all_task_defaults(module_path: Path | str) -> dict[str, dict[str, Any]]:
                 raise ValueError(f"Unable to locate module '{module_path}'.")
             module_file = Path(spec.origin)
 
-    # Parse the source file
+    # - Parse the source file
     with open(module_file, 'r') as f:
         source_code = f.read()
     tree = ast.parse(source_code)
 
-    # Build a map of *module‑level* constants (e.g. `{'COLMAP_EXE': "/usr/bin/colmap"}`)
+    # - Build a map of *module‑level* constants (e.g. `{'COLMAP_EXE': "/usr/bin/colmap"}`)
     global_consts: dict[str, Any] = {}
     for node in tree.body:
         if isinstance(node, ast.Assign):
@@ -239,8 +244,8 @@ def get_all_task_defaults(module_path: Path | str) -> dict[str, dict[str, Any]]:
                 if const_val is not None:
                     global_consts[const_name] = const_val
 
-    # Build a map of imported names → (module, original_name)
-    #      Handles both ``import module`` and ``from mod import name as alias``.
+    # - Build a map of imported names → (module, original_name)
+    # Handles both ``import module`` and ``from mod import name as alias``.
     import_map: dict[str, tuple[str, str]] = {}
     for node in tree.body:
         if isinstance(node, ast.Import):
@@ -254,17 +259,17 @@ def get_all_task_defaults(module_path: Path | str) -> dict[str, dict[str, Any]]:
                 asname = alias.asname or alias.name
                 import_map[asname] = (node.module, alias.name)  # ``from module import name``
 
-    # Walk the tree and extract class defaults, passing the globals map
-    all_defaults: dict[str, dict[str, Any]] = {}
+    # - Build a map of class definitions for quick lookup
+    class_map: dict[str, ast.ClassDef] = {}
     for node in ast.walk(tree):
-        if not isinstance(node, ast.ClassDef):
-            continue
+        if isinstance(node, ast.ClassDef):
+            class_map[node.name] = node
 
-        class_name = node.name
+    # - Helper function to extract class defaults from a single ClassDef node
+    def extract_class_defaults(class_node: ast.ClassDef) -> dict[str, Any]:
         defaults: dict[str, Any] = {}
-
-        for item in node.body:
-            # 1. Plain assignment:  attr = <value>
+        for item in class_node.body:
+            # 1. Plain assignment: "attr = <value>"
             if isinstance(item, ast.Assign):
                 for target in item.targets:
                     if isinstance(target, ast.Name):
@@ -273,20 +278,114 @@ def get_all_task_defaults(module_path: Path | str) -> dict[str, dict[str, Any]]:
                                                              globals_map=global_consts,
                                                              import_map=import_map)
 
-            # 2. Annotated assignment:  attr: type = <value>
+            # 2. Annotated assignment: "attr: type = <value>"
             elif isinstance(item, ast.AnnAssign) and isinstance(item.target, ast.Name):
                 if item.value is not None:
                     attr_name = item.target.id
                     defaults[attr_name] = _extract_value(item.value,
                                                          globals_map=global_consts,
                                                          import_map=import_map)
+        try:
+            defaults.pop('scan_id')
+        except KeyError:
+            pass
+        return defaults
 
-        # Keep only classes that yielded at least one default
+    # - Helper function to resolve base class and get its defaults
+    def get_base_class_defaults(base_node: ast.AST) -> dict[str, Any]:
+        """
+        Given a base class reference in the AST, attempt to load its defaults.
+
+        Returns a dictionary of defaults from the base class, or an empty dict if
+        the base class cannot be resolved.
+        """
+        base_defaults: dict[str, Any] = {}
+
+        # Case 1: Simple name (e.g., class Child(Parent))
+        if isinstance(base_node, ast.Name):
+            base_class_name = base_node.id
+            # Check if it's defined in the same module
+            if base_class_name in class_map:
+                base_defaults = extract_class_defaults(class_map[base_class_name])
+                # Recursively get parent's parent defaults
+                parent_defaults = get_inherited_defaults(class_map[base_class_name])
+                parent_defaults.update(base_defaults)
+                return parent_defaults
+            # Check if it's imported
+            elif base_class_name in import_map:
+                mod_name, orig_name = import_map[base_class_name]
+                try:
+                    # Recursively get all defaults from the imported module
+                    parent_all_defaults = get_all_task_defaults(mod_name)
+                    actual_name = orig_name or base_class_name
+                    if actual_name in parent_all_defaults:
+                        base_defaults = parent_all_defaults[actual_name]
+                except Exception:
+                    pass
+
+        # Case 2: Attribute (e.g., class Child(module.Parent))
+        elif isinstance(base_node, ast.Attribute):
+            # Build the full dotted name
+            parts: list[str] = []
+            cur = base_node
+            while isinstance(cur, ast.Attribute):
+                parts.append(cur.attr)
+                cur = cur.value
+            if isinstance(cur, ast.Name):
+                parts.append(cur.id)
+
+                # Try to resolve the module
+                base_module = parts[-1]
+                if base_module in import_map:
+                    mod_name, _ = import_map[base_module]
+                    class_name = parts[-2] if len(parts) > 1 else None
+                    if class_name:
+                        try:
+                            parent_all_defaults = get_all_task_defaults(mod_name)
+                            if class_name in parent_all_defaults:
+                                base_defaults = parent_all_defaults[class_name]
+                        except Exception:
+                            pass
+
+        return base_defaults
+
+    # - Helper function to get all inherited defaults for a class
+    def get_inherited_defaults(class_node: ast.ClassDef) -> dict[str, Any]:
+        """
+        Recursively collect defaults from all parent classes.
+
+        Returns a dictionary with defaults from all ancestors, with more specific
+        (child) classes overriding more general (parent) classes.
+        """
+        inherited: dict[str, Any] = {}
+
+        # Process base classes in order (left to right in the class definition)
+        for base in class_node.bases:
+            base_defaults = get_base_class_defaults(base)
+            inherited.update(base_defaults)
+
+        return inherited
+
+    # - Walk the tree and extract class defaults, passing the globals & import map
+    all_defaults: dict[str, dict[str, Any]] = {}
+    for node in ast.walk(tree):
+        if not isinstance(node, ast.ClassDef):
+            continue
+
+        class_name = node.name
+
+        # Start with inherited defaults from parent classes
+        defaults = get_inherited_defaults(node)
+
+        # Then add/override with this class's own defaults
+        class_defaults = extract_class_defaults(node)
+        defaults.update(class_defaults)
+
+        # - Keep only classes that yielded at least one default
         if defaults:
             all_defaults[class_name] = defaults
 
     return all_defaults
-
 
 def _load_module_globals(module_name: str) -> dict[str, Any]:
     """
