@@ -355,7 +355,7 @@ def check_dataset_directory(path: Path, task: str, logger: Logger) -> str:
 
     Notes
     -----
-    If a "Scan" like tasks is required, a directory should be created to receive the created fileset.
+    If a "Scan" like task is required, a directory should be created to receive the created fileset.
     Else, the dataset directory should exist as an existing fileset will be processed.
     """
     if task == "ScannerToCenter":
@@ -399,14 +399,17 @@ def update_config(config: dict, update: dict) -> dict:
     Notes
     -----
     We update only the values from the update dictionary without removing any existing keys.
-
     """
-    from collections.abc import Mapping
-    for k, v in update.items():
-        if isinstance(v, Mapping):
-            config[k] = update_config(config.get(k, {}), v)
-        else:
-            config[k] = v
+    for task_name, task_params in update.items():
+        for tp_name, tp_value in task_params.items():
+            try:
+                if not config.get(task_name):
+                    config[task_name] = {}
+                config[task_name][tp_name] = tp_value
+            except TypeError:
+                print(f"Could not update '{task_name}.{tp_name}': {tp_value}")
+                print(f"{config[task_name][tp_name]=}")
+                raise
     return config
 
 
@@ -485,15 +488,16 @@ def run_task(dataset_path: str | Path,
     local_toml = [f for f in local_toml if f.name != SCAN_TOML]  # exclude SCAN backup TOML config
     local_toml = [f for f in local_toml if f.name != PIPE_TOML]  # exclude PIPELINE backup TOML config
     # - Load the local configuration from detected file(s):
-    local_config = {}
     if len(local_toml) > 0:
+        local_config = {}
         logger.info(f"Found {len(local_toml)} local TOML configuration file{'s' if len(local_toml) > 1 else ''}!")
         for f in local_toml:
-            local_config.update(load_config_from_file(str(f), logger=logger))
+           local_config = update_config(local_config, load_config_from_file(str(f), logger=logger))
         if local_config != {}:
             logger.info(f"Got local definitions for: {list(local_config.keys())}")
+            logger.debug(f"{local_config=}")
             # Update the given PIPELINE configuration with the local configuration:
-            update_config(config, local_config)
+            config = update_config(config, local_config)
             logger.info("Updated given configuration with local definitions!")
 
     # Apply CLI override (manual definition of parameters)
@@ -554,10 +558,10 @@ def run_task(dataset_path: str | Path,
 
         # - Print or Start the configured pipeline:
         if kwargs.get('dry_run', False):
-            logger.info(f"Luigi command to call is:\n{cmd}")
+            logger.info(f"Luigi command to call is:\n{' '.join(list(map(str, cmd)))}")
         else:
             t_start = time.time()
-            logger.debug(f"Running luigi command: {cmd}")
+            logger.info(f"Running luigi command:\n{' '.join(list(map(str, cmd)))}")
             logger.debug(f"Using locally defined varenv: {env}")
             logger.debug(f"Using globally defined varenv: {os.environ}")
             # System‑wide variables (`os.environ`) overwrite any duplicate keys from the custom `env` dict
