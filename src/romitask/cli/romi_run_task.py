@@ -413,6 +413,7 @@ def update_config(config: dict, update: dict) -> dict:
 def run_task(dataset_path: str | Path,
              task: str,
              config: str | Path | dict,
+             cfg_override: dict[str, Any] | None = None,
              **kwargs: Any) -> None:
     """Load the configuration to use and call the luigi command to run the selected task.
 
@@ -424,6 +425,8 @@ def run_task(dataset_path: str | Path,
         The name of the task to execute by luigi.
     config : pathlib.Path or str or dict
         The configuration path or dictionary.
+    cfg_override : dict, optional
+        A configuration dictionary that defines tasks and parameters that override the values from `config`.
 
     Other Parameters
     ----------------
@@ -492,8 +495,11 @@ def run_task(dataset_path: str | Path,
             # Update the given PIPELINE configuration with the local configuration:
             update_config(config, local_config)
             logger.info("Updated given configuration with local definitions!")
-        else:
-            logger.error(f"Failed to load local TOML configuration file{'s' if len(local_toml) > 1 else ''}!")
+
+    # Apply CLI override (manual definition of parameters)
+    if cfg_override:
+        for task_override, param_override in cfg_override.items():
+            config[task_override] = {**config.get(task_override, {}), **param_override}
 
     # - Set the name of the module to be loaded for the selected task:
     module = get_task_module(task, logger=logger, module=kwargs.get("module", None))
@@ -603,6 +609,12 @@ def run_task(dataset_path: str | Path,
          "By default, search a 'pipeline.toml' file in the selected dataset directory."
 )
 @click.option(
+    '--cfg',
+    'cfg_override',
+    default="",
+    help="Override configuration file using specific parameters, e.g. \"Clean.keep_task='Masks'\"."
+)
+@click.option(
     '--module',
     default=None,
     help="Library and module of the task. "
@@ -654,6 +666,7 @@ def main(
         task: str,
         dataset_path: tuple[str, ...],
         config: str,
+        cfg_override: str,
         module: Optional[str],
         log_level: LogLevel,
         dry_run: bool,
@@ -722,6 +735,16 @@ def main(
         if isinstance(folders, list) and len(folders) == 0:
             _dataset_path_error(dataset_path)
 
+    # Try to parse the cfg_override string or default to `None`
+    if cfg_override:
+        try:
+            cfg_override = tomlkit.loads(cfg_override)
+        except Exception as e:
+            logger.critical(f"Could not parse a TOML config from '{cfg_override}': {e}")
+            cfg_override = None
+    else:
+        cfg_override = None
+
     # Finally, we can call the main `run_task` method:
     if isinstance(folders, list):
         ## For each folder:
@@ -731,7 +754,7 @@ def main(
             print("\n")  # to facilitate the search in the console by separating the datasets
             logger.info(f"Processing dataset '{Path(dataset_path_item).name}'.")
             try:
-                run_task(dataset_path_item, task, config,
+                run_task(dataset_path_item, task, config, cfg_override,
                          log_level=log_level, luigicmd=luigicmd, module=module,
                          local_scheduler=local_scheduler, dry_run=dry_run,
                          no_auth=no_auth, db_user=db_user, db_password=db_password)
@@ -739,7 +762,7 @@ def main(
                 print(e)
     else:
         ## For the folder:
-        run_task(folders, task, config,
+        run_task(folders, task, config, cfg_override,
                  log_level=log_level, luigicmd=luigicmd, module=module,
                  local_scheduler=local_scheduler, dry_run=dry_run,
                  no_auth=no_auth, db_user=db_user, db_password=db_password)
