@@ -103,6 +103,10 @@ def get_class_defaults(source_code: str, class_name: str) -> dict[str, Any]:
     for node in ast.walk(tree):
         if isinstance(node, ast.ClassDef) and node.name == class_name:
             for item in node.body:
+                try:
+                    ast.literal_eval(item.value)
+                except (AttributeError, ValueError, TypeError):
+                    continue
                 # Look for simple assignments at class level
                 if isinstance(item, ast.Assign):
                     for target in item.targets:
@@ -204,7 +208,10 @@ def get_all_task_defaults(module_path: Path | str) -> dict[str, dict[str, Any]]:
             module_file = Path(module_path)
         else:
             # Assume it is a Python module name; locate the source file via importlib.
-            spec = importlib.util.find_spec(module_path)
+            try:
+                spec = importlib.util.find_spec(module_path)
+            except ModuleNotFoundError:
+                return {}
             if spec is None or spec.origin is None:
                 raise ValueError(f"Unable to locate module '{module_path}'.")
             module_file = Path(spec.origin)
@@ -338,7 +345,7 @@ def _load_module_globals(module_name: str) -> dict[str, Any]:
     """
     try:
         spec = importlib.util.find_spec(module_name)
-    except ModuleNotFoundError:
+    except (ModuleNotFoundError, ValueError):
         return {}
 
     if spec is None or spec.origin is None:
