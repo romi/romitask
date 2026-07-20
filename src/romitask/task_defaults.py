@@ -274,11 +274,42 @@ def _extract_value(node: ast.AST) -> Any:
             # Try to find a ``default`` keyword argument
             for kw in node.keywords:
                 if kw.arg == "default":
-                    return _safe_literal_eval(kw.value)
+                    # If the default is a simple literal, evaluate it
+                    val = _safe_literal_eval(kw.value)
+                    if val is not None:
+                        return val
+                    # If the default is a Name (e.g. a class reference), return its identifier as a string
+                    if isinstance(kw.value, ast.Name):
+                        return kw.value.id
+                    # If the default is an Attribute (e.g. module.Class), return the dotted name
+                    if isinstance(kw.value, ast.Attribute):
+                        parts = []
+                        cur = kw.value
+                        while isinstance(cur, ast.Attribute):
+                            parts.append(cur.attr)
+                            cur = cur.value
+                        if isinstance(cur, ast.Name):
+                            parts.append(cur.id)
+                        return ".".join(reversed(parts))
 
             # If no explicit keyword, luigi often uses the first positional arg as default
             if node.args:
-                return _safe_literal_eval(node.args[0])
+                # Evaluate first positional arg if possible
+                val = _safe_literal_eval(node.args[0])
+                if val is not None:
+                    return val
+                # Handle Name or Attribute similarly to keyword case
+                if isinstance(node.args[0], ast.Name):
+                    return node.args[0].id
+                if isinstance(node.args[0], ast.Attribute):
+                    parts = []
+                    cur = node.args[0]
+                    while isinstance(cur, ast.Attribute):
+                        parts.append(cur.attr)
+                        cur = cur.value
+                    if isinstance(cur, ast.Name):
+                        parts.append(cur.id)
+                    return ".".join(reversed(parts))
 
     # If we reach this point, we couldn't evaluate the expression
     return None
