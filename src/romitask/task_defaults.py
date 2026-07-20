@@ -14,6 +14,8 @@ This module makes it easy to keep configuration files up‑to‑date without man
 - **Bulk processing**: `get_all_task_defaults` scans an entire module and returns a mapping of every class to its defaults.
 - **Configuration merging**: `merge_config_with_defaults` combines a user‑provided dictionary (e.g., loaded from TOML) with the discovered defaults, preserving user overrides.
 - **TOML update helper**: `update_toml_with_defaults` reads a TOML file, merges in defaults, and writes the result back to disk (in‑place or to a new file).
+- **Module‑level constant handling and import mapping**: map top‑level constants defined in the inspected file and map imported symbols (both `import module` and `from module import name`).
+  These maps are used to resolve references such as `COLMAP_EXE` or imported constants, ensuring that default values referencing other modules or constants are correctly evaluated.
 
 ## Usage Examples
 
@@ -26,12 +28,14 @@ This module makes it easy to keep configuration files up‑to‑date without man
 >>> module_path = 'romitask.task'
 >>> # 1. Extract defaults from a task module
 >>> defaults = get_all_task_defaults(module_path)
->>> print(defaults)  # {'Clean': {'upstream_task': None, 'no_confirm': False, ...}, ...}
+>>> print(defaults["Clean"])
+{'upstream_task': None, 'no_confirm': False, 'keep_metadata': [], 'keep_pipeline_cfg': True, 'keep_task': ''}
 >>>
 >>> # 2. Merge with an existing configuration (e.g., loaded from a TOML file)
->>> config = {"Clean": {"no_confirm": True}}  # user‑provided overrides
+>>> config = {"Clean": {"no_confirm": True, "undefined_param": None}}  # user‑provided overrides
 >>> merged = merge_config_with_defaults(config, defaults)
->>> print(merged["Clean"])  # {'upstream_task': None, 'no_confirm': True, ...}
+>>> print(merged["Clean"])  # Note the absence on the undefined parameter 'undefined_param'
+{'upstream_task': None, 'no_confirm': True, 'keep_metadata': [], 'keep_pipeline_cfg': True, 'keep_task': ''}
 >>>
 >>> # 3. Update the configuration from a TOML file
 >>> pipe_cfg = update_toml_with_defaults(Path('configs/geom_pipe_real.toml'))
