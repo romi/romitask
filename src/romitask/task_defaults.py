@@ -128,7 +128,7 @@ def get_all_task_defaults(module_path: Path | str) -> dict[str, dict[str, Any]]:
 
     The function parses the source file at ``module_path`` using the ``ast`` module,
     walks the abstract syntax tree, and collects attributes that can be safely
-    evaluated with :func:`ast.literal_eval`.  In addition to plain assignments
+    evaluated with `ast.literal_eval`.  In addition to plain assignments
     (e.g. ``attr = 10``) and annotated assignments (e.g. ``attr: int = 5``), it now
     recognises *luigi* parameters such as ``luigi.BoolParameter(default=False)`` or
     ``luigi.ListParameter(default=[])`` and extracts the value passed to the
@@ -279,14 +279,64 @@ def get_all_task_defaults(module_path: Path | str) -> dict[str, dict[str, Any]]:
 
 def _load_module_globals(module_name: str) -> dict[str, Any]:
     """
-    Load the source file of *module_name* and return a mapping of its
-    top‑level constant assignments (those that can be evaluated with
-    ``ast.literal_eval`` or simple expressions like os.environ.get()).
-    This is used as a fallback when an imported name cannot be obtained
-    via ``importlib.import_module`` because the attribute is a complex
-    expression defined in the module.
+    Load the source file for *module_name* and return a mapping of its top‑level
+    constant assignments.
+
+    The function parses the module's source code using `ast` and extracts
+    assignments that can be safely evaluated with ``ast.literal_eval`` or simple
+    expressions such as ``os.environ.get``.  It performs two passes:
+
+    1. **First pass** – collect literals and simple annotated values.
+    2. **Second pass** – attempt to evaluate expressions that reference
+       constants discovered in the first pass (e.g. ``CONST_A = 1`` followed by
+       ``CONST_B = CONST_A + 2``).
+
+    This utility is used as a fallback when an imported name cannot be obtained
+    via `importlib.import_module` because the attribute is defined as a
+    complex expression in the module.
+
+    Parameters
+    ----------
+    module_name : str
+        The fully‑qualified name of the module to inspect (e.g. ``'my_pkg.utils'``).
+
+    Returns
+    -------
+    dict[str, Any]
+        A dictionary mapping constant names to their evaluated values.
+        If the module cannot be found, cannot be read, or no evaluable constants are
+        present, an empty dictionary is returned.
+
+    Raises
+    ------
+    None
+        The function never raises; any failure (missing file, parse error,
+        evaluation error) results in an empty mapping being returned.
+
+    Notes
+    -----
+    * Only top‑level assignments are considered; constants defined inside
+      functions or classes are ignored.
+    * Evaluation is deliberately conservative – if a value cannot be safely
+      interpreted, it is skipped rather than executing arbitrary code.
+    * Environment variable lookups via ``os.environ.get`` or ``os.getenv`` are
+      supported and will return the value from the environment (or the provided default).
+
+    Examples
+    --------
+    >>> from romitask.task_defaults import _load_module_globals
+    >>> consts = _load_module_globals('romitask.task')
+    >>> consts.get('IMAGES_MD')
+    ['pose', 'approximate_pose', 'channel', 'shot_id', 'camera']
+    >>> # When the module does not exist, an empty dict is returned
+    >>> _load_module_globals('non.existent.module')
+    {}
     """
-    spec = importlib.util.find_spec(module_name)
+    try:
+        spec = importlib.util.find_spec(module_name)
+    except ModuleNotFoundError:
+        return {}
+
     if spec is None or spec.origin is None:
         return {}
 
