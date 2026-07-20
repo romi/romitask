@@ -273,7 +273,7 @@ def get_task_predefined_module(task: str, logger) -> str:
     return module
 
 
-def create_backup_cfg(path: str | Path, cfgname: str, config: dict) -> str:
+def create_backup_cfg(path: str | Path, cfgname: str, config: dict[str, dict[str, Any]]) -> str:
     """Create the backup configuration file used by luigi.
 
     Parameters
@@ -321,8 +321,14 @@ def create_backup_cfg(path: str | Path, cfgname: str, config: dict) -> str:
                          "not_run": 25, "task_failed": 30,
                          "scheduling_error": 35, "unhandled_exception": 40}
 
-    # Save the libraries version:
+    # Save the version number for each ROMI library:
     config["version"] = get_version()
+
+    compat_cfg = copy.copy(config)
+    for task_name, task_params in compat_cfg.items():
+        # Convert any list or dict task parameter value to a string for compatibility:
+        compat_cfg[task_name] = {param_name: str(param) if isinstance(param, (list, dict)) else param for param_name, param in task_params.items()}
+        compat_cfg[task_name] = {param_name: param for param_name, param in task_params.items() if param}
 
     with open(file_path, 'w') as f:
         tomlkit.dump(compat_cfg, f)
