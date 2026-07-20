@@ -67,7 +67,7 @@ from typing import Literal
 from typing import Optional
 
 import click
-import toml
+import tomlkit
 from click_option_group import optgroup
 from dotenv import dotenv_values
 
@@ -108,8 +108,8 @@ def load_backup_scan_cfg(path: str | Path) -> dict:
     """
     scan_last_cfg = os.path.join(path, SCAN_TOML)
     bak_scan_config = {}
-    if os.path.isfile(scan_last_cfg):
-        bak_scan_config = toml.load(scan_last_cfg)
+    with open(scan_last_cfg, "r", encoding="utf-8") as f:
+        bak_scan_config = tomlkit.load(f)
 
     return bak_scan_config
 
@@ -140,7 +140,8 @@ def load_backup_pipe_cfg(dataset_path: Path, task: str, logger: Logger) -> dict:
             logger.critical(f"Task '{task}' was called with dataset '{dataset_path}'!")
             logger.critical(f"It contains a processing pipeline configuration backup file!")
             sys.exit(f"Requested {task} task in non-empty folder, clean it up or change location!")
-        bak_pipe_config = toml.load(bak_pipe_path)
+        with open(bak_pipe_path, "r", encoding="utf-8") as f:
+            bak_pipe_config = tomlkit.load(f)
 
     return bak_pipe_config
 
@@ -179,7 +180,8 @@ def load_config_from_directory(path: str | Path, logger: Logger) -> dict:
     # Read TOML configs
     for f in toml_list:
         try:
-            c = toml.load(f)
+            with open(f, "r", encoding="utf-8") as fp:
+                c = tomlkit.load(fp)
             config.update(c)  # update the config with the new one
         except:
             logger.warning(f"Could not process TOML config file: {f}")
@@ -212,7 +214,8 @@ def load_config_from_file(path: str | Path, logger: Logger) -> dict:
         logger.critical(f"Could not configuration find file: '{path.absolute()}'")
     # Try to load the TOML configuration file:
     try:
-        config = toml.load(path)
+        with open(path, "r", encoding="utf-8") as f:
+            config = tomlkit.load(f)
     except:
         if not path.suffix == ".toml":
             logger.critical(f"Could not load TOML configuration file '{path}'!")
@@ -322,7 +325,8 @@ def create_backup_cfg(path: str | Path, cfgname: str, config: dict) -> str:
     config["version"] = get_version()
 
     with open(file_path, 'w') as f:
-        toml.dump(config, f)
+        tomlkit.dump(compat_cfg, f)
+
     return file_path
 
 
