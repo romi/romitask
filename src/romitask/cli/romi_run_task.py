@@ -23,31 +23,49 @@
 # <https://www.gnu.org/licenses/>.
 # ------------------------------------------------------------------------------
 
-"""ROMI tasks CLI.
+"""
+# CLI to execute ROMI Luigi tasks
 
-It is intended to be used as the main program to run the various tasks defined in ``MODULES``.
+A lightweight wrapper that launches ROMI‑specific Luigi tasks from the command line (or programmatically).
+It loads and merges configuration files, validates dataset directories, prepares logging, sets up environment variables, and finally invokes Luigi with the appropriate module and task.
+This makes complex pipeline execution simple, reproducible, and portable.
 
-It uses ``luigi`` paradigm with ``Task``, ``Target`` & ``Parameters`` defined
-for each ``RomiTask`` in their module.
+## Key Features
 
-The program uses two config files stored in the root scan dataset folder:
+- **Unified CLI entry point** (`romi_run_task.py`) to run any pre‑defined ROMI task.
+- **Automatic configuration handling**: loads backup `scan.toml` / `pipeline.toml`, merges multiple local TOML files, and applies CLI overrides.
+- **Dynamic module resolution**: selects the correct Python module for a task, with optional manual override.
+- **Dataset validation**: ensures the dataset directory matches the expectations of the selected task (creation vs. processing).
+- **Robust logging**: generates per‑task log files, configurable log level, and temporary logging configuration passed to Luigi.
+- **Environment preparation**: injects `.env` variables, sets `LUIGI_CONFIG_PATH`, `PYOPENCL_CTX`, and optional DB authentication flags.
+- **Dry‑run mode**: prints the full Luigi command without executing it, useful for debugging.
+- **Authentication options**: support for DB credentials or a “no‑auth” testing mode.
+- **Local scheduler by default**: runs the Luigi scheduler locally unless overridden.
+- **Programmatic API**: `run_task()` can be called from Python code for tighter integration.
 
-  - ``scan.toml``: the last configuration used with the 'Scan' module;
-  - ``pipeline.toml``: the last configuration used with any other module.
+## Usage Examples
 
+### 1. Command‑line execution
+Run a `Scan` task to create a dataset `scan01` located at `/data/ROMI/` with a custom configuration:
 
-They define tasks parameters that will override the default tasks parameters
-using luigi's "config ingestion" [^1] and ROMI configuration classes.
+```shell
+romi_run_task Scan /data/ROMI/scan01 --config /path/to/my/config.toml
+```
 
-The tasks "CalibrationScan", "IntrinsicCalibrationScan", "Scan" & "VirtualScan"
-requires a non-existent or empty dataset directory.
-The other tasks requires a dataset directory populated by images from one of
-the previously named task.
+### 2. Programmatic use from Python
+```python
+>>> from pathlib import Path
+>>> from romitask.cli.romi_run_task import run_task
+>>> dataset = Path("/data/scan01")
+>>> config_path = "/path/to/config.toml"
+>>> run_task(dataset_path=dataset, task="Scan", config=config_path, db_user="my_user", db_password="secret")
+```
+
+The call performs the same steps as the CLI, loading configurations, preparing logging, and invoking Luigi.
 
 References
 ----------
 [^1]: https://luigi.readthedocs.io/en/stable/configuration.html#parameters-from-config-ingestion
-
 """
 
 import copy
@@ -94,7 +112,7 @@ LogLevel = Literal["DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"]
 
 
 def load_backup_scan_cfg(path: str | Path) -> dict:
-    """Try to load ``SCAN_TOML`` configuration from path.
+    """Try to load a ``SCAN_TOML`` configuration from the given path.
 
     Parameters
     ----------
@@ -104,7 +122,7 @@ def load_backup_scan_cfg(path: str | Path) -> dict:
     Returns
     -------
     dict
-        The configuration dictionary, if loaded from backup file.
+        The configuration dictionary, if loaded from a backup file.
     """
     scan_last_cfg = os.path.join(path, SCAN_TOML)
     bak_scan_config = {}
@@ -115,7 +133,7 @@ def load_backup_scan_cfg(path: str | Path) -> dict:
 
 
 def load_backup_pipe_cfg(dataset_path: Path, task: str, logger: Logger) -> dict:
-    """Try to load ``PIPE_TOML`` configuration from path.
+    """Try to load a ``PIPE_TOML`` configuration from the given path.
 
     Parameters
     ----------
@@ -129,7 +147,7 @@ def load_backup_pipe_cfg(dataset_path: Path, task: str, logger: Logger) -> dict:
     Returns
     -------
     dict
-        The configuration dictionary, if loaded from backup file.
+        The configuration dictionary, if loaded from a backup file.
     """
     bak_pipe_path = dataset_path / PIPE_TOML
     bak_pipe_config = {}
@@ -147,7 +165,7 @@ def load_backup_pipe_cfg(dataset_path: Path, task: str, logger: Logger) -> dict:
 
 
 def load_config_from_directory(path: str | Path, logger: Logger) -> dict:
-    """Load TOML & JSON configuration files from path.
+    """Load the TOML & JSON configuration files from the given path.
 
     Parameters
     ----------
@@ -192,7 +210,7 @@ def load_config_from_directory(path: str | Path, logger: Logger) -> dict:
 
 
 def load_config_from_file(path: str | Path, logger: Logger) -> dict:
-    """Load TOML configuration file from path.
+    """Load the TOML configuration file from the given path.
 
     Parameters
     ----------
@@ -293,7 +311,6 @@ def create_backup_cfg(path: str | Path, cfgname: str, config: dict[str, dict[str
     Notes
     -----
     We append "return codes" and "library versioning" to the given configuration dictionary.
-
     """
     file_path = os.path.join(path, cfgname)
 
@@ -437,7 +454,7 @@ def run_task(dataset_path: str | Path,
         A logger to use with this method, default to the global logger named `LOGGER_NAME`.
     log_fname : str
         The log file name to use.
-        Defaults to use the standardised log filename with the date and task name from `get_log_filename`.
+        Defaults to use the standardized log filename with the date and task name from `get_log_filename`.
     log_level : {'DEBUG', 'INFO', 'WARNING', 'ERROR', 'CRITICAL'}
         The logging level to use, defaults to 'INFO'.
     luigicmd : str
