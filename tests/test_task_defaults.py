@@ -766,10 +766,10 @@ class TestUpdateTomlWithDefaults(unittest.TestCase):
         self.module_file.write_text(source)
 
         # Write a TOML config file
-        import toml
+        import tomlkit
         config = {"TaskA": {"param1": 20}}
         with open(self.toml_file, "w") as f:
-            toml.dump(config, f)
+            tomlkit.dump(config, f)
 
         # Define module mapping
         module_mapping = {"TaskA": self.module_file}
@@ -792,13 +792,13 @@ class TestUpdateTomlWithDefaults(unittest.TestCase):
 
     def test_invalid_toml_syntax(self):
         """Test that invalid TOML syntax raises TomlDecodeError."""
-        import toml
+        from tomlkit.exceptions import ParseError
 
         # Write invalid TOML content
         self.toml_file.write_text("[[invalid toml")
 
         # Should raise TomlDecodeError
-        with self.assertRaises(toml.TomlDecodeError):
+        with self.assertRaises(ParseError):
             task_defaults.update_toml_with_defaults(self.toml_file)
 
 
@@ -842,13 +842,13 @@ class TestIntegrationScenarios(unittest.TestCase):
         self.module_file.write_text(source)
 
         # Write initial TOML config
-        import toml
+        import tomlkit
         config = {
             "TaskA": {"retry": 5},  # override
             "TaskB": {"count": 20}  # override
         }
         with open(self.toml_file, "w") as f:
-            toml.dump(config, f)
+            tomlkit.dump(config, f)
 
         # Step 1: Extract defaults from module
         defaults = task_defaults.get_all_task_defaults(self.module_file)
