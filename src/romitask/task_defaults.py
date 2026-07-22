@@ -51,7 +51,7 @@ import os
 from pathlib import Path
 from typing import Any
 
-import toml
+import tomlkit
 
 from romitask.modules import MODULES
 
@@ -819,10 +819,10 @@ def update_config_with_defaults(
 
     Examples
     --------
-    >>> import toml
+    >>> import tomlkit
     >>> from pathlib import Path
     >>> from romitask.task_defaults import update_config_with_defaults
-    >>> with open('configs/geom_pipe_real.toml') as f: config = toml.load(f)
+    >>> with open('configs/geom_pipe_real.toml') as f: config = tomlkit.load(f)
     >>> print(config['Clean'])
     {'no_confirm': True}
     >>> updated_config = update_config_with_defaults(config)
@@ -886,6 +886,6 @@ def update_toml_with_defaults(
     """
     # Load existing config
     with open(toml_path, 'r') as f:
-        config = toml.load(f)
+        config = tomlkit.load(f)
 
     return update_config_with_defaults(config, module_mapping)

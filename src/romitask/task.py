@@ -1068,7 +1068,7 @@ class Clean(RomiTask):
             Dictionary mapping task names to their upstream task names.
             For example: {"Masks": "Undistort", "Voxels": "Masks", ...}
         """
-        import toml
+        import tomlkit
         from romitask.task_defaults import update_config_with_defaults
         from romitask.modules import MODULES
 
@@ -1080,7 +1080,7 @@ class Clean(RomiTask):
 
         task_dependencies = {}
         try:
-            config = toml.load(backup_path)
+            config = tomlkit.load(backup_path)
             # Update the loaded config undefined task values with default task values from classes implementation
             config = update_config_with_defaults(config, MODULES)
 

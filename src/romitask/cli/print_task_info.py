@@ -32,7 +32,7 @@ import json
 import os
 
 import numpy as np
-import toml
+import tomlkit
 
 from romitask.modules import TASKS
 
@@ -275,7 +275,7 @@ def list_configured_tasks(toml_conf):
 def main():
     args = parsing().parse_args()
 
-    config = toml.load(os.path.join(args.db_path, "pipeline.toml"))
+    config = tomlkit.load(os.path.join(args.db_path, "pipeline.toml"))
     # conf_tasks = list_configured_tasks(config)
     print(f"# -- Summary of task {args.task}:")
     print("# - Used TOML configuration:")
