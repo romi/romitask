@@ -481,17 +481,21 @@ def run_task(dataset_path: str | Path,
 
     # - Process given PIPELINE configuration directory OR file, if any:
     if isinstance(config, dict):
+        # Use directly the given config dictionary:
         logger.info("Loading configuration from dictionary.")
     elif os.path.isdir(config):
+        # Load all config files from the given directory, if any, to a single config dictionary:
         config = load_config_from_directory(config, logger=logger)
     elif os.path.isfile(config):
+        # Load config file to a config dictionary:
         config = load_config_from_file(config, logger=logger)
     elif config != "":
         logger.critical(f"Could not understand `config` option '{config}'!")
         sys.exit("Error with configuration file!")
     else:
-        if bak_pipe_config is None:
-            logger.info("Using NO configuration!")
+        if not bak_pipe_config:
+            config = {}
+            logger.warning("Using full default configuration!")
         else:
             config = bak_pipe_config
             logger.info("Using a PREVIOUS pipeline configuration!")
@@ -501,7 +505,7 @@ def run_task(dataset_path: str | Path,
 
     # - Look for "local" PIPELINE configuration file(s) to load:
     local_path = copy.copy(dataset_path)
-    local_toml = list(local_path.glob('*.toml'))
+    local_toml = sorted(local_path.glob('*.toml'), reverse=True)  # maintain resolution order, priority goes from first to last in alphabetical order
     local_toml = [f for f in local_toml if f.name != SCAN_TOML]  # exclude SCAN backup TOML config
     local_toml = [f for f in local_toml if f.name != PIPE_TOML]  # exclude PIPELINE backup TOML config
     # - Load the local configuration from detected file(s):
