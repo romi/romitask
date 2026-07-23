@@ -21,730 +21,148 @@ This module makes it easy to keep configuration files up‑to‑date without man
 
 ```python
 >>> from pathlib import Path
->>> from romitask.task_defaults import get_all_task_defaults
+>>> from romitask.task_defaults import get_task_defaults
 >>> from romitask.task_defaults import merge_config_with_defaults
 >>> from romitask.task_defaults import update_toml_with_defaults
 >>>
 >>> module_path = 'romitask.task'
 >>> # 1. Extract defaults from a task module
->>> defaults = get_all_task_defaults(module_path)
->>> print(defaults["Clean"])
+>>> defaults = get_task_defaults("Clean", module_path)
+>>> print(defaults)
 {'upstream_task': None, 'no_confirm': False, 'keep_metadata': [], 'keep_pipeline_cfg': True, 'keep_task': ''}
 >>>
 >>> # 2. Merge with an existing configuration (e.g., loaded from a TOML file)
 >>> config = {"Clean": {"no_confirm": True, "undefined_param": None}}  # user‑provided overrides
->>> merged = merge_config_with_defaults(config, defaults)
->>> print(merged["Clean"])  # Note the absence on the undefined parameter 'undefined_param'
+>>> merged = merge_config_with_defaults(config["Clean"], defaults)
+>>> print(merged)  # Note the absence on the undefined parameter 'undefined_param'
 {'upstream_task': None, 'no_confirm': True, 'keep_metadata': [], 'keep_pipeline_cfg': True, 'keep_task': ''}
 >>>
 >>> # 3. Update the configuration from a TOML file
->>> pipe_cfg = update_toml_with_defaults(Path('configs/geom_pipe_real.toml'))
+>>> pipe_cfg = update_toml_with_defaults(Path('../configs/geom_pipe_real.toml'))
 >>> print(pipe_cfg['Clean'])
 {'upstream_task': None, 'no_confirm': True, 'keep_metadata': [], 'keep_pipeline_cfg': True, 'keep_task': ''}
 ```
 
 """
 
-import ast
 import importlib.util
-import os
 from pathlib import Path
 from typing import Any
 
 import tomlkit
+from luigi.task_register import Register
 
 from romitask.modules import MODULES
 
 
-def get_class_defaults(source_code: str, class_name: str) -> dict[str, Any]:
+def get_task_defaults(task_name: str, module_path: Path | str) -> dict[str, Any]:
     """
-    Extract default class attributes from a Python source string.
+    Extract default parameter values from a task class in a specified module.
+
+    This function dynamically imports a module, retrieves a task class by name,
+    and extracts its default parameter values.
 
     Parameters
     ----------
-    source_code : str
-        The complete source code of a Python module as a single string.
-    class_name : str
-        Name of the class whose class‑level defaults should be extracted.
+    task_name : str
+        The name of the task class to retrieve from the module. This should be
+        an exact match to the class name as defined in the module.
+    module_path : Path or str
+        The import path to the module containing the task class. Can be provided
+        as a string (e.g., 'package.subpackage.module') or as a Path object.
+        Must be a valid Python module path.
 
     Returns
     -------
     dict[str, Any]
-        Mapping from the attribute name to its default value for the specified class.
-        Only attributes that can be evaluated by `ast.literal_eval` are included;
-        attributes with complex expressions are ignored.
-
-    Notes
-    -----
-    * The function walks the AST of ``source_code`` and looks for ``ast.ClassDef`` nodes matching ``class_name``.
-    * It supports both plain assignments (e.g. ``attr = 10``) and annotated
-      assignments with a value (e.g. ``attr: int = 5``).
-    * Attributes whose values cannot be safely evaluated with
-      ``ast.literal_eval`` (e.g., calls or comprehensions) are silently skipped.
-    * The search stops after the first matching class definition is found.
-
-    Examples
-    --------
-    >>> from romitask.task_defaults import get_class_defaults
-    >>> source = '''
-    ... class Example:
-    ...     count = 42
-    ...     name: str = "test"
-    ...     # Complex expression (ignored)
-    ...     value = [i for i in range(3)]
-    ... '''
-    >>> defaults = get_class_defaults(source, "Example")
-    >>> print(defaults)
-    {'count': 42, 'name': 'test'}
-    """
-    tree = ast.parse(source_code)
-    defaults = {}
-
-    for node in ast.walk(tree):
-        if isinstance(node, ast.ClassDef) and node.name == class_name:
-            for item in node.body:
-                try:
-                    ast.literal_eval(item.value)
-                except (AttributeError, ValueError, TypeError):
-                    continue
-                # Look for simple assignments at class level
-                if isinstance(item, ast.Assign):
-                    for target in item.targets:
-                        if isinstance(target, ast.Name):
-                            attr_name = target.id
-                            # Extract the value
-                            value = ast.literal_eval(item.value)
-                            defaults[attr_name] = value
-                # Handle annotated assignments (e.g., attr: str = "value")
-                elif isinstance(item, ast.AnnAssign) and isinstance(item.target, ast.Name):
-                    if item.value is not None:
-                        attr_name = item.target.id
-                        try:
-                            value = ast.literal_eval(item.value)
-                            defaults[attr_name] = value
-                        except (ValueError, TypeError):
-                            pass
-            break
-
-    return defaults
-
-
-def get_all_task_defaults(module_path: Path | str) -> dict[str, dict[str, Any]]:
-    """
-    Extract default class attributes from all classes defined in a Python module,
-    including defaults of *luigi* parameter objects.
-
-    The function parses the source file at ``module_path`` using the ``ast`` module,
-    walks the abstract syntax tree, and collects attributes that can be safely
-    evaluated with `ast.literal_eval`.  In addition to plain assignments
-    (e.g. ``attr = 10``) and annotated assignments (e.g. ``attr: int = 5``), it now
-    recognises *luigi* parameters such as ``luigi.BoolParameter(default=False)`` or
-    ``luigi.ListParameter(default=[])`` and extracts the value passed to the
-    ``default`` keyword (or the first positional argument when ``default`` is not
-    explicitly named).
-
-    The function also traverses the inheritance hierarchy and collects attributes
-    from parent classes, with child class attributes overriding parent class attributes.
-
-    Parameters
-    ----------
-    module_path : pathlib.Path or str
-        Path to the Python module file whose classes should be inspected.
-
-    Returns
-    -------
-    dict[str, dict[str, Any]]
-        Mapping from class name to a dictionary of attribute names and their
-        evaluated default values.  Only classes that define at least one
-        evaluable attribute are included in the result.
+        A dictionary mapping parameter names to their default values.
 
     Raises
     ------
-    FileNotFoundError
-        If ``module_path`` does not point to an existing file.
-    PermissionError
-        If the file cannot be read due to insufficient permissions.
+    ModuleNotFoundError
+        If the specified module_path does not exist or cannot be imported.
+    AttributeError
+        If the task_name does not exist as an attribute in the specified module.
+    TypeError
+        If the task class is not a ``luigi.task_register.Register`` instance.
 
     Notes
     -----
-    * The function does **not** execute any code from the target module; it
-      only analyses the static source tree, making it safe for untrusted input.
-    * Attributes with values that cannot be represented by ``ast.literal_eval``
-      (e.g., function calls, list comprehensions, lambda expressions) are
-      skipped without raising an exception, unless they are recognised *luigi*
-      parameter calls.
-    * For *luigi* parameters the parser extracts the ``default`` argument.  If
-      the argument cannot be evaluated (e.g., it is a complex expression), the
-      attribute is omitted.
-    * The search includes all classes in the module, regardless of inheritance
-      hierarchy.
-    * For classes with inheritance, attributes are collected from parent classes
-      first, then overridden by child class attributes. Parent classes may be
-      defined in different modules.
+    The 'scan_id' parameter is explicitly excluded from the results.
+    Special handling is applied to different parameter types:
 
-    See Also
-    --------
-    get_class_defaults : Extract defaults from a single class given source code.
-    merge_config_with_defaults : Combine a configuration dictionary with defaults obtained from task classes.
+    - dictionaries and lists are converted to strings,
+    - type objects are converted to their string names,
 
     Examples
     --------
     >>> from pathlib import Path
-    >>> from romitask.task_defaults import get_all_task_defaults
-    >>> defaults = get_all_task_defaults('romitask.task')
-    >>> print(defaults['Clean'])
-    {'upstream_task': None, 'no_confirm': False, 'keep_metadata': [], 'keep_pipeline_cfg': True, 'keep_task': ''}
-    >>> defaults = get_all_task_defaults(Path('romitask/src/romitask/task.py'))
-    >>> print(defaults['Clean'])
-    {'upstream_task': None, 'no_confirm': False, 'keep_metadata': [], 'keep_pipeline_cfg': True, 'keep_task': ''}
-    >>> defaults = get_all_task_defaults('plant3dvision.tasks.voxel_reconstruction')
+    >>> from romitask.task_defaults import get_task_defaults
+    >>> defaults = get_task_defaults('Undistort', 'plant3dvision.tasks.proc2d')
     >>> print(defaults)
-    {'Voxels': {'upstream_task': 'Masks', 'query': {}, 'camera_metadata': 'colmap_camera', 'voxel_size': 1.0, 'method': 'averaging', 'log': True, 'invert': False, 'labels': [], 'bounding_box': None, 'bounding_box_edit': None}}
-    >>> defaults = get_all_task_defaults('plant3dvision.tasks.colmap')
+    {'query': '{}', 'upstream_task': 'ImagesFilesetExists', 'camera_model_src': 'Colmap', 'camera_model': 'SIMPLE_RADIAL', 'intrinsic_calib_scan_id': '', 'extrinsic_calib_scan_id': '', 'n_workers': -1, 'parallel': True}
+    >>> defaults = get_task_defaults('Clean', 'romitask.task')
     >>> print(defaults)
-    {'Colmap': {'upstream_task': 'ImagesFilesetExists', 'query': {}, 'colmap_exe': 'roboticsmicrofarms/colmap', 'matcher': 'exhaustive', 'use_gpu': True, 'single_camera': True, 'compute_dense': False, 'alignment_max_error': 10, 'align_pcd': True, 'camera_model': 'SIMPLE_RADIAL', 'bounding_box': None, 'cli_args': {}, 'intrinsic_calibration_scan_id': '', 'extrinsic_calibration_scan_id': '', 'use_calibration_camera': True, 'qc_check': True, 'mad_factor': 3.0, 'metrics': ['xy', 'z', 'pan', 'roll'], 'distance_threshold': 3.0, 'fixed_distance_threshold': 1.0, 'angle_threshold': 5.0, 'fixed_angle_threshold': 3.5, 'max_blind_angle': 30.0, 'retry_count': 10, 'retry': 0}}
+    {'query': '{}', 'upstream_task': 'ImagesFilesetExists', 'camera_model_src': 'Colmap', 'camera_model': 'SIMPLE_RADIAL', 'intrinsic_calib_scan_id': '', 'extrinsic_calib_scan_id': '', 'n_workers': -1, 'parallel': True}
     """
-    # - Resolve ``module_path`` which may be a file system path or a dotted module name.
+    # Accept both import‑style strings (e.g. "package.module") and filesystem paths.
     if isinstance(module_path, Path):
-        module_file = module_path
+        module_path = str(module_path)
+    # If the string looks like a filesystem path to a .py file, load it via spec.
+    path_obj = Path(module_path)
+    if path_obj.is_file() and path_obj.suffix == ".py":
+        # Use the stem of the file as a temporary module name.
+        module_name = path_obj.stem
+        spec = importlib.util.spec_from_file_location(module_name, module_path)
+        if spec is None or spec.loader is None:  # pragma: no cover
+            raise ModuleNotFoundError(f"Cannot load module from path: {module_path}")
+        module = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(module)  # type: ignore[attr-defined]
     else:
-        # ``module_path`` is a string – decide whether it looks like a file path.
-        if os.path.sep in module_path or module_path.endswith('.py'):
-            module_file = Path(module_path)
+        # Dynamically import the module using its import path.
+        module = importlib.import_module(module_path)
+
+    task = getattr(module, task_name)
+
+    if not isinstance(task, Register):
+        raise TypeError(f"Class '{task_name}' is not a Luigi task.'")
+
+    # Extract the default parameter values:
+    defaults = [(p_name, p._default) for p_name, p in task.get_params() if p_name != 'scan_id']
+
+    # Convert default parameter values to desired types:
+    task_defaults = {}
+    for (p_name, p_value) in defaults:
+        if isinstance(p_value, (dict, list)):
+            # Convert dictionaries and lists to strings:
+            task_defaults[p_name] = str(p_value)
+        elif isinstance(p_value, type):
+            # convert type objects to their string names:
+            task_defaults[p_name] = p_value.__name__
         else:
-            # Assume it is a Python module name; locate the source file via importlib.
-            try:
-                spec = importlib.util.find_spec(module_path)
-            except ModuleNotFoundError:
-                return {}
-            if spec is None or spec.origin is None:
-                raise ValueError(f"Unable to locate module '{module_path}'.")
-            module_file = Path(spec.origin)
+            task_defaults[p_name] = p_value
 
-    # - Parse the source file
-    with open(module_file, 'r') as f:
-        source_code = f.read()
-    tree = ast.parse(source_code)
+    # Force 'upstream_task' definition:
+    if 'upstream_task' not in task_defaults:
+        task_defaults['upstream_task'] = None
 
-    # - Build a map of *module‑level* constants (e.g. `{'COLMAP_EXE': "/usr/bin/colmap"}`)
-    global_consts: dict[str, Any] = {}
-    for node in tree.body:
-        if isinstance(node, ast.Assign):
-            # Only handle simple names on the left‑hand side
-            if len(node.targets) == 1 and isinstance(node.targets[0], ast.Name):
-                const_name = node.targets[0].id
-                const_val = _safe_literal_eval(node.value)
-                if const_val is not None:  # keep only literals we can evaluate
-                    global_consts[const_name] = const_val
-        # also accept annotated assignments (e.g. VAR: str = "value")
-        elif isinstance(node, ast.AnnAssign) and isinstance(node.target, ast.Name):
-            if node.value is not None:
-                const_name = node.target.id
-                const_val = _safe_literal_eval(node.value)
-                if const_val is not None:
-                    global_consts[const_name] = const_val
-
-    # - Build a map of imported names → (module, original_name)
-    # Handles both ``import module`` and ``from mod import name as alias``.
-    import_map: dict[str, tuple[str, str]] = {}
-    for node in tree.body:
-        if isinstance(node, ast.Import):
-            for alias in node.names:
-                asname = alias.asname or alias.name
-                import_map[asname] = (alias.name, None)  # ``module`` is the package itself
-        elif isinstance(node, ast.ImportFrom):
-            if node.module is None:
-                continue  # skip relative imports without a module name
-            for alias in node.names:
-                asname = alias.asname or alias.name
-                import_map[asname] = (node.module, alias.name)  # ``from module import name``
-
-    # - Build a map of class definitions for quick lookup
-    class_map: dict[str, ast.ClassDef] = {}
-    for node in ast.walk(tree):
-        if isinstance(node, ast.ClassDef):
-            class_map[node.name] = node
-
-    # - Helper function to extract class defaults from a single ClassDef node
-    def extract_class_defaults(class_node: ast.ClassDef) -> dict[str, Any]:
-        defaults: dict[str, Any] = {}
-        for item in class_node.body:
-            # 1. Plain assignment: "attr = <value>"
-            if isinstance(item, ast.Assign):
-                for target in item.targets:
-                    if isinstance(target, ast.Name):
-                        attr_name = target.id
-                        defaults[attr_name] = _extract_value(item.value,
-                                                             globals_map=global_consts,
-                                                             import_map=import_map)
-
-            # 2. Annotated assignment: "attr: type = <value>"
-            elif isinstance(item, ast.AnnAssign) and isinstance(item.target, ast.Name):
-                if item.value is not None:
-                    attr_name = item.target.id
-                    defaults[attr_name] = _extract_value(item.value,
-                                                         globals_map=global_consts,
-                                                         import_map=import_map)
-        try:
-            defaults.pop('scan_id')
-        except KeyError:
-            pass
-        return defaults
-
-    # - Helper function to resolve base class and get its defaults
-    def get_base_class_defaults(base_node: ast.AST) -> dict[str, Any]:
-        """
-        Given a base class reference in the AST, attempt to load its defaults.
-
-        Returns a dictionary of defaults from the base class, or an empty dict if
-        the base class cannot be resolved.
-        """
-        base_defaults: dict[str, Any] = {}
-
-        # Case 1: Simple name (e.g., class Child(Parent))
-        if isinstance(base_node, ast.Name):
-            base_class_name = base_node.id
-            # Check if it's defined in the same module
-            if base_class_name in class_map:
-                base_defaults = extract_class_defaults(class_map[base_class_name])
-                # Recursively get parent's parent defaults
-                parent_defaults = get_inherited_defaults(class_map[base_class_name])
-                parent_defaults.update(base_defaults)
-                return parent_defaults
-            # Check if it's imported
-            elif base_class_name in import_map:
-                mod_name, orig_name = import_map[base_class_name]
-                try:
-                    # Recursively get all defaults from the imported module
-                    parent_all_defaults = get_all_task_defaults(mod_name)
-                    actual_name = orig_name or base_class_name
-                    if actual_name in parent_all_defaults:
-                        base_defaults = parent_all_defaults[actual_name]
-                except Exception:
-                    pass
-
-        # Case 2: Attribute (e.g., class Child(module.Parent))
-        elif isinstance(base_node, ast.Attribute):
-            # Build the full dotted name
-            parts: list[str] = []
-            cur = base_node
-            while isinstance(cur, ast.Attribute):
-                parts.append(cur.attr)
-                cur = cur.value
-            if isinstance(cur, ast.Name):
-                parts.append(cur.id)
-
-                # Try to resolve the module
-                base_module = parts[-1]
-                if base_module in import_map:
-                    mod_name, _ = import_map[base_module]
-                    class_name = parts[-2] if len(parts) > 1 else None
-                    if class_name:
-                        try:
-                            parent_all_defaults = get_all_task_defaults(mod_name)
-                            if class_name in parent_all_defaults:
-                                base_defaults = parent_all_defaults[class_name]
-                        except Exception:
-                            pass
-
-        return base_defaults
-
-    # - Helper function to get all inherited defaults for a class
-    def get_inherited_defaults(class_node: ast.ClassDef) -> dict[str, Any]:
-        """
-        Recursively collect defaults from all parent classes.
-
-        Returns a dictionary with defaults from all ancestors, with more specific
-        (child) classes overriding more general (parent) classes.
-        """
-        inherited: dict[str, Any] = {}
-
-        # Process base classes in order (left to right in the class definition)
-        for base in class_node.bases:
-            base_defaults = get_base_class_defaults(base)
-            inherited.update(base_defaults)
-
-        return inherited
-
-    # - Walk the tree and extract class defaults, passing the globals & import map
-    all_defaults: dict[str, dict[str, Any]] = {}
-    for node in ast.walk(tree):
-        if not isinstance(node, ast.ClassDef):
-            continue
-
-        class_name = node.name
-
-        # Start with inherited defaults from parent classes
-        defaults = get_inherited_defaults(node)
-
-        # Then add/override with this class's own defaults
-        class_defaults = extract_class_defaults(node)
-        defaults.update(class_defaults)
-
-        # - Keep only classes that yielded at least one default
-        if defaults:
-            all_defaults[class_name] = defaults
-
-    return all_defaults
-
-def _load_module_globals(module_name: str) -> dict[str, Any]:
-    """
-    Load the source file for *module_name* and return a mapping of its top‑level
-    constant assignments.
-
-    The function parses the module's source code using `ast` and extracts
-    assignments that can be safely evaluated with ``ast.literal_eval`` or simple
-    expressions such as ``os.environ.get``.  It performs two passes:
-
-    1. **First pass** – collect literals and simple annotated values.
-    2. **Second pass** – attempt to evaluate expressions that reference
-       constants discovered in the first pass (e.g. ``CONST_A = 1`` followed by
-       ``CONST_B = CONST_A + 2``).
-
-    This utility is used as a fallback when an imported name cannot be obtained
-    via `importlib.import_module` because the attribute is defined as a
-    complex expression in the module.
-
-    Parameters
-    ----------
-    module_name : str
-        The fully‑qualified name of the module to inspect (e.g. ``'my_pkg.utils'``).
-
-    Returns
-    -------
-    dict[str, Any]
-        A dictionary mapping constant names to their evaluated values.
-        If the module cannot be found, cannot be read, or no evaluable constants are
-        present, an empty dictionary is returned.
-
-    Raises
-    ------
-    None
-        The function never raises; any failure (missing file, parse error,
-        evaluation error) results in an empty mapping being returned.
-
-    Notes
-    -----
-    * Only top‑level assignments are considered; constants defined inside
-      functions or classes are ignored.
-    * Evaluation is deliberately conservative – if a value cannot be safely
-      interpreted, it is skipped rather than executing arbitrary code.
-    * Environment variable lookups via ``os.environ.get`` or ``os.getenv`` are
-      supported and will return the value from the environment (or the provided default).
-
-    Examples
-    --------
-    >>> from romitask.task_defaults import _load_module_globals
-    >>> consts = _load_module_globals('romitask.task')
-    >>> consts.get('IMAGES_MD')
-    ['pose', 'approximate_pose', 'channel', 'shot_id', 'camera']
-    >>> # When the module does not exist, an empty dict is returned
-    >>> _load_module_globals('non.existent.module')
-    {}
-    """
-    try:
-        spec = importlib.util.find_spec(module_name)
-    except (ModuleNotFoundError, ValueError):
-        return {}
-
-    if spec is None or spec.origin is None:
-        return {}
-
-    try:
-        with open(spec.origin, "r") as f:
-            src = f.read()
-    except Exception:
-        return {}
-
-    try:
-        tree = ast.parse(src)
-    except Exception:
-        return {}
-
-    # First pass: collect simple literals
-    consts: dict[str, Any] = {}
-    for node in tree.body:
-        if isinstance(node, ast.Assign):
-            if len(node.targets) == 1 and isinstance(node.targets[0], ast.Name):
-                name = node.targets[0].id
-                val = _safe_literal_eval(node.value)
-                if val is not None:
-                    consts[name] = val
-        elif isinstance(node, ast.AnnAssign) and isinstance(node.target, ast.Name):
-            if node.value is not None:
-                name = node.target.id
-                val = _safe_literal_eval(node.value)
-                if val is not None:
-                    consts[name] = val
-
-    # Second pass: try to evaluate expressions that reference already-resolved constants
-    for node in tree.body:
-        if isinstance(node, ast.Assign):
-            if len(node.targets) == 1 and isinstance(node.targets[0], ast.Name):
-                name = node.targets[0].id
-                if name not in consts:  # Only process if not already resolved
-                    val = _evaluate_expression(node.value, consts)
-                    if val is not None:
-                        consts[name] = val
-        elif isinstance(node, ast.AnnAssign) and isinstance(node.target, ast.Name):
-            if node.value is not None:
-                name = node.target.id
-                if name not in consts:  # Only process if not already resolved
-                    val = _evaluate_expression(node.value, consts)
-                    if val is not None:
-                        consts[name] = val
-
-    return consts
-
-
-def _evaluate_expression(node: ast.AST, local_consts: dict[str, Any]) -> Any:
-    """
-    Try to evaluate an AST expression node using available constants.
-
-    Handles:
-    - Simple literals
-    - Name references to local_consts
-    - os.environ.get() calls with literal arguments
-
-    Parameters
-    ----------
-    node : ast.AST
-        The expression node to evaluate
-    local_consts : dict[str, Any]
-        Dictionary of already-resolved constant values
-
-    Returns
-    -------
-    Any
-        The evaluated value, or None if evaluation is not possible
-    """
-    # Try simple literal first
-    val = _safe_literal_eval(node)
-    if val is not None:
-        return val
-
-    # Handle Name nodes that reference local constants
-    if isinstance(node, ast.Name):
-        return local_consts.get(node.id)
-
-    # Handle os.environ.get('KEY', 'default') or os.getenv('KEY', 'default')
-    if isinstance(node, ast.Call):
-        # Check if it's os.environ.get() or os.getenv()
-        is_environ_get = False
-        if isinstance(node.func, ast.Attribute):
-            # os.environ.get
-            if (isinstance(node.func.value, ast.Attribute) and
-                    isinstance(node.func.value.value, ast.Name) and
-                    node.func.value.value.id == 'os' and
-                    node.func.value.attr == 'environ' and
-                    node.func.attr == 'get'):
-                is_environ_get = True
-            # os.getenv
-            elif (isinstance(node.func.value, ast.Name) and
-                  node.func.value.id == 'os' and
-                  node.func.attr == 'getenv'):
-                is_environ_get = True
-
-        if is_environ_get and len(node.args) >= 1:
-            # Get the environment variable name
-            key_node = node.args[0]
-            key_val = _safe_literal_eval(key_node)
-            if isinstance(key_val, str):
-                # Get the default value if provided
-                default_val = None
-                if len(node.args) >= 2:
-                    default_val = _safe_literal_eval(node.args[1])
-                elif any(kw.arg == 'default' for kw in node.keywords):
-                    for kw in node.keywords:
-                        if kw.arg == 'default':
-                            default_val = _safe_literal_eval(kw.value)
-                            break
-
-                # Get from environment or use default
-                return os.environ.get(key_val, default_val)
-
-    return None
-
-
-def _extract_value(
-        node: ast.AST, *,
-        globals_map: dict[str, Any] | None = None,
-        import_map: dict[str, tuple[str, str]] | None = None
-) -> Any:
-    """
-    Helper that returns the evaluated value for a given AST node.
-
-    - Tries ``ast.literal_eval`` for simple literals.
-    - Detects ``luigi.*Parameter`` calls and extracts the ``default`` argument.
-    - Returns ``None`` if the value cannot be safely evaluated.
-    - If the node is a ``Name`` (e.g. ``COLMAP_EXE``) we look it up in `globals_map`.
-    - Resolves imported names (e.g. ``COLMAP_EXE`` coming from
-      ``from plant3dvision.colmap import COLMAP_EXE``) by importing the
-      originating module and fetching the attribute.
-    - When the name is not present, we fall back to the identifier string
-
-    Parameters
-    ----------
-    node : ast.AST
-        The AST node representing the right‑hand side of an assignment.
-
-    Returns
-    -------
-    Any
-        The evaluated value, or ``None`` when evaluation is not possible.
-    """
-    # Simple literals (numbers, strings, tuples, lists, dicts, booleans, None)
-    try:
-        return ast.literal_eval(node)
-    except (ValueError, TypeError):
-        pass
-
-    # Name node (local constant or imported)
-    if isinstance(node, ast.Name):
-        # Local constant defined in the same file
-        if globals_map and node.id in globals_map:
-            return globals_map[node.id]  # resolved literal
-
-        # Imported symbol – look it up in ``import_map`` and import the module
-        if import_map and node.id in import_map:
-            mod_name, orig_name = import_map[node.id]
-            # Try a normal import first
-            try:
-                mod = importlib.import_module(mod_name)
-                attr_name = orig_name or node.id
-                value = getattr(mod, attr_name)
-                if isinstance(value, (str, int, float, bool, type(None), dict, list, tuple)):
-                    return value
-                # If it's a class or callable, return its name as a string
-                if isinstance(value, type):  # It's a class
-                    return attr_name
-                # If it's not a plain literal, fall back to static analysis
-                fallback_consts = _load_module_globals(mod_name)
-                if attr_name in fallback_consts:
-                    return fallback_consts[attr_name]
-                # As a last resort, return the identifier string (not None)
-                return attr_name
-            except Exception:
-                # Normal import failed – fall back to static analysis of the module
-                fallback_consts = _load_module_globals(mod_name)
-                attr_name = orig_name or node.id
-                if attr_name in fallback_consts:
-                    return fallback_consts[attr_name]
-                # Could not resolve, return the identifier string
-                return attr_name
-
-        # Not a literal we could evaluate – return the identifier string
-        return node.id
-
-    # Attribute chain (module.Class or module.CONST)
-    if isinstance(node, ast.Attribute):
-        parts: list[str] = []
-        cur = node
-        while isinstance(cur, ast.Attribute):
-            parts.append(cur.attr)
-            cur = cur.value
-        if isinstance(cur, ast.Name):
-            parts.append(cur.id)
-            base_name = parts[-1]
-
-            # Resolve the left‑most name via import map if possible
-            if import_map and base_name in import_map:
-                mod_name, orig_name = import_map[base_name]
-                try:
-                    mod = importlib.import_module(mod_name)
-                    obj = getattr(mod, orig_name or base_name)
-                    # Walk remaining attributes on that object
-                    for attr in reversed(parts[:-1]):
-                        obj = getattr(obj, attr)
-                    # Return literal if possible
-                    if isinstance(obj, (str, int, float, bool, type(None), dict, list, tuple)):
-                        return obj
-                    return ".".join(reversed(parts))
-                except Exception:
-                    # Fallback to static analysis of the module
-                    fallback_consts = _load_module_globals(mod_name)
-                    full_name = ".".join(reversed(parts))
-                    if full_name in fallback_consts:
-                        return fallback_consts[full_name]
-                    # Return dotted name as a last resort
-                    return ".".join(reversed(parts))
-
-            # Fallback – just return the dotted name
-            return ".".join(reversed(parts))
-
-    # Look for luigi parameter calls, e.g. luigi.BoolParameter(default=False)
-    if isinstance(node, ast.Call):
-        # Resolve the called object's name (could be Name or Attribute)
-        func_name = None
-        if isinstance(node.func, ast.Attribute):
-            # e.g. luigi.BoolParameter
-            func_name = node.func.attr
-        elif isinstance(node.func, ast.Name):
-            # e.g. BoolParameter (if imported directly)
-            func_name = node.func.id
-
-        if func_name and func_name.endswith("Parameter"):
-            # Try to find a ``default`` keyword argument
-            for kw in node.keywords:
-                if kw.arg == "default":
-                    # If the default is a simple literal, evaluate it
-                    val = _safe_literal_eval(kw.value)
-                    if val is not None:
-                        return val
-                    # Fallback to name / attribute handling
-                    return _extract_value(kw.value, globals_map=globals_map, import_map=import_map)
-
-            # If no explicit keyword, luigi often uses the first positional arg as default
-            if node.args:
-                # Evaluate first positional arg if possible
-                val = _safe_literal_eval(node.args[0])
-                if val is not None:
-                    return val
-                # Fallback to name / attribute handling
-                return _extract_value(node.args[0], globals_map=globals_map, import_map=import_map)
-
-    # If we reach this point, we couldn't evaluate the expression
-    return None
-
-
-def _safe_literal_eval(node: ast.AST) -> Any:
-    """
-    Wrapper around ``ast.literal_eval`` that silences ``ValueError``/``TypeError``
-    and returns ``None`` for unsupported nodes.
-
-    Parameters
-    ----------
-    node : ast.AST
-        Node to evaluate.
-
-    Returns
-    -------
-    Any
-        Evaluated value or ``None``.
-    """
-    try:
-        return ast.literal_eval(node)
-    except (ValueError, TypeError):
-        return None
+    # Return the dictionary with 'upstream_task' key in first position
+    return {'upstream_task': task_defaults.pop('upstream_task'), **task_defaults}
 
 
 def merge_config_with_defaults(
-        config: dict[str, Any],
-        defaults: dict[str, dict[str, Any]],
+        task_config: dict[str, Any],
+        task_defaults: dict[str, Any],
 ) -> dict[str, Any]:
     """
-    Merge a user‑provided configuration dictionary with default task attributes.
+    Merge a user‑provided task configuration dictionary with default task values.
 
-    The function iterates over each task defined in ``config`` and combines the
-    corresponding entries from ``default`` (if present).
-    Tasks present only in ``config`` are retained unchanged.
-    The merge is shallow: nested dictionaries are not merged recursively.
 
     Parameters
     ----------
-    config : dict[str, Any]
-        Existing configuration dictionary, typically loaded from a TOML file.
-    defaults : dict[str, dict[str, Any]]
+    task_config : dict[str, Any]
+        Existing task configuration dictionary, typically loaded from a TOML file.
+    task_defaults : dict[str, Any]
         Mapping of task names to their default attribute dictionaries as
         produced by `get_all_task_defaults`.
 
@@ -752,34 +170,19 @@ def merge_config_with_defaults(
     -------
     dict[str, Any]
         A new configuration dictionary containing the merged values.
-        The original ``config`` and ``defaults`` inputs are not mutated.
 
     Examples
     --------
     >>> from romitask.task_defaults import merge_config_with_defaults
     >>> config = {"TaskA": {"param": 1}, "ExtraTask": {"value": 42}}
-    >>> defaults = {"TaskA": {"param": 0, "threshold": 0.5}, "TaskB": {"enabled": True}}
-    >>> merged = merge_config_with_defaults(config, defaults)
-    >>> merged["TaskA"]
+    >>> task_defaults = {"param": 0, "threshold": 0.5}  # "TaskA" defaults
+    >>> merged = merge_config_with_defaults(config["TaskA"], task_defaults)
+    >>> merged
     {'param': 1, 'threshold': 0.5}
-    >>> merged["ExtraTask"]
-    {'value': 42}
-    >>> "TaskB" in merged
-    False
     """
-    merged = {}
-
-    # Process each task section
-    for task_name in config:
-        if task_name in defaults:
-            # Merge existing config with defaults, replacing default values with config
-            # eliminating non-existant params from the config if not found in the default
-            merged[task_name] = {param_name: config[task_name].get(param_name, param_value) for param_name, param_value
-                                 in defaults[task_name].items()}
-        else:
-            merged[task_name] = config[task_name]
-
-    return merged
+    # Merge existing config with defaults, replacing default values with config
+    # eliminating non-existent params from the config if not found in the default
+    return {param_name: task_config.get(param_name, param_value) for param_name, param_value in task_defaults.items()}
 
 
 def update_config_with_defaults(
@@ -822,7 +225,7 @@ def update_config_with_defaults(
     >>> import tomlkit
     >>> from pathlib import Path
     >>> from romitask.task_defaults import update_config_with_defaults
-    >>> with open('configs/geom_pipe_real.toml') as f: config = tomlkit.load(f)
+    >>> with open('../configs/geom_pipe_real.toml') as f: config = tomlkit.load(f)
     >>> print(config['Clean'])
     {'no_confirm': True}
     >>> updated_config = update_config_with_defaults(config)
@@ -835,9 +238,9 @@ def update_config_with_defaults(
         if not module_path:
             continue
         # Get defaults from module
-        defaults = get_all_task_defaults(module_path)
+        task_defaults = get_task_defaults(task_name, module_path)
         # Merge config with defaults
-        merged_config[task_name] = merge_config_with_defaults({task_name: task_config}, defaults)[task_name]
+        merged_config[task_name] = merge_config_with_defaults(task_config, task_defaults)
 
     return merged_config
 
