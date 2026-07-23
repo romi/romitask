@@ -1353,7 +1353,7 @@ class Clean(RomiTask):
         if 'Colmap' not in tasks_to_preserve:
             images_fs = scan.get_fileset("images")
             if images_fs is None:
-                logger.critical("Could not locate the 'images' fileset in scan %s.", scan.id)
+                logger.warning("Could not locate the 'images' fileset in scan %s.", scan.id)
             else:
                 self._clean_images_metadata(images_fs, metadata_whitelist)
 
