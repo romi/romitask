@@ -2725,7 +2725,7 @@ romitask.task.IMAGES_MD</p>
     <span class="k">if</span> <span class="s1">&#39;Colmap&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">tasks_to_preserve</span><span class="p">:</span>
         <span class="n">images_fs</span> <span class="o">=</span> <span class="n">scan</span><span class="o">.</span><span class="n">get_fileset</span><span class="p">(</span><span class="s2">&quot;images&quot;</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">images_fs</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">logger</span><span class="o">.</span><span class="n">critical</span><span class="p">(</span><span class="s2">&quot;Could not locate the &#39;images&#39; fileset in scan </span><span class="si">%s</span><span class="s2">.&quot;</span><span class="p">,</span> <span class="n">scan</span><span class="o">.</span><span class="n">id</span><span class="p">)</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s2">&quot;Could not locate the &#39;images&#39; fileset in scan </span><span class="si">%s</span><span class="s2">.&quot;</span><span class="p">,</span> <span class="n">scan</span><span class="o">.</span><span class="n">id</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_clean_images_metadata</span><span class="p">(</span><span class="n">images_fs</span><span class="p">,</span> <span class="n">metadata_whitelist</span><span class="p">)</span>
 
