@@ -80,6 +80,7 @@ from datetime import timedelta
 from logging import Logger
 from logging import getLogger
 from pathlib import Path
+from subprocess import CompletedProcess
 from typing import Any
 from typing import Literal
 from typing import Optional
@@ -434,7 +435,7 @@ def run_task(dataset_path: str | Path,
              task: str,
              config: str | Path | dict,
              cfg_override: dict[str, Any] | None = None,
-             **kwargs: Any) -> None:
+             **kwargs: Any) -> CompletedProcess[bytes]:
     """Load the configuration to use and call the luigi command to run the selected task.
 
     Parameters
@@ -465,11 +466,26 @@ def run_task(dataset_path: str | Path,
         Whether to run the task locally. Defaults to `True`.
     dry_run : bool
         Whether to make it a dry run, returning the command but not calling it. Defaults to `False`.
+    no_auth : bool
+        Use a database with automatic 'admin' user login, for testing purposes only.
+    db_user : str
+        Username for FSDB login.
+    db_password : str
+        Password for FSDB login.
 
     See Also
     --------
     romitask.log.get_logging_config
     romitask.log.get_log_filename
+
+    Examples
+    --------
+    >>> from pathlib import Path
+    >>> from romitask.cli.romi_run_task import run_task
+    >>> geom_pipe_real_conf = Path("configs/test_geom_pipe_real.toml").resolve()
+    >>> real_plant_data = Path("tests/testdata/real_plant/").resolve()
+    >>> process = run_task(real_plant_data, 'Clean', geom_pipe_real_conf, no_auth=True)
+    >>> process = run_task(real_plant_data, 'PointCloud', geom_pipe_real_conf, no_auth=True)
     """
     logger = kwargs.get("logger", getLogger(LOGGER_NAME))
     log_level = kwargs.get("log_level", "INFO")
@@ -574,7 +590,7 @@ def run_task(dataset_path: str | Path,
         cmd = [luigicmd, "--logging-conf-file", logging_file_path,
                "--module", module, task,
                "--ScanConfiguration-scan", dataset_path]
-        if kwargs.get('local_scheduler', False):
+        if kwargs.get('local_scheduler', True):
             cmd.append("--local-scheduler")
 
         # - Print or Start the configured pipeline:
@@ -614,7 +630,7 @@ def run_task(dataset_path: str | Path,
             except Exception as move_err:
                 logger.error(f"Failed to move temporary config files: {move_err}")
             # -------------------------------------------------------------
-    return
+    return p
 
 
 @click.command(
