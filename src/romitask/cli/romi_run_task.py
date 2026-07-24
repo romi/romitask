@@ -23,31 +23,49 @@
 # <https://www.gnu.org/licenses/>.
 # ------------------------------------------------------------------------------
 
-"""ROMI tasks CLI.
+"""
+# CLI to execute ROMI Luigi tasks
 
-It is intended to be used as the main program to run the various tasks defined in ``MODULES``.
+A lightweight wrapper that launches ROMI‑specific Luigi tasks from the command line (or programmatically).
+It loads and merges configuration files, validates dataset directories, prepares logging, sets up environment variables, and finally invokes Luigi with the appropriate module and task.
+This makes complex pipeline execution simple, reproducible, and portable.
 
-It uses ``luigi`` paradigm with ``Task``, ``Target`` & ``Parameters`` defined
-for each ``RomiTask`` in their module.
+## Key Features
 
-The program uses two config files stored in the root scan dataset folder:
+- **Unified CLI entry point** (`romi_run_task.py`) to run any pre‑defined ROMI task.
+- **Automatic configuration handling**: loads backup `scan.toml` / `pipeline.toml`, merges multiple local TOML files, and applies CLI overrides.
+- **Dynamic module resolution**: selects the correct Python module for a task, with optional manual override.
+- **Dataset validation**: ensures the dataset directory matches the expectations of the selected task (creation vs. processing).
+- **Robust logging**: generates per‑task log files, configurable log level, and temporary logging configuration passed to Luigi.
+- **Environment preparation**: injects `.env` variables, sets `LUIGI_CONFIG_PATH`, `PYOPENCL_CTX`, and optional DB authentication flags.
+- **Dry‑run mode**: prints the full Luigi command without executing it, useful for debugging.
+- **Authentication options**: support for DB credentials or a “no‑auth” testing mode.
+- **Local scheduler by default**: runs the Luigi scheduler locally unless overridden.
+- **Programmatic API**: `run_task()` can be called from Python code for tighter integration.
 
-  - ``scan.toml``: the last configuration used with the 'Scan' module;
-  - ``pipeline.toml``: the last configuration used with any other module.
+## Usage Examples
 
+### 1. Command‑line execution
+Run a `Scan` task to create a dataset `scan01` located at `/data/ROMI/` with a custom configuration:
 
-They define tasks parameters that will override the default tasks parameters
-using luigi's "config ingestion" [^1] and ROMI configuration classes.
+```shell
+romi_run_task Scan /data/ROMI/scan01 --config /path/to/my/config.toml
+```
 
-The tasks "CalibrationScan", "IntrinsicCalibrationScan", "Scan" & "VirtualScan"
-requires a non-existent or empty dataset directory.
-The other tasks requires a dataset directory populated by images from one of
-the previously named task.
+### 2. Programmatic use from Python
+```python
+>>> from pathlib import Path
+>>> from romitask.cli.romi_run_task import run_task
+>>> dataset = Path("/data/scan01")
+>>> config_path = "/path/to/config.toml"
+>>> run_task(dataset_path=dataset, task="Scan", config=config_path, db_user="my_user", db_password="secret")
+```
+
+The call performs the same steps as the CLI, loading configurations, preparing logging, and invoking Luigi.
 
 References
 ----------
 [^1]: https://luigi.readthedocs.io/en/stable/configuration.html#parameters-from-config-ingestion
-
 """
 
 import copy
@@ -68,7 +86,7 @@ from typing import Literal
 from typing import Optional
 
 import click
-import toml
+import tomlkit
 from click_option_group import optgroup
 from dotenv import dotenv_values
 
@@ -82,6 +100,7 @@ from romitask.modules import DATA_CREATION_TASK
 from romitask.modules import MODULES
 from romitask.modules import NO_DATASET_TASK
 from romitask.modules import TASKS
+from romitask.task_defaults import update_config_with_defaults
 from romitask.utils import get_version
 from romitask.utils import parse_kbdi
 
@@ -94,7 +113,7 @@ LogLevel = Literal["DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"]
 
 
 def load_backup_scan_cfg(path: str | Path) -> dict:
-    """Try to load ``SCAN_TOML`` configuration from path.
+    """Try to load a ``SCAN_TOML`` configuration from the given path.
 
     Parameters
     ----------
@@ -104,18 +123,18 @@ def load_backup_scan_cfg(path: str | Path) -> dict:
     Returns
     -------
     dict
-        The configuration dictionary, if loaded from backup file.
+        The configuration dictionary, if loaded from a backup file.
     """
     scan_last_cfg = os.path.join(path, SCAN_TOML)
     bak_scan_config = {}
-    if os.path.isfile(scan_last_cfg):
-        bak_scan_config = toml.load(scan_last_cfg)
+    with open(scan_last_cfg, "r", encoding="utf-8") as f:
+        bak_scan_config = tomlkit.load(f)
 
     return bak_scan_config
 
 
 def load_backup_pipe_cfg(dataset_path: Path, task: str, logger: Logger) -> dict:
-    """Try to load ``PIPE_TOML`` configuration from path.
+    """Try to load a ``PIPE_TOML`` configuration from the given path.
 
     Parameters
     ----------
@@ -129,7 +148,7 @@ def load_backup_pipe_cfg(dataset_path: Path, task: str, logger: Logger) -> dict:
     Returns
     -------
     dict
-        The configuration dictionary, if loaded from backup file.
+        The configuration dictionary, if loaded from a backup file.
     """
     bak_pipe_path = dataset_path / PIPE_TOML
     bak_pipe_config = {}
@@ -140,13 +159,14 @@ def load_backup_pipe_cfg(dataset_path: Path, task: str, logger: Logger) -> dict:
             logger.critical(f"Task '{task}' was called with dataset '{dataset_path}'!")
             logger.critical(f"It contains a processing pipeline configuration backup file!")
             sys.exit(f"Requested {task} task in non-empty folder, clean it up or change location!")
-        bak_pipe_config = toml.load(bak_pipe_path)
+        with open(bak_pipe_path, "r", encoding="utf-8") as f:
+            bak_pipe_config = tomlkit.load(f)
 
     return bak_pipe_config
 
 
 def load_config_from_directory(path: str | Path, logger: Logger) -> dict:
-    """Load TOML & JSON configuration files from path.
+    """Load the TOML & JSON configuration files from the given path.
 
     Parameters
     ----------
@@ -179,7 +199,8 @@ def load_config_from_directory(path: str | Path, logger: Logger) -> dict:
     # Read TOML configs
     for f in toml_list:
         try:
-            c = toml.load(f)
+            with open(f, "r", encoding="utf-8") as fp:
+                c = tomlkit.load(fp)
             config.update(c)  # update the config with the new one
         except:
             logger.warning(f"Could not process TOML config file: {f}")
@@ -190,7 +211,7 @@ def load_config_from_directory(path: str | Path, logger: Logger) -> dict:
 
 
 def load_config_from_file(path: str | Path, logger: Logger) -> dict:
-    """Load TOML configuration file from path.
+    """Load the TOML configuration file from the given path.
 
     Parameters
     ----------
@@ -212,7 +233,8 @@ def load_config_from_file(path: str | Path, logger: Logger) -> dict:
         logger.critical(f"Could not configuration find file: '{path.absolute()}'")
     # Try to load the TOML configuration file:
     try:
-        config = toml.load(path)
+        with open(path, "r", encoding="utf-8") as f:
+            config = tomlkit.load(f)
     except:
         if not path.suffix == ".toml":
             logger.critical(f"Could not load TOML configuration file '{path}'!")
@@ -270,7 +292,7 @@ def get_task_predefined_module(task: str, logger) -> str:
     return module
 
 
-def create_backup_cfg(path: str | Path, cfgname: str, config: dict) -> str:
+def create_backup_cfg(path: str | Path, cfgname: str, config: dict[str, dict[str, Any]]) -> str:
     """Create the backup configuration file used by luigi.
 
     Parameters
@@ -290,7 +312,6 @@ def create_backup_cfg(path: str | Path, cfgname: str, config: dict) -> str:
     Notes
     -----
     We append "return codes" and "library versioning" to the given configuration dictionary.
-
     """
     file_path = os.path.join(path, cfgname)
 
@@ -318,11 +339,18 @@ def create_backup_cfg(path: str | Path, cfgname: str, config: dict) -> str:
                          "not_run": 25, "task_failed": 30,
                          "scheduling_error": 35, "unhandled_exception": 40}
 
-    # Save the libraries version:
+    # Save the version number for each ROMI library:
     config["version"] = get_version()
 
+    compat_cfg = copy.copy(config)
+    for task_name, task_params in compat_cfg.items():
+        # Convert any list or dict task parameter value to a string for compatibility:
+        compat_cfg[task_name] = {param_name: str(param) if isinstance(param, (list, dict)) else param for param_name, param in task_params.items()}
+        compat_cfg[task_name] = {param_name: param for param_name, param in task_params.items() if param}
+
     with open(file_path, 'w') as f:
-        toml.dump(config, f)
+        tomlkit.dump(compat_cfg, f)
+
     return file_path
 
 
@@ -345,7 +373,7 @@ def check_dataset_directory(path: Path, task: str, logger: Logger) -> str:
 
     Notes
     -----
-    If a "Scan" like tasks is required, a directory should be created to receive the created fileset.
+    If a "Scan" like task is required, a directory should be created to receive the created fileset.
     Else, the dataset directory should exist as an existing fileset will be processed.
     """
     if task == "ScannerToCenter":
@@ -389,20 +417,24 @@ def update_config(config: dict, update: dict) -> dict:
     Notes
     -----
     We update only the values from the update dictionary without removing any existing keys.
-
     """
-    from collections.abc import Mapping
-    for k, v in update.items():
-        if isinstance(v, Mapping):
-            config[k] = update_config(config.get(k, {}), v)
-        else:
-            config[k] = v
+    for task_name, task_params in update.items():
+        for tp_name, tp_value in task_params.items():
+            try:
+                if not config.get(task_name):
+                    config[task_name] = {}
+                config[task_name][tp_name] = tp_value
+            except TypeError:
+                print(f"Could not update '{task_name}.{tp_name}': {tp_value}")
+                print(f"{config[task_name][tp_name]=}")
+                raise
     return config
 
 
 def run_task(dataset_path: str | Path,
              task: str,
              config: str | Path | dict,
+             cfg_override: dict[str, Any] | None = None,
              **kwargs: Any) -> CompletedProcess[bytes]:
     """Load the configuration to use and call the luigi command to run the selected task.
 
@@ -414,6 +446,8 @@ def run_task(dataset_path: str | Path,
         The name of the task to execute by luigi.
     config : pathlib.Path or str or dict
         The configuration path or dictionary.
+    cfg_override : dict, optional
+        A configuration dictionary that defines tasks and parameters that override the values from `config`.
 
     Other Parameters
     ----------------
@@ -421,7 +455,7 @@ def run_task(dataset_path: str | Path,
         A logger to use with this method, default to the global logger named `LOGGER_NAME`.
     log_fname : str
         The log file name to use.
-        Defaults to use the standardised log filename with the date and task name from `get_log_filename`.
+        Defaults to use the standardized log filename with the date and task name from `get_log_filename`.
     log_level : {'DEBUG', 'INFO', 'WARNING', 'ERROR', 'CRITICAL'}
         The logging level to use, defaults to 'INFO'.
     luigicmd : str
@@ -463,39 +497,50 @@ def run_task(dataset_path: str | Path,
 
     # - Process given PIPELINE configuration directory OR file, if any:
     if isinstance(config, dict):
+        # Use directly the given config dictionary:
         logger.info("Loading configuration from dictionary.")
     elif os.path.isdir(config):
+        # Load all config files from the given directory, if any, to a single config dictionary:
         config = load_config_from_directory(config, logger=logger)
     elif os.path.isfile(config):
+        # Load config file to a config dictionary:
         config = load_config_from_file(config, logger=logger)
     elif config != "":
         logger.critical(f"Could not understand `config` option '{config}'!")
         sys.exit("Error with configuration file!")
     else:
-        if bak_pipe_config is None:
-            logger.info("Using NO configuration!")
+        if not bak_pipe_config:
+            config = {}
+            logger.warning("Using full default configuration!")
         else:
             config = bak_pipe_config
             logger.info("Using a PREVIOUS pipeline configuration!")
 
+    # Update the loaded config undefined task values with default task values from classes implementation
+    config = update_config_with_defaults(config, MODULES)
+
     # - Look for "local" PIPELINE configuration file(s) to load:
     local_path = copy.copy(dataset_path)
-    local_toml = list(local_path.glob('*.toml'))
+    local_toml = sorted(local_path.glob('*.toml'), reverse=True)  # maintain resolution order, priority goes from first to last in alphabetical order
     local_toml = [f for f in local_toml if f.name != SCAN_TOML]  # exclude SCAN backup TOML config
     local_toml = [f for f in local_toml if f.name != PIPE_TOML]  # exclude PIPELINE backup TOML config
     # - Load the local configuration from detected file(s):
-    local_config = {}
     if len(local_toml) > 0:
+        local_config = {}
         logger.info(f"Found {len(local_toml)} local TOML configuration file{'s' if len(local_toml) > 1 else ''}!")
         for f in local_toml:
-            local_config.update(load_config_from_file(str(f), logger=logger))
+           local_config = update_config(local_config, load_config_from_file(str(f), logger=logger))
         if local_config != {}:
             logger.info(f"Got local definitions for: {list(local_config.keys())}")
+            logger.debug(f"{local_config=}")
             # Update the given PIPELINE configuration with the local configuration:
-            update_config(config, local_config)
+            config = update_config(config, local_config)
             logger.info("Updated given configuration with local definitions!")
-        else:
-            logger.error(f"Failed to load local TOML configuration file{'s' if len(local_toml) > 1 else ''}!")
+
+    # Apply CLI override (manual definition of parameters)
+    if cfg_override:
+        for task_override, param_override in cfg_override.items():
+            config[task_override] = {**config.get(task_override, {}), **param_override}
 
     # - Set the name of the module to be loaded for the selected task:
     module = get_task_module(task, logger=logger, module=kwargs.get("module", None))
@@ -550,10 +595,10 @@ def run_task(dataset_path: str | Path,
 
         # - Print or Start the configured pipeline:
         if kwargs.get('dry_run', False):
-            logger.info(f"Luigi command to call is:\n{cmd}")
+            logger.info(f"Luigi command to call is:\n{' '.join(list(map(str, cmd)))}")
         else:
             t_start = time.time()
-            logger.debug(f"Running luigi command: {cmd}")
+            logger.info(f"Running luigi command:\n{' '.join(list(map(str, cmd)))}")
             logger.debug(f"Using locally defined varenv: {env}")
             logger.debug(f"Using globally defined varenv: {os.environ}")
             # System‑wide variables (`os.environ`) overwrite any duplicate keys from the custom `env` dict
@@ -601,8 +646,14 @@ def run_task(dataset_path: str | Path,
     default="",
     help="Pipeline configuration file (TOML) or directory. "
          "If a file, read the configuration from it. "
-         "If a directory, read & concatenate all configuration files in it. "
+         "If a directory, read & concatenate all TOML configuration files in it. "
          "By default, search a 'pipeline.toml' file in the selected dataset directory."
+)
+@click.option(
+    '--cfg',
+    'cfg_override',
+    default="",
+    help="Override configuration file using specific parameters, e.g. \"Clean.keep_task='Masks'\"."
 )
 @click.option(
     '--module',
@@ -656,6 +707,7 @@ def main(
         task: str,
         dataset_path: tuple[str, ...],
         config: str,
+        cfg_override: str,
         module: Optional[str],
         log_level: LogLevel,
         dry_run: bool,
@@ -724,6 +776,16 @@ def main(
         if isinstance(folders, list) and len(folders) == 0:
             _dataset_path_error(dataset_path)
 
+    # Try to parse the cfg_override string or default to `None`
+    if cfg_override:
+        try:
+            cfg_override = tomlkit.loads(cfg_override)
+        except Exception as e:
+            logger.critical(f"Could not parse a TOML config from '{cfg_override}': {e}")
+            cfg_override = None
+    else:
+        cfg_override = None
+
     # Finally, we can call the main `run_task` method:
     if isinstance(folders, list):
         ## For each folder:
@@ -733,7 +795,7 @@ def main(
             print("\n")  # to facilitate the search in the console by separating the datasets
             logger.info(f"Processing dataset '{Path(dataset_path_item).name}'.")
             try:
-                run_task(dataset_path_item, task, config,
+                run_task(dataset_path_item, task, config, cfg_override,
                          log_level=log_level, luigicmd=luigicmd, module=module,
                          local_scheduler=local_scheduler, dry_run=dry_run,
                          no_auth=no_auth, db_user=db_user, db_password=db_password)
@@ -741,7 +803,7 @@ def main(
                 print(e)
     else:
         ## For the folder:
-        run_task(folders, task, config,
+        run_task(folders, task, config, cfg_override,
                  log_level=log_level, luigicmd=luigicmd, module=module,
                  local_scheduler=local_scheduler, dry_run=dry_run,
                  no_auth=no_auth, db_user=db_user, db_password=db_password)

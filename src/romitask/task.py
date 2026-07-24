@@ -23,13 +23,14 @@
 # <https://www.gnu.org/licenses/>.
 # ------------------------------------------------------------------------------
 
-"""Task Management System for ROMI Project
+"""
+# Task Management System for ROMI Project
 
 A comprehensive task management framework that provides base classes and utilities for defining, executing, and managing data processing tasks in the ROMI (RObot for MIcrofarm) project.
 This module implements a dependency-aware task system with database integration for managing plant imaging and analysis workflows.
 
-Key Features
-------------
+## Key Features
+
 - Task dependency management through upstream task declarations
 - File and dataset existence verification
 - Database-integrated file management system
@@ -43,8 +44,9 @@ Key Features
 - Virtual plant object handling
 - Error handling and failure management
 
-Usage Examples
---------------
+## Usage Examples
+
+```python
 >>> # Creating a simple task
 >>> class MyProcessingTask(RomiTask):
 ...     upstream_task = "PreviousTask"
@@ -64,6 +66,7 @@ Usage Examples
 ...     def f(self, file):
 ...         # Process individual file
 ...         return processed_data
+```
 """
 
 import concurrent.futures
@@ -78,12 +81,14 @@ from typing import Iterable
 import luigi
 from tqdm import tqdm
 
+import plantdb.commons.fsdb.core
 from plantdb.commons.fsdb.core import FSDB
 from plantdb.commons.fsdb.exceptions import FilesetExistsError
 from plantdb.commons.fsdb.exceptions import NotAnFSDBError
 from plantdb.commons.fsdb.validation import _is_fsdb
 from plantdb.commons.io import read_json
 from plantdb.commons.io import write_json
+from plantdb.commons.utils import locate_task_filesets
 from romitask.log import get_logger
 from romitask.utils import ask_confirmation
 
@@ -271,7 +276,7 @@ class ScanConfiguration(luigi.Config):
     >>> type(scan_cfg.scan)
     plantdb.commons.fsdb.Scan
     """
-    scan = ScanParameter()
+    scan: plantdb.commons.fsdb.core.Scan = ScanParameter()
 
 
 class FilesetTarget(luigi.Target):
@@ -1003,6 +1008,10 @@ class Clean(RomiTask):
     keep_metadata : luigi.listParameter
         list of metadata to keep (retain) in the `images` fileset metadata.
         Default to ``IMAGES_MD``.
+    keep_task : luigi.Parameter, optional
+        Task name to keep along with all its upstream dependencies.
+        If specified, this task and all anterior tasks will be preserved.
+        Default to empty string (keep nothing).
 
     See Also
     --------
@@ -1013,6 +1022,7 @@ class Clean(RomiTask):
     no_confirm = luigi.BoolParameter(default=False)
     keep_metadata = luigi.ListParameter(default=[])
     keep_pipeline_cfg = luigi.BoolParameter(default=True)
+    keep_task = luigi.Parameter(default="")
 
     def requires(self):
         """No requirements here."""
@@ -1042,6 +1052,102 @@ class Clean(RomiTask):
             The union of ``user_keep`` and :data:`~romitask.task.IMAGES_MD`.
         """
         return set(user_keep).union(IMAGES_MD)
+
+    @staticmethod
+    def _parse_pipeline_toml(scan: "Scan") -> dict[str, str]:
+        """Parse the pipeline.toml configuration file to extract task dependencies.
+
+        Parameters
+        ----------
+        scan:
+            The active scan.
+
+        Returns
+        -------
+        dict[str, str]
+            Dictionary mapping task names to their upstream task names.
+            For example: {"Masks": "Undistort", "Voxels": "Masks", ...}
+        """
+        import tomlkit
+        from romitask.task_defaults import update_config_with_defaults
+        from romitask.modules import MODULES
+
+        backup_path = Path(scan.path()) / "pipeline.toml"
+
+        if not backup_path.is_file():
+            logger.warning("No pipeline.toml found at %s", backup_path)
+            return {}
+
+        task_dependencies = {}
+        try:
+            config = tomlkit.load(backup_path)
+            # Update the loaded config undefined task values with default task values from classes implementation
+            config = update_config_with_defaults(config, MODULES)
+
+            for task_name, task_config in config.items():
+                # Collect any keys that start with "upstream_"
+                upstream_keys = [k for k in task_config.keys() if k.startswith("upstream_")]
+                if isinstance(task_config, dict) and upstream_keys:
+                    if len(upstream_keys) == 1:
+                        if task_config[upstream_keys[0]] is not None:
+                            # If only one upstream key, store its value directly.
+                            task_dependencies[task_name] = task_config[upstream_keys[0]]
+                    else:
+                        # If multiple, store a list of all upstream values.
+                        task_dependencies[task_name] = [task_config[key] for key in upstream_keys if task_config[key] is not None]
+            logger.info("Parsed pipeline dependencies: %s", task_dependencies)
+            return task_dependencies
+        except Exception as e:
+            logger.error("Failed to parse pipeline.toml: %s", e)
+            return {}
+
+    @staticmethod
+    def _compute_task_hierarchy(task_name: str, dependencies: dict[str, str]) -> set[str]:
+        """Compute all upstream tasks (ancestors) for a given task.
+
+        Parameters
+        ----------
+        task_name:
+            The task name for which to compute the hierarchy.
+        dependencies:
+            Dictionary mapping task names to their upstream task names.
+
+        Returns
+        -------
+        set[str]
+            Set of all task names that should be preserved, including the input task
+            and all its ancestors up to the root.
+        """
+        import networkx as nx
+
+        # Build a directed graph from the dependencies
+        G = nx.DiGraph()
+
+        # Add all edges (task -> upstream_task)
+        for task, upstream in dependencies.items():
+            if not task or not upstream:
+                continue
+            if isinstance(upstream, str):
+                G.add_edge(upstream, task)
+            elif isinstance(upstream, list):
+                [G.add_edge(up, task) for up in upstream]
+
+        # Check if the task exists in the graph
+        if task_name not in G:
+            logger.warning("Task %r not found in dependency graph", task_name)
+            return set()
+
+        # Find all ancestors (upstream tasks) of the given task
+        try:
+            ancestors = nx.ancestors(G, task_name)
+            # Include the task itself
+            preserved_tasks = ancestors | {task_name}
+        except nx.NetworkXError as e:
+            logger.error("Error computing ancestors for %r: %s", task_name, e)
+            preserved_tasks = {task_name}
+
+        logger.info("Tasks to preserve for %r: %s", task_name, preserved_tasks)
+        return preserved_tasks
 
     @staticmethod
     def _filesets_to_remove(scan: "Scan", exclude: set[str]) -> list[str]:
@@ -1101,22 +1207,29 @@ class Clean(RomiTask):
             file_.set_metadata(cleaned_md)
 
     @staticmethod
-    def _clean_orphan_json_files(metadata_dir: Path) -> None:
-        """Remove JSON files that are not ``images.json`` or ``metadata.json``.
+    def _clean_orphan_json_files(metadata_dir: Path, known_fileset: list[str]) -> None:
+        """Remove JSON files related to orphan filesets.
+
+        Orphan filesets are defined as those unknown to the scan `files.json`.
 
         Parameters
         ----------
-        metadata_dir:
-            Path to the ``metadata`` directory of the scan.
+        metadata_dir: pathlib.Path
+            The path to the ``metadata`` directory of the scan.
+        known_fileset: list[str]
+            The list of known fileset, _i.e._ those to keep, resolve to their name with a '.json' extension.
         """
         pattern = str(metadata_dir / "*.json")
+        # List the fileset metadata to remove:
+        json2keep = {"metadata.json"} | {f"{fs}.json" for fs in known_fileset}
         json_files = [
-            f for f in glob.glob(pattern) if Path(f).name not in {"images.json", "metadata.json"}
+            f for f in glob.glob(pattern) if Path(f).name not in json2keep
         ]
 
         if json_files:
             logger.info("Found %d orphan JSON metadata files.", len(json_files))
 
+        # Perform fileset metadata cleanup:
         for file_path in json_files:
             try:
                 Path(file_path).unlink(missing_ok=False)
@@ -1125,21 +1238,27 @@ class Clean(RomiTask):
                 logger.error("Failed to delete JSON file (not found): %s", file_path)
 
     @staticmethod
-    def _clean_orphan_directories(metadata_dir: Path) -> None:
-        """Remove empty metadata sub‑directories that are not the ``images`` folder.
+    def _clean_orphan_directories(metadata_dir: Path, known_fileset: list[str]) -> None:
+        """Remove orphan fileset directories.
+
+        Orphan filesets are defined as those unknown to the scan `files.json`.
 
         Parameters
         ----------
-        metadata_dir:
-            Path to the ``metadata`` directory of the scan.
+        metadata_dir: pathlib.Path
+            The path to the ``metadata`` directory of the scan.
+        known_fileset: list[str]
+            The list of known fileset, _i.e._ those to keep, resolve to their name.
         """
+        # List the fileset directories to remove:
         subdirs = {
                       d for d in os.listdir(metadata_dir) if (metadata_dir / d).is_dir()
-                  } - {"images"}
+                  } - set(known_fileset)
 
         if subdirs:
             logger.info("Found %d orphan metadata directories.", len(subdirs))
 
+        # Perform fileset directories cleanup:
         for subdir in subdirs:
             dir_path = metadata_dir / subdir
             try:
@@ -1180,32 +1299,71 @@ class Clean(RomiTask):
         # - Create the list of metadata to keep (retain) to a set and add the ones defined in `IMAGES_MD`
         metadata_whitelist = self._merge_metadata_keep_list(self.keep_metadata)
 
+        # - Compute the set of filesets to preserve
+        filesets_to_preserve = {"images"}  # Always keep images
+
+        tasks_to_preserve = []
+        if self.keep_task:
+            # Parse the pipeline configuration to get task dependencies
+            task_dependencies = self._parse_pipeline_toml(scan)
+
+            if task_dependencies:
+                # Compute the full hierarchy of tasks to preserve
+                tasks_to_preserve = self._compute_task_hierarchy(
+                    self.keep_task, task_dependencies
+                )
+
+                # Fileset IDs need to be matched to task names as they have specific suffixes
+                task_fs_map = locate_task_filesets(scan, tasks_to_preserve)
+                # Add task-related fileset IDs to the preserve list
+                filesets_to_preserve.update(list(task_fs_map.values()))
+
+                logger.info(
+                    "Preserving task %r and its ancestors: %s",
+                    self.keep_task,
+                    tasks_to_preserve
+                )
+            else:
+                logger.warning(
+                    "Could not parse task dependencies, only keeping %r",
+                    self.keep_task
+                )
+                filesets_to_preserve.add(self.keep_task)
+
         # - Handle the necessity to confirm prior to dataset & metadata cleaning.
         if not self.no_confirm:
-            del_msg = "This will delete all filesets and metadata except for the `images` & 'VirtualPlant' filesets."
+            del_msg = (
+                f"This will delete all filesets except: {filesets_to_preserve} "
+                "and 'VirtualPlant' filesets."
+            )
             logger.warning(del_msg)
             if not self._confirm():
                 logger.info("User aborted the cleaning operation.")
                 return
 
         # - Delete unwanted filesets.
-        filesets_to_remove = self._filesets_to_remove(scan, exclude={"images"})
+        filesets_to_remove = self._filesets_to_remove(scan, exclude=filesets_to_preserve)
         if filesets_to_remove:
             self._delete_filesets(scan, filesets_to_remove)
         else:
-            logger.info("No filesets to delete (only 'images' and VirtualPlant* remain).")
+            logger.info("No filesets to delete (preserved: %s).", filesets_to_preserve)
 
-        # - Clean the metadata of the ``images`` fileset.
-        images_fs = scan.get_fileset("images")
-        if images_fs is None:
-            logger.critical("Could not locate the 'images' fileset in scan %s.", scan.id)
-        else:
-            self._clean_images_metadata(images_fs, metadata_whitelist)
+        # - Clean the metadata of the ``images`` fileset if Colmap task is not preserved.
+        # Colmap is the only task that writes to the 'images' metadata.
+        if 'Colmap' not in tasks_to_preserve:
+            images_fs = scan.get_fileset("images")
+            if images_fs is None:
+                logger.warning("Could not locate the 'images' fileset in scan %s.", scan.id)
+            else:
+                self._clean_images_metadata(images_fs, metadata_whitelist)
 
         # - Clean orphan metadata files and directories.
+        with open(scan.path() / "files.json", "r") as f:
+            json_data = json.load(f)["filesets"]
+            known_fs = [fs['id'] for fs in json_data]
         metadata_dir = Path(scan.path()) / "metadata"
-        self._clean_orphan_json_files(metadata_dir)
-        self._clean_orphan_directories(metadata_dir)
+        self._clean_orphan_json_files(metadata_dir, known_fs)
+        self._clean_orphan_directories(metadata_dir, known_fs)
 
         # - Optionally remove the pipeline backup.
         if not self.keep_pipeline_cfg:
@@ -1213,7 +1371,6 @@ class Clean(RomiTask):
 
         logger.info("Cleaning task finished for scan %r.", scan.id)
         return
-
 
 class RetryTracker(RomiTask):
     """Tracks retry counts for tasks by storing them in a JSON file.

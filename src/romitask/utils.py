@@ -136,6 +136,7 @@ def parse_kbdi(kbdi, default='n'):
     else:
         return valid[kbdi]
 
+
 def ask_confirmation(prompt: str, default: str = "n") -> bool:
     """Prompt the user for a yes/no answer.
 
