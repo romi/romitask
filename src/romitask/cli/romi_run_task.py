@@ -345,7 +345,8 @@ def create_backup_cfg(path: str | Path, cfgname: str, config: dict[str, dict[str
     compat_cfg = copy.copy(config)
     for task_name, task_params in compat_cfg.items():
         # Convert any list or dict task parameter value to a string for compatibility:
-        compat_cfg[task_name] = {param_name: str(param) if isinstance(param, (list, dict)) else param for param_name, param in task_params.items()}
+        compat_cfg[task_name] = {param_name: str(param) if isinstance(param, (list, dict)) else param for
+                                 param_name, param in task_params.items()}
         # Exclude `None` from the config
         compat_cfg[task_name] = {param_name: param for param_name, param in task_params.items() if param is not None}
 
