@@ -602,10 +602,14 @@ def run_task(dataset_path: str | Path,
             logger.info(f"Running luigi command:\n{' '.join(list(map(str, cmd)))}")
             logger.debug(f"Using locally defined varenv: {env}")
             logger.debug(f"Using globally defined varenv: {os.environ}")
+
             # System‑wide variables (`os.environ`) overwrite any duplicate keys from the custom `env` dict
-            p = subprocess.run(cmd, env={**env, **os.environ}, check=True)
+            # Use `check=False` to avoid raising on non‑zero exit; we will handle failures manually.
+            p = subprocess.run(cmd, env={**env, **os.environ}, check=False)
+
             delta = timedelta(seconds=time.time() - t_start)
             delta = str(delta).split('.')[0]  # to get HH:MM:SS
+
             if p.returncode == 0:
                 logger.info(f"Done in {delta}s!")
                 # Move the temporary logging configuration and backup TOML file
@@ -629,27 +633,10 @@ def run_task(dataset_path: str | Path,
                     logger.error(f"Failed to move temporary config files: {move_err}")
             else:
                 logger.info(f"Failed after {delta}s!")
-            # -------------------------------------------------------------
-            # Move the temporary logging configuration and backup TOML file
-            # to the actual dataset directory after the task has created it.
-            # This must happen **after** the subprocess call because the
-            # dataset directory is created by the task itself.
-            try:
-                # Move logging.cfg
-                shutil.move(logging_file_path, Path(dataset_path) / log_fname)
-                # Move the backup configuration file (scan.toml or pipeline.toml)
-                # Ensure the destination file is overwritten if it already exists.
-                dest_cfg_path = Path(dataset_path) / Path(cfg_file_path).name
-                if dest_cfg_path.exists():
-                    try:
-                        dest_cfg_path.unlink()  # Remove the existing file first
-                    except Exception as e_unlink:
-                        logger.error(f"Could not remove existing config file '{dest_cfg_path}': {e_unlink}")
-                        raise
-                shutil.move(cfg_file_path, dest_cfg_path)
-            except Exception as move_err:
-                logger.error(f"Failed to move temporary config files: {move_err}")
-            # -------------------------------------------------------------
+                failed_tmp_workdir = tmpd + "_failed"
+                shutil.copytree(tmpd, failed_tmp_workdir, copy_function=shutil.copy2)
+                logger.info(f"Moved failed temporary working directory to: {failed_tmp_workdir}")
+
     return p
 
 
