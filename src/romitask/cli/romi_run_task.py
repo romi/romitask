@@ -530,7 +530,7 @@ def run_task(dataset_path: str | Path,
         local_config = {}
         logger.info(f"Found {len(local_toml)} local TOML configuration file{'s' if len(local_toml) > 1 else ''}!")
         for f in local_toml:
-           local_config = update_config(local_config, load_config_from_file(str(f), logger=logger))
+            local_config = update_config(local_config, load_config_from_file(str(f), logger=logger))
         if local_config != {}:
             logger.info(f"Got local definitions for: {list(local_config.keys())}")
             logger.debug(f"{local_config=}")
@@ -551,9 +551,9 @@ def run_task(dataset_path: str | Path,
     with tempfile.TemporaryDirectory() as tmpd:
         # Get the log_file name, with the date & task name by default:
         log_fname = kwargs.get('log_fname', get_log_filename(task))
+        logfile_path = os.path.join(tmpd, log_fname)
         # - Get logging configuration string for luigi, specifying the log file name :
-        logging_config = get_logging_config(log_level=log_level,
-                                            logfile_path=os.path.join(tmpd, log_fname))
+        logging_config = get_logging_config(log_level=log_level, logfile_path=logfile_path)
         # - Create a "logging.cfg" file to be used by `luigi`:
         logging_file_path = os.path.join(tmpd, "logging.cfg")
         with open(logging_file_path, 'w') as f:
@@ -608,6 +608,25 @@ def run_task(dataset_path: str | Path,
             delta = str(delta).split('.')[0]  # to get HH:MM:SS
             if p.returncode == 0:
                 logger.info(f"Done in {delta}s!")
+                # Move the temporary logging configuration and backup TOML file
+                # to the actual dataset directory after the task has created it.
+                # This must happen **after** the subprocess call because the
+                # dataset directory is created by the task itself.
+                try:
+                    # Move logging.cfg
+                    shutil.move(logfile_path, Path(dataset_path) / log_fname)
+                    # Move the backup configuration file (scan.toml or pipeline.toml)
+                    # Ensure the destination file is overwritten if it already exists.
+                    dest_cfg_path = Path(dataset_path) / Path(cfg_file_path).name
+                    if dest_cfg_path.exists():
+                        try:
+                            dest_cfg_path.unlink()  # Remove the existing file first
+                        except Exception as e_unlink:
+                            logger.error(f"Could not remove existing config file '{dest_cfg_path}': {e_unlink}")
+                            raise
+                    shutil.move(cfg_file_path, dest_cfg_path)
+                except Exception as move_err:
+                    logger.error(f"Failed to move temporary config files: {move_err}")
             else:
                 logger.info(f"Failed after {delta}s!")
             # -------------------------------------------------------------
