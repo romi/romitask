@@ -1236,9 +1236,9 @@ This makes complex pipeline execution simple, reproducible, and portable.</p>
 <h4 id="romitask.cli.romi_run_task--2-programmatic-use-from-python">2. Programmatic use from Python<a class="headerlink" href="#romitask.cli.romi_run_task--2-programmatic-use-from-python" title="Permanent link">Link</a></h4>
 <div class="highlight"><pre><span></span><code><span class="o">&gt;&gt;&gt;</span> <span class="kn">from</span><span class="w"> </span><span class="nn">pathlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">Path</span>
 <span class="o">&gt;&gt;&gt;</span> <span class="kn">from</span><span class="w"> </span><span class="nn">romitask.cli.romi_run_task</span><span class="w"> </span><span class="kn">import</span> <span class="n">run_task</span>
-<span class="o">&gt;&gt;&gt;</span> <span class="n">dataset</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="s2">&quot;/data/scan01&quot;</span><span class="p">)</span>
-<span class="o">&gt;&gt;&gt;</span> <span class="n">config_path</span> <span class="o">=</span> <span class="s2">&quot;/path/to/config.toml&quot;</span>
-<span class="o">&gt;&gt;&gt;</span> <span class="n">run_task</span><span class="p">(</span><span class="n">dataset_path</span><span class="o">=</span><span class="n">dataset</span><span class="p">,</span> <span class="n">task</span><span class="o">=</span><span class="s2">&quot;Scan&quot;</span><span class="p">,</span> <span class="n">config</span><span class="o">=</span><span class="n">config_path</span><span class="p">,</span> <span class="n">db_user</span><span class="o">=</span><span class="s2">&quot;my_user&quot;</span><span class="p">,</span> <span class="n">db_password</span><span class="o">=</span><span class="s2">&quot;secret&quot;</span><span class="p">)</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="n">dataset</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="s2">"/data/scan01"</span><span class="p">)</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="n">config_path</span> <span class="o">=</span> <span class="s2">"/path/to/config.toml"</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="n">run_task</span><span class="p">(</span><span class="n">dataset_path</span><span class="o">=</span><span class="n">dataset</span><span class="p">,</span> <span class="n">task</span><span class="o">=</span><span class="s2">"Scan"</span><span class="p">,</span> <span class="n">config</span><span class="o">=</span><span class="n">config_path</span><span class="p">,</span> <span class="n">db_user</span><span class="o">=</span><span class="s2">"my_user"</span><span class="p">,</span> <span class="n">db_password</span><span class="o">=</span><span class="s2">"secret"</span><span class="p">)</span>
 </code></pre></div>
 <p>The call performs the same steps as the CLI, loading configurations, preparing logging, and invoking Luigi.</p>
 
@@ -1425,7 +1425,7 @@ Else, the dataset directory should exist as an existing fileset will be processe
 <span class="normal">399</span>
 <span class="normal">400</span>
 <span class="normal">401</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">check_dataset_directory</span><span class="p">(</span><span class="n">path</span><span class="p">:</span> <span class="n">Path</span><span class="p">,</span> <span class="n">task</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">logger</span><span class="p">:</span> <span class="n">Logger</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Check the dataset directory is correctly defined depending on the `task` to execute.</span>
+<span class="w">    </span><span class="sd">"""Check the dataset directory is correctly defined depending on the `task` to execute.</span>
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
@@ -1443,28 +1443,28 @@ Else, the dataset directory should exist as an existing fileset will be processe
 
 <span class="sd">    Notes</span>
 <span class="sd">    -----</span>
-<span class="sd">    If a &quot;Scan&quot; like task is required, a directory should be created to receive the created fileset.</span>
+<span class="sd">    If a "Scan" like task is required, a directory should be created to receive the created fileset.</span>
 <span class="sd">    Else, the dataset directory should exist as an existing fileset will be processed.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
-    <span class="k">if</span> <span class="n">task</span> <span class="o">==</span> <span class="s2">&quot;ScannerToCenter&quot;</span><span class="p">:</span>
+<span class="sd">    """</span>
+    <span class="k">if</span> <span class="n">task</span> <span class="o">==</span> <span class="s2">"ScannerToCenter"</span><span class="p">:</span>
         <span class="n">cfgname</span> <span class="o">=</span> <span class="n">SCAN_TOML</span>
     <span class="k">elif</span> <span class="n">task</span> <span class="ow">in</span> <span class="n">DATA_CREATION_TASK</span><span class="p">:</span>
         <span class="k">try</span><span class="p">:</span>
             <span class="k">assert</span> <span class="ow">not</span> <span class="n">path</span><span class="o">.</span><span class="n">is_dir</span><span class="p">()</span>
         <span class="k">except</span> <span class="ne">AssertionError</span><span class="p">:</span>
-            <span class="n">logger</span><span class="o">.</span><span class="n">critical</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Given dataset directory &#39;</span><span class="si">{</span><span class="n">path</span><span class="si">}</span><span class="s2">&#39; exists and is not empty!&quot;</span><span class="p">)</span>
-            <span class="n">delete</span> <span class="o">=</span> <span class="n">parse_kbdi</span><span class="p">(</span><span class="nb">input</span><span class="p">(</span><span class="s2">&quot;Do you want ro remove the previous dataset? [y/N]&quot;</span><span class="p">))</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">critical</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Given dataset directory '</span><span class="si">{</span><span class="n">path</span><span class="si">}</span><span class="s2">' exists and is not empty!"</span><span class="p">)</span>
+            <span class="n">delete</span> <span class="o">=</span> <span class="n">parse_kbdi</span><span class="p">(</span><span class="nb">input</span><span class="p">(</span><span class="s2">"Do you want ro remove the previous dataset? [y/N]"</span><span class="p">))</span>
             <span class="k">if</span> <span class="n">delete</span><span class="p">:</span>
                 <span class="n">shutil</span><span class="o">.</span><span class="n">rmtree</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
             <span class="k">else</span><span class="p">:</span>
-                <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="s2">&quot;Non-empty dataset directory for data creation task.&quot;</span><span class="p">)</span>
+                <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="s2">"Non-empty dataset directory for data creation task."</span><span class="p">)</span>
         <span class="n">cfgname</span> <span class="o">=</span> <span class="n">SCAN_TOML</span>
     <span class="k">else</span><span class="p">:</span>
         <span class="k">try</span><span class="p">:</span>
             <span class="k">assert</span> <span class="n">path</span><span class="o">.</span><span class="n">is_dir</span><span class="p">()</span>
         <span class="k">except</span> <span class="ne">AssertionError</span><span class="p">:</span>
-            <span class="n">logger</span><span class="o">.</span><span class="n">critical</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Could not find dataset directory &#39;</span><span class="si">{</span><span class="n">path</span><span class="si">}</span><span class="s2">&#39;!&quot;</span><span class="p">)</span>
-            <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="s2">&quot;Non-existing dataset directory for processing task.&quot;</span><span class="p">)</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">critical</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Could not find dataset directory '</span><span class="si">{</span><span class="n">path</span><span class="si">}</span><span class="s2">'!"</span><span class="p">)</span>
+            <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="s2">"Non-existing dataset directory for processing task."</span><span class="p">)</span>
         <span class="n">cfgname</span> <span class="o">=</span> <span class="n">PIPE_TOML</span>
     <span class="k">return</span> <span class="n">cfgname</span>
 </code></pre></div></td></tr></table></div>
@@ -1642,7 +1642,7 @@ Else, the dataset directory should exist as an existing fileset will be processe
 <span class="normal">354</span>
 <span class="normal">355</span>
 <span class="normal">356</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">create_backup_cfg</span><span class="p">(</span><span class="n">path</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">Path</span><span class="p">,</span> <span class="n">cfgname</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">config</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]])</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Create the backup configuration file used by luigi.</span>
+<span class="w">    </span><span class="sd">"""Create the backup configuration file used by luigi.</span>
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
@@ -1660,36 +1660,36 @@ Else, the dataset directory should exist as an existing fileset will be processe
 
 <span class="sd">    Notes</span>
 <span class="sd">    -----</span>
-<span class="sd">    We append &quot;return codes&quot; and &quot;library versioning&quot; to the given configuration dictionary.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    We append "return codes" and "library versioning" to the given configuration dictionary.</span>
+<span class="sd">    """</span>
     <span class="n">file_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="n">cfgname</span><span class="p">)</span>
 
     <span class="c1"># The following parameters control Luigi worker behavior.</span>
     <span class="c1"># https://luigi.readthedocs.io/en/stable/configuration.html#worker</span>
-    <span class="n">config</span><span class="p">[</span><span class="s2">&quot;worker&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span>
-        <span class="s2">&quot;keep_alive&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
-        <span class="s2">&quot;max_keep_alive_idle_duration&quot;</span><span class="p">:</span> <span class="mi">10</span><span class="p">,</span>  <span class="c1"># in seconds</span>
+    <span class="n">config</span><span class="p">[</span><span class="s2">"worker"</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s2">"keep_alive"</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+        <span class="s2">"max_keep_alive_idle_duration"</span><span class="p">:</span> <span class="mi">10</span><span class="p">,</span>  <span class="c1"># in seconds</span>
     <span class="p">}</span>
 
     <span class="c1"># The following parameters control Luigi scheduler behavior.</span>
     <span class="c1"># https://luigi.readthedocs.io/en/stable/configuration.html#scheduler</span>
-    <span class="n">config</span><span class="p">[</span><span class="s2">&quot;scheduler&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span>
-        <span class="s2">&quot;retry_count&quot;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span>
+    <span class="n">config</span><span class="p">[</span><span class="s2">"scheduler"</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s2">"retry_count"</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span>
         <span class="c1"># Number of times a task can fail within `disable_window` before the scheduler will automatically disable it.</span>
-        <span class="s2">&quot;retry_delay&quot;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span>  <span class="c1"># Number of seconds to wait after a task failure to mark it pending again.</span>
-        <span class="s2">&quot;disable_window&quot;</span><span class="p">:</span> <span class="mi">3600</span><span class="p">,</span>
+        <span class="s2">"retry_delay"</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span>  <span class="c1"># Number of seconds to wait after a task failure to mark it pending again.</span>
+        <span class="s2">"disable_window"</span><span class="p">:</span> <span class="mi">3600</span><span class="p">,</span>
         <span class="c1"># Number of seconds during which `retry_count` failures must occur in order for an automatic disable by the scheduler.</span>
     <span class="p">}</span>
 
     <span class="c1"># The following return codes are the recommended exit codes for Luigi.</span>
     <span class="c1"># They are in increasing level of severity (for most applications).</span>
     <span class="c1"># https://luigi.readthedocs.io/en/stable/configuration.html#retcode</span>
-    <span class="n">config</span><span class="p">[</span><span class="s2">&quot;retcode&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;already_running&quot;</span><span class="p">:</span> <span class="mi">10</span><span class="p">,</span> <span class="s2">&quot;missing_data&quot;</span><span class="p">:</span> <span class="mi">20</span><span class="p">,</span>
-                         <span class="s2">&quot;not_run&quot;</span><span class="p">:</span> <span class="mi">25</span><span class="p">,</span> <span class="s2">&quot;task_failed&quot;</span><span class="p">:</span> <span class="mi">30</span><span class="p">,</span>
-                         <span class="s2">&quot;scheduling_error&quot;</span><span class="p">:</span> <span class="mi">35</span><span class="p">,</span> <span class="s2">&quot;unhandled_exception&quot;</span><span class="p">:</span> <span class="mi">40</span><span class="p">}</span>
+    <span class="n">config</span><span class="p">[</span><span class="s2">"retcode"</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span><span class="s2">"already_running"</span><span class="p">:</span> <span class="mi">10</span><span class="p">,</span> <span class="s2">"missing_data"</span><span class="p">:</span> <span class="mi">20</span><span class="p">,</span>
+                         <span class="s2">"not_run"</span><span class="p">:</span> <span class="mi">25</span><span class="p">,</span> <span class="s2">"task_failed"</span><span class="p">:</span> <span class="mi">30</span><span class="p">,</span>
+                         <span class="s2">"scheduling_error"</span><span class="p">:</span> <span class="mi">35</span><span class="p">,</span> <span class="s2">"unhandled_exception"</span><span class="p">:</span> <span class="mi">40</span><span class="p">}</span>
 
     <span class="c1"># Save the version number for each ROMI library:</span>
-    <span class="n">config</span><span class="p">[</span><span class="s2">&quot;version&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">get_version</span><span class="p">()</span>
+    <span class="n">config</span><span class="p">[</span><span class="s2">"version"</span><span class="p">]</span> <span class="o">=</span> <span class="n">get_version</span><span class="p">()</span>
 
     <span class="n">compat_cfg</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">copy</span><span class="p">(</span><span class="n">config</span><span class="p">)</span>
     <span class="k">for</span> <span class="n">task_name</span><span class="p">,</span> <span class="n">task_params</span> <span class="ow">in</span> <span class="n">compat_cfg</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
@@ -1699,7 +1699,7 @@ Else, the dataset directory should exist as an existing fileset will be processe
         <span class="c1"># Exclude `None` from the config</span>
         <span class="n">compat_cfg</span><span class="p">[</span><span class="n">task_name</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span><span class="n">param_name</span><span class="p">:</span> <span class="n">param</span> <span class="k">for</span> <span class="n">param_name</span><span class="p">,</span> <span class="n">param</span> <span class="ow">in</span> <span class="n">task_params</span><span class="o">.</span><span class="n">items</span><span class="p">()</span> <span class="k">if</span> <span class="n">param</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">}</span>
 
-    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">file_path</span><span class="p">,</span> <span class="s1">&#39;w&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">file_path</span><span class="p">,</span> <span class="s1">'w'</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
         <span class="n">tomlkit</span><span class="o">.</span><span class="n">dump</span><span class="p">(</span><span class="n">compat_cfg</span><span class="p">,</span> <span class="n">f</span><span class="p">)</span>
 
     <span class="k">return</span> <span class="n">file_path</span>
@@ -1842,7 +1842,7 @@ If <code>module</code> is not <code>None</code>, check it exists.</p>
 <span class="normal">276</span>
 <span class="normal">277</span>
 <span class="normal">278</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">get_task_module</span><span class="p">(</span><span class="n">task</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">logger</span><span class="p">:</span> <span class="n">Logger</span><span class="p">,</span> <span class="n">module</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Set the name of the `module` to be loaded for the selected `task`.</span>
+<span class="w">    </span><span class="sd">"""Set the name of the `module` to be loaded for the selected `task`.</span>
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
@@ -1858,16 +1858,16 @@ If <code>module</code> is not <code>None</code>, check it exists.</p>
 <span class="sd">    -------</span>
 <span class="sd">    str</span>
 <span class="sd">        The name of the `module` to use with `task`.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="kn">import</span><span class="w"> </span><span class="nn">importlib</span>
     <span class="k">if</span> <span class="n">module</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
         <span class="k">try</span><span class="p">:</span>
             <span class="n">importlib</span><span class="o">.</span><span class="n">import_module</span><span class="p">(</span><span class="n">module</span><span class="p">)</span>
         <span class="k">except</span> <span class="ne">ModuleNotFoundError</span><span class="p">:</span>
-            <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Could not load manually defined module: &#39;</span><span class="si">{</span><span class="n">module</span><span class="si">}</span><span class="s2">&#39;.&quot;</span><span class="p">)</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Could not load manually defined module: '</span><span class="si">{</span><span class="n">module</span><span class="si">}</span><span class="s2">'."</span><span class="p">)</span>
             <span class="n">module</span> <span class="o">=</span> <span class="n">get_task_predefined_module</span><span class="p">(</span><span class="n">task</span><span class="p">,</span> <span class="n">logger</span><span class="o">=</span><span class="n">logger</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Got a manually defined module: &#39;</span><span class="si">{</span><span class="n">module</span><span class="si">}</span><span class="s2">&#39;.&quot;</span><span class="p">)</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Got a manually defined module: '</span><span class="si">{</span><span class="n">module</span><span class="si">}</span><span class="s2">'."</span><span class="p">)</span>
     <span class="k">else</span><span class="p">:</span>
         <span class="n">module</span> <span class="o">=</span> <span class="n">get_task_predefined_module</span><span class="p">(</span><span class="n">task</span><span class="p">,</span> <span class="n">logger</span><span class="o">=</span><span class="n">logger</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">module</span>
@@ -1905,16 +1905,16 @@ If <code>module</code> is not <code>None</code>, check it exists.</p>
 <span class="normal">290</span>
 <span class="normal">291</span>
 <span class="normal">292</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">get_task_predefined_module</span><span class="p">(</span><span class="n">task</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">logger</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Try to get the task from the pre-defined ``MODULES`` dictionary.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""Try to get the task from the pre-defined ``MODULES`` dictionary."""</span>
     <span class="k">try</span><span class="p">:</span>
         <span class="n">module</span> <span class="o">=</span> <span class="n">MODULES</span><span class="p">[</span><span class="n">task</span><span class="p">]</span>
     <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
-        <span class="n">logger</span><span class="o">.</span><span class="n">critical</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Could not find pre-defined module for selected task &#39;</span><span class="si">{</span><span class="n">task</span><span class="si">}</span><span class="s2">&#39;!&quot;</span><span class="p">)</span>
-        <span class="n">logger</span><span class="o">.</span><span class="n">critical</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;The list of pre-defined tasks is: </span><span class="si">{</span><span class="s1">&#39;, &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="nb">sorted</span><span class="p">(</span><span class="n">TASKS</span><span class="p">))</span><span class="si">}</span><span class="s2">.&quot;</span><span class="p">)</span>
-        <span class="n">logger</span><span class="o">.</span><span class="n">critical</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Use `--module` to manually define the Python module corresponding to the selected task.&quot;</span><span class="p">)</span>
-        <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="s2">&quot;Error with module definition!&quot;</span><span class="p">)</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">critical</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Could not find pre-defined module for selected task '</span><span class="si">{</span><span class="n">task</span><span class="si">}</span><span class="s2">'!"</span><span class="p">)</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">critical</span><span class="p">(</span><span class="sa">f</span><span class="s2">"The list of pre-defined tasks is: </span><span class="si">{</span><span class="s1">', '</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="nb">sorted</span><span class="p">(</span><span class="n">TASKS</span><span class="p">))</span><span class="si">}</span><span class="s2">."</span><span class="p">)</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">critical</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Use `--module` to manually define the Python module corresponding to the selected task."</span><span class="p">)</span>
+        <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="s2">"Error with module definition!"</span><span class="p">)</span>
     <span class="k">else</span><span class="p">:</span>
-        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Found pre-defined module &#39;</span><span class="si">{</span><span class="n">module</span><span class="si">}</span><span class="s2">&#39; for task &#39;</span><span class="si">{</span><span class="n">task</span><span class="si">}</span><span class="s2">&#39;.&quot;</span><span class="p">)</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Found pre-defined module '</span><span class="si">{</span><span class="n">module</span><span class="si">}</span><span class="s2">' for task '</span><span class="si">{</span><span class="n">task</span><span class="si">}</span><span class="s2">'."</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">module</span>
 </code></pre></div></td></tr></table></div>
             </details>
@@ -2054,7 +2054,7 @@ If <code>module</code> is not <code>None</code>, check it exists.</p>
 <span class="normal">163</span>
 <span class="normal">164</span>
 <span class="normal">165</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">load_backup_pipe_cfg</span><span class="p">(</span><span class="n">dataset_path</span><span class="p">:</span> <span class="n">Path</span><span class="p">,</span> <span class="n">task</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">logger</span><span class="p">:</span> <span class="n">Logger</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Try to load a ``PIPE_TOML`` configuration from the given path.</span>
+<span class="w">    </span><span class="sd">"""Try to load a ``PIPE_TOML`` configuration from the given path.</span>
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
@@ -2069,17 +2069,17 @@ If <code>module</code> is not <code>None</code>, check it exists.</p>
 <span class="sd">    -------</span>
 <span class="sd">    dict</span>
 <span class="sd">        The configuration dictionary, if loaded from a backup file.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="n">bak_pipe_path</span> <span class="o">=</span> <span class="n">dataset_path</span> <span class="o">/</span> <span class="n">PIPE_TOML</span>
     <span class="n">bak_pipe_config</span> <span class="o">=</span> <span class="p">{}</span>
     <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">bak_pipe_path</span><span class="p">):</span>
-        <span class="c1"># Raise an IOError when task &#39;Scan&#39; is required in a folder with a backup of a processing pipeline</span>
+        <span class="c1"># Raise an IOError when task 'Scan' is required in a folder with a backup of a processing pipeline</span>
         <span class="c1"># This probably means that you are trying to use a dataset that is NOT EMPTY!</span>
-        <span class="k">if</span> <span class="s2">&quot;Scan&quot;</span> <span class="ow">in</span> <span class="n">task</span><span class="p">:</span>
-            <span class="n">logger</span><span class="o">.</span><span class="n">critical</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Task &#39;</span><span class="si">{</span><span class="n">task</span><span class="si">}</span><span class="s2">&#39; was called with dataset &#39;</span><span class="si">{</span><span class="n">dataset_path</span><span class="si">}</span><span class="s2">&#39;!&quot;</span><span class="p">)</span>
-            <span class="n">logger</span><span class="o">.</span><span class="n">critical</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;It contains a processing pipeline configuration backup file!&quot;</span><span class="p">)</span>
-            <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Requested </span><span class="si">{</span><span class="n">task</span><span class="si">}</span><span class="s2"> task in non-empty folder, clean it up or change location!&quot;</span><span class="p">)</span>
-        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">bak_pipe_path</span><span class="p">,</span> <span class="s2">&quot;r&quot;</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="s2">&quot;utf-8&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+        <span class="k">if</span> <span class="s2">"Scan"</span> <span class="ow">in</span> <span class="n">task</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">critical</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Task '</span><span class="si">{</span><span class="n">task</span><span class="si">}</span><span class="s2">' was called with dataset '</span><span class="si">{</span><span class="n">dataset_path</span><span class="si">}</span><span class="s2">'!"</span><span class="p">)</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">critical</span><span class="p">(</span><span class="sa">f</span><span class="s2">"It contains a processing pipeline configuration backup file!"</span><span class="p">)</span>
+            <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Requested </span><span class="si">{</span><span class="n">task</span><span class="si">}</span><span class="s2"> task in non-empty folder, clean it up or change location!"</span><span class="p">)</span>
+        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">bak_pipe_path</span><span class="p">,</span> <span class="s2">"r"</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="s2">"utf-8"</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
             <span class="n">bak_pipe_config</span> <span class="o">=</span> <span class="n">tomlkit</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">f</span><span class="p">)</span>
 
     <span class="k">return</span> <span class="n">bak_pipe_config</span>
@@ -2178,7 +2178,7 @@ If <code>module</code> is not <code>None</code>, check it exists.</p>
 <span class="normal">131</span>
 <span class="normal">132</span>
 <span class="normal">133</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">load_backup_scan_cfg</span><span class="p">(</span><span class="n">path</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">Path</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Try to load a ``SCAN_TOML`` configuration from the given path.</span>
+<span class="w">    </span><span class="sd">"""Try to load a ``SCAN_TOML`` configuration from the given path.</span>
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
@@ -2189,10 +2189,10 @@ If <code>module</code> is not <code>None</code>, check it exists.</p>
 <span class="sd">    -------</span>
 <span class="sd">    dict</span>
 <span class="sd">        The configuration dictionary, if loaded from a backup file.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="n">scan_last_cfg</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="n">SCAN_TOML</span><span class="p">)</span>
     <span class="n">bak_scan_config</span> <span class="o">=</span> <span class="p">{}</span>
-    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">scan_last_cfg</span><span class="p">,</span> <span class="s2">&quot;r&quot;</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="s2">&quot;utf-8&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">scan_last_cfg</span><span class="p">,</span> <span class="s2">"r"</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="s2">"utf-8"</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
         <span class="n">bak_scan_config</span> <span class="o">=</span> <span class="n">tomlkit</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">f</span><span class="p">)</span>
 
     <span class="k">return</span> <span class="n">bak_scan_config</span>
@@ -2336,7 +2336,7 @@ If <code>module</code> is not <code>None</code>, check it exists.</p>
 <span class="normal">208</span>
 <span class="normal">209</span>
 <span class="normal">210</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">load_config_from_directory</span><span class="p">(</span><span class="n">path</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">Path</span><span class="p">,</span> <span class="n">logger</span><span class="p">:</span> <span class="n">Logger</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Load the TOML &amp; JSON configuration files from the given path.</span>
+<span class="w">    </span><span class="sd">"""Load the TOML &amp; JSON configuration files from the given path.</span>
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
@@ -2354,28 +2354,28 @@ If <code>module</code> is not <code>None</code>, check it exists.</p>
 <span class="sd">    -----</span>
 <span class="sd">    We exclude the backup files ``SCAN_TOML`` &amp; ``PIPE_TOML`` from the list of loadable files.</span>
 
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="c1"># List TOML config files:</span>
-    <span class="n">toml_list</span> <span class="o">=</span> <span class="n">glob</span><span class="o">.</span><span class="n">glob</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="s2">&quot;*.toml&quot;</span><span class="p">))</span>
+    <span class="n">toml_list</span> <span class="o">=</span> <span class="n">glob</span><span class="o">.</span><span class="n">glob</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="s2">"*.toml"</span><span class="p">))</span>
 
     <span class="c1"># Exclude BACKUP configuration files from TOML config files list:</span>
-    <span class="n">toml_list</span> <span class="o">=</span> <span class="p">[</span><span class="n">Path</span><span class="p">(</span><span class="n">cfg</span><span class="p">)</span> <span class="k">for</span> <span class="n">cfg</span> <span class="ow">in</span> <span class="n">toml_list</span> <span class="k">if</span> <span class="n">cfg</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;/&quot;</span><span class="p">)[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">(</span><span class="n">SCAN_TOML</span><span class="p">,</span> <span class="n">PIPE_TOML</span><span class="p">)]</span>
+    <span class="n">toml_list</span> <span class="o">=</span> <span class="p">[</span><span class="n">Path</span><span class="p">(</span><span class="n">cfg</span><span class="p">)</span> <span class="k">for</span> <span class="n">cfg</span> <span class="ow">in</span> <span class="n">toml_list</span> <span class="k">if</span> <span class="n">cfg</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">"/"</span><span class="p">)[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">(</span><span class="n">SCAN_TOML</span><span class="p">,</span> <span class="n">PIPE_TOML</span><span class="p">)]</span>
     <span class="c1"># Make sure we got at least one TOML or JSON config file:</span>
     <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">toml_list</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
-        <span class="n">logger</span><span class="o">.</span><span class="n">critical</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Could not find any TOML configuration file in &#39;</span><span class="si">{</span><span class="n">path</span><span class="si">}</span><span class="s2">&#39;!&quot;</span><span class="p">)</span>
-        <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="s2">&quot;Configuration file missing!&quot;</span><span class="p">)</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">critical</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Could not find any TOML configuration file in '</span><span class="si">{</span><span class="n">path</span><span class="si">}</span><span class="s2">'!"</span><span class="p">)</span>
+        <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="s2">"Configuration file missing!"</span><span class="p">)</span>
 
     <span class="n">config</span> <span class="o">=</span> <span class="p">{}</span>
     <span class="c1"># Read TOML configs</span>
     <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">toml_list</span><span class="p">:</span>
         <span class="k">try</span><span class="p">:</span>
-            <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">f</span><span class="p">,</span> <span class="s2">&quot;r&quot;</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="s2">&quot;utf-8&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">fp</span><span class="p">:</span>
+            <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">f</span><span class="p">,</span> <span class="s2">"r"</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="s2">"utf-8"</span><span class="p">)</span> <span class="k">as</span> <span class="n">fp</span><span class="p">:</span>
                 <span class="n">c</span> <span class="o">=</span> <span class="n">tomlkit</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">fp</span><span class="p">)</span>
             <span class="n">config</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">c</span><span class="p">)</span>  <span class="c1"># update the config with the new one</span>
         <span class="k">except</span><span class="p">:</span>
-            <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Could not process TOML config file: </span><span class="si">{</span><span class="n">f</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Could not process TOML config file: </span><span class="si">{</span><span class="n">f</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Loaded TOML configuration file: </span><span class="si">{</span><span class="n">f</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Loaded TOML configuration file: </span><span class="si">{</span><span class="n">f</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
 
     <span class="k">return</span> <span class="n">config</span>
 </code></pre></div></td></tr></table></div>
@@ -2504,7 +2504,7 @@ If <code>module</code> is not <code>None</code>, check it exists.</p>
 <span class="normal">244</span>
 <span class="normal">245</span>
 <span class="normal">246</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">load_config_from_file</span><span class="p">(</span><span class="n">path</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">Path</span><span class="p">,</span> <span class="n">logger</span><span class="p">:</span> <span class="n">Logger</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Load the TOML configuration file from the given path.</span>
+<span class="w">    </span><span class="sd">"""Load the TOML configuration file from the given path.</span>
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
@@ -2517,24 +2517,24 @@ If <code>module</code> is not <code>None</code>, check it exists.</p>
 <span class="sd">    -------</span>
 <span class="sd">    dict</span>
 <span class="sd">        The configuration dictionary.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="n">config</span> <span class="o">=</span> <span class="p">{}</span>
     <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
         <span class="n">path</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
     <span class="c1"># Check that the given configuration file exists:</span>
     <span class="k">if</span> <span class="ow">not</span> <span class="n">path</span><span class="o">.</span><span class="n">is_file</span><span class="p">():</span>
-        <span class="n">logger</span><span class="o">.</span><span class="n">critical</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Could not configuration find file: &#39;</span><span class="si">{</span><span class="n">path</span><span class="o">.</span><span class="n">absolute</span><span class="p">()</span><span class="si">}</span><span class="s2">&#39;&quot;</span><span class="p">)</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">critical</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Could not configuration find file: '</span><span class="si">{</span><span class="n">path</span><span class="o">.</span><span class="n">absolute</span><span class="p">()</span><span class="si">}</span><span class="s2">'"</span><span class="p">)</span>
     <span class="c1"># Try to load the TOML configuration file:</span>
     <span class="k">try</span><span class="p">:</span>
-        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="s2">&quot;r&quot;</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="s2">&quot;utf-8&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="s2">"r"</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="s2">"utf-8"</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
             <span class="n">config</span> <span class="o">=</span> <span class="n">tomlkit</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">f</span><span class="p">)</span>
     <span class="k">except</span><span class="p">:</span>
-        <span class="k">if</span> <span class="ow">not</span> <span class="n">path</span><span class="o">.</span><span class="n">suffix</span> <span class="o">==</span> <span class="s2">&quot;.toml&quot;</span><span class="p">:</span>
-            <span class="n">logger</span><span class="o">.</span><span class="n">critical</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Could not load TOML configuration file &#39;</span><span class="si">{</span><span class="n">path</span><span class="si">}</span><span class="s2">&#39;!&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">path</span><span class="o">.</span><span class="n">suffix</span> <span class="o">==</span> <span class="s2">".toml"</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">critical</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Could not load TOML configuration file '</span><span class="si">{</span><span class="n">path</span><span class="si">}</span><span class="s2">'!"</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="n">logger</span><span class="o">.</span><span class="n">critical</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Unsupported configuration file format, should be a TOML file, got &#39;</span><span class="si">{</span><span class="n">path</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">&#39;!&quot;</span><span class="p">)</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">critical</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Unsupported configuration file format, should be a TOML file, got '</span><span class="si">{</span><span class="n">path</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">'!"</span><span class="p">)</span>
     <span class="k">else</span><span class="p">:</span>
-        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Loaded TOML configuration file: </span><span class="si">{</span><span class="n">path</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Loaded TOML configuration file: </span><span class="si">{</span><span class="n">path</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
 
     <span class="k">return</span> <span class="n">config</span>
 </code></pre></div></td></tr></table></div>
@@ -2733,74 +2733,74 @@ If <code>module</code> is not <code>None</code>, check it exists.</p>
 <span class="normal">815</span>
 <span class="normal">816</span>
 <span class="normal">817</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@click</span><span class="o">.</span><span class="n">command</span><span class="p">(</span>
-    <span class="n">context_settings</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span><span class="n">help_option_names</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;-h&#39;</span><span class="p">,</span> <span class="s1">&#39;--help&#39;</span><span class="p">]),</span>
-    <span class="n">help</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;Run a ROMI task on selected dataset.</span><span class="se">\n\n</span><span class="s2">&quot;</span>
-         <span class="sa">f</span><span class="s2">&quot;The list of pre-defined tasks is: </span><span class="si">{</span><span class="s1">&#39;, &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">TASKS</span><span class="p">)</span><span class="si">}</span><span class="s2">.</span><span class="se">\n\n</span><span class="s2">&quot;</span>
-         <span class="sa">f</span><span class="s2">&quot;See </span><span class="si">{</span><span class="n">HELP_URL</span><span class="si">}</span><span class="s2"> for a detailed help with CLI.&quot;</span>
+    <span class="n">context_settings</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span><span class="n">help_option_names</span><span class="o">=</span><span class="p">[</span><span class="s1">'-h'</span><span class="p">,</span> <span class="s1">'--help'</span><span class="p">]),</span>
+    <span class="n">help</span><span class="o">=</span><span class="sa">f</span><span class="s2">"Run a ROMI task on selected dataset.</span><span class="se">\n\n</span><span class="s2">"</span>
+         <span class="sa">f</span><span class="s2">"The list of pre-defined tasks is: </span><span class="si">{</span><span class="s1">', '</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">TASKS</span><span class="p">)</span><span class="si">}</span><span class="s2">.</span><span class="se">\n\n</span><span class="s2">"</span>
+         <span class="sa">f</span><span class="s2">"See </span><span class="si">{</span><span class="n">HELP_URL</span><span class="si">}</span><span class="s2"> for a detailed help with CLI."</span>
 <span class="p">)</span>
-<span class="nd">@click</span><span class="o">.</span><span class="n">argument</span><span class="p">(</span><span class="s1">&#39;task&#39;</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="nb">str</span><span class="p">)</span>
-<span class="nd">@click</span><span class="o">.</span><span class="n">argument</span><span class="p">(</span><span class="s1">&#39;dataset_path&#39;</span><span class="p">,</span> <span class="n">nargs</span><span class="o">=-</span><span class="mi">1</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="nb">str</span><span class="p">)</span>
+<span class="nd">@click</span><span class="o">.</span><span class="n">argument</span><span class="p">(</span><span class="s1">'task'</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="nb">str</span><span class="p">)</span>
+<span class="nd">@click</span><span class="o">.</span><span class="n">argument</span><span class="p">(</span><span class="s1">'dataset_path'</span><span class="p">,</span> <span class="n">nargs</span><span class="o">=-</span><span class="mi">1</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="nb">str</span><span class="p">)</span>
 <span class="nd">@click</span><span class="o">.</span><span class="n">option</span><span class="p">(</span>
-    <span class="s1">&#39;--config&#39;</span><span class="p">,</span>
-    <span class="n">default</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">,</span>
-    <span class="n">help</span><span class="o">=</span><span class="s2">&quot;Pipeline configuration file (TOML) or directory. &quot;</span>
-         <span class="s2">&quot;If a file, read the configuration from it. &quot;</span>
-         <span class="s2">&quot;If a directory, read &amp; concatenate all TOML configuration files in it. &quot;</span>
-         <span class="s2">&quot;By default, search a &#39;pipeline.toml&#39; file in the selected dataset directory.&quot;</span>
-<span class="p">)</span>
-<span class="nd">@click</span><span class="o">.</span><span class="n">option</span><span class="p">(</span>
-    <span class="s1">&#39;--cfg&#39;</span><span class="p">,</span>
-    <span class="s1">&#39;cfg_override&#39;</span><span class="p">,</span>
-    <span class="n">default</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">,</span>
-    <span class="n">help</span><span class="o">=</span><span class="s2">&quot;Override configuration file using specific parameters, e.g. </span><span class="se">\&quot;</span><span class="s2">Clean.keep_task=&#39;Masks&#39;</span><span class="se">\&quot;</span><span class="s2">.&quot;</span>
+    <span class="s1">'--config'</span><span class="p">,</span>
+    <span class="n">default</span><span class="o">=</span><span class="s2">""</span><span class="p">,</span>
+    <span class="n">help</span><span class="o">=</span><span class="s2">"Pipeline configuration file (TOML) or directory. "</span>
+         <span class="s2">"If a file, read the configuration from it. "</span>
+         <span class="s2">"If a directory, read &amp; concatenate all TOML configuration files in it. "</span>
+         <span class="s2">"By default, search a 'pipeline.toml' file in the selected dataset directory."</span>
 <span class="p">)</span>
 <span class="nd">@click</span><span class="o">.</span><span class="n">option</span><span class="p">(</span>
-    <span class="s1">&#39;--module&#39;</span><span class="p">,</span>
+    <span class="s1">'--cfg'</span><span class="p">,</span>
+    <span class="s1">'cfg_override'</span><span class="p">,</span>
+    <span class="n">default</span><span class="o">=</span><span class="s2">""</span><span class="p">,</span>
+    <span class="n">help</span><span class="o">=</span><span class="s2">"Override configuration file using specific parameters, e.g. </span><span class="se">\"</span><span class="s2">Clean.keep_task='Masks'</span><span class="se">\"</span><span class="s2">."</span>
+<span class="p">)</span>
+<span class="nd">@click</span><span class="o">.</span><span class="n">option</span><span class="p">(</span>
+    <span class="s1">'--module'</span><span class="p">,</span>
     <span class="n">default</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-    <span class="n">help</span><span class="o">=</span><span class="s2">&quot;Library and module of the task. &quot;</span>
-         <span class="s2">&quot;Use it if not available or different than defined in `romitask.modules.MODULES`.&quot;</span>
+    <span class="n">help</span><span class="o">=</span><span class="s2">"Library and module of the task. "</span>
+         <span class="s2">"Use it if not available or different than defined in `romitask.modules.MODULES`."</span>
 <span class="p">)</span>
 <span class="nd">@click</span><span class="o">.</span><span class="n">option</span><span class="p">(</span>
-    <span class="s1">&#39;--log-level&#39;</span><span class="p">,</span>
+    <span class="s1">'--log-level'</span><span class="p">,</span>
     <span class="nb">type</span><span class="o">=</span><span class="n">click</span><span class="o">.</span><span class="n">Choice</span><span class="p">(</span><span class="n">LOG_LEVELS</span><span class="p">,</span> <span class="n">case_sensitive</span><span class="o">=</span><span class="kc">False</span><span class="p">),</span>
-    <span class="n">default</span><span class="o">=</span><span class="s1">&#39;INFO&#39;</span><span class="p">,</span>
-    <span class="n">help</span><span class="o">=</span><span class="s2">&quot;Level of message logging, defaults to &#39;INFO&#39;.&quot;</span>
+    <span class="n">default</span><span class="o">=</span><span class="s1">'INFO'</span><span class="p">,</span>
+    <span class="n">help</span><span class="o">=</span><span class="s2">"Level of message logging, defaults to 'INFO'."</span>
 <span class="p">)</span>
 <span class="nd">@click</span><span class="o">.</span><span class="n">option</span><span class="p">(</span>
-    <span class="s1">&#39;--dry-run&#39;</span><span class="p">,</span>
+    <span class="s1">'--dry-run'</span><span class="p">,</span>
     <span class="n">is_flag</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
-    <span class="n">help</span><span class="o">=</span><span class="s2">&quot;Use this to test the command-line by doing everything except calling the task(s).&quot;</span>
+    <span class="n">help</span><span class="o">=</span><span class="s2">"Use this to test the command-line by doing everything except calling the task(s)."</span>
 <span class="p">)</span>
-<span class="nd">@optgroup</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="s1">&#39;Authentication options&#39;</span><span class="p">)</span>
+<span class="nd">@optgroup</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="s1">'Authentication options'</span><span class="p">)</span>
 <span class="nd">@optgroup</span><span class="o">.</span><span class="n">option</span><span class="p">(</span>
-    <span class="s1">&#39;-u&#39;</span><span class="p">,</span> <span class="s1">&#39;--user&#39;</span><span class="p">,</span>
-    <span class="s1">&#39;db_user&#39;</span><span class="p">,</span>
+    <span class="s1">'-u'</span><span class="p">,</span> <span class="s1">'--user'</span><span class="p">,</span>
+    <span class="s1">'db_user'</span><span class="p">,</span>
     <span class="n">default</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-    <span class="n">help</span><span class="o">=</span><span class="s2">&quot;Username for FSDB login.&quot;</span>
+    <span class="n">help</span><span class="o">=</span><span class="s2">"Username for FSDB login."</span>
 <span class="p">)</span>
 <span class="nd">@optgroup</span><span class="o">.</span><span class="n">option</span><span class="p">(</span>
-    <span class="s1">&#39;-p&#39;</span><span class="p">,</span> <span class="s1">&#39;--password&#39;</span><span class="p">,</span>
-    <span class="s1">&#39;db_password&#39;</span><span class="p">,</span>
+    <span class="s1">'-p'</span><span class="p">,</span> <span class="s1">'--password'</span><span class="p">,</span>
+    <span class="s1">'db_password'</span><span class="p">,</span>
     <span class="n">default</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-    <span class="n">help</span><span class="o">=</span><span class="s2">&quot;Password for FSDB login.&quot;</span>
+    <span class="n">help</span><span class="o">=</span><span class="s2">"Password for FSDB login."</span>
 <span class="p">)</span>
 <span class="nd">@optgroup</span><span class="o">.</span><span class="n">option</span><span class="p">(</span>
-    <span class="s1">&#39;--no-auth&#39;</span><span class="p">,</span>
+    <span class="s1">'--no-auth'</span><span class="p">,</span>
     <span class="n">is_flag</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
-    <span class="n">help</span><span class="o">=</span><span class="s2">&quot;Use a database with automatic &#39;admin&#39; user log in, for testing purposes only.&quot;</span>
+    <span class="n">help</span><span class="o">=</span><span class="s2">"Use a database with automatic 'admin' user log in, for testing purposes only."</span>
 <span class="p">)</span>
-<span class="nd">@optgroup</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="s1">&#39;Luigi options&#39;</span><span class="p">)</span>
+<span class="nd">@optgroup</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="s1">'Luigi options'</span><span class="p">)</span>
 <span class="nd">@optgroup</span><span class="o">.</span><span class="n">option</span><span class="p">(</span>
-    <span class="s1">&#39;--luigicmd&#39;</span><span class="p">,</span>
+    <span class="s1">'--luigicmd'</span><span class="p">,</span>
     <span class="n">default</span><span class="o">=</span><span class="n">LUIGI_CMD</span><span class="p">,</span>
-    <span class="n">help</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;Luigi command, defaults to `</span><span class="si">{</span><span class="n">LUIGI_CMD</span><span class="si">}</span><span class="s2">`.&quot;</span>
+    <span class="n">help</span><span class="o">=</span><span class="sa">f</span><span class="s2">"Luigi command, defaults to `</span><span class="si">{</span><span class="n">LUIGI_CMD</span><span class="si">}</span><span class="s2">`."</span>
 <span class="p">)</span>
 <span class="nd">@optgroup</span><span class="o">.</span><span class="n">option</span><span class="p">(</span>
-    <span class="s1">&#39;--local-scheduler&#39;</span><span class="p">,</span>
-    <span class="s1">&#39;local_scheduler&#39;</span><span class="p">,</span>
+    <span class="s1">'--local-scheduler'</span><span class="p">,</span>
+    <span class="s1">'local_scheduler'</span><span class="p">,</span>
     <span class="n">is_flag</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
     <span class="n">default</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
-    <span class="n">help</span><span class="o">=</span><span class="s2">&quot;Use the local luigi scheduler, defaults to `True`.&quot;</span>
+    <span class="n">help</span><span class="o">=</span><span class="s2">"Use the local luigi scheduler, defaults to `True`."</span>
 <span class="p">)</span>
 <span class="k">def</span><span class="w"> </span><span class="nf">main</span><span class="p">(</span>
         <span class="n">task</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
@@ -2816,35 +2816,35 @@ If <code>module</code> is not <code>None</code>, check it exists.</p>
         <span class="n">luigicmd</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
         <span class="n">local_scheduler</span><span class="p">:</span> <span class="nb">bool</span>
 <span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Main CLI entry point.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""Main CLI entry point."""</span>
     <span class="c1"># - Configure a logger from this application:</span>
     <span class="k">global</span> <span class="n">logger</span>
     <span class="n">logger</span> <span class="o">=</span> <span class="n">get_logger</span><span class="p">(</span><span class="n">LOGGER_NAME</span><span class="p">,</span> <span class="n">log_level</span><span class="o">=</span><span class="n">log_level</span><span class="p">)</span>
 
     <span class="c1"># Convert dataset_path tuple to appropriate format</span>
     <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">dataset_path</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
-        <span class="n">dataset_path</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
+        <span class="n">dataset_path</span> <span class="o">=</span> <span class="s1">''</span>
     <span class="k">elif</span> <span class="nb">len</span><span class="p">(</span><span class="n">dataset_path</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
         <span class="n">dataset_path</span> <span class="o">=</span> <span class="n">dataset_path</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
     <span class="k">else</span><span class="p">:</span>
         <span class="n">dataset_path</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">dataset_path</span><span class="p">)</span>
 
     <span class="k">if</span> <span class="n">task</span> <span class="ow">in</span> <span class="n">DATA_CREATION_TASK</span><span class="p">:</span>
-        <span class="c1"># These are &quot;data creation modules&quot;, we thus require a single path to dataset...</span>
+        <span class="c1"># These are "data creation modules", we thus require a single path to dataset...</span>
         <span class="k">try</span><span class="p">:</span>
             <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">dataset_path</span><span class="p">,</span> <span class="nb">str</span><span class="p">)</span>
         <span class="k">except</span> <span class="ne">AssertionError</span><span class="p">:</span>
-            <span class="n">logger</span><span class="o">.</span><span class="n">critical</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Task &#39;</span><span class="si">{</span><span class="n">task</span><span class="si">}</span><span class="s2">&#39; requires the `dataset_path` to be a string.&quot;</span><span class="p">)</span>
-            <span class="n">logger</span><span class="o">.</span><span class="n">critical</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Got &#39;</span><span class="si">{</span><span class="n">dataset_path</span><span class="si">}</span><span class="s2">&#39;!&quot;</span><span class="p">)</span>
-            <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Error with input dataset path for &#39;</span><span class="si">{</span><span class="n">task</span><span class="si">}</span><span class="s2">&#39; module!&quot;</span><span class="p">)</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">critical</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Task '</span><span class="si">{</span><span class="n">task</span><span class="si">}</span><span class="s2">' requires the `dataset_path` to be a string."</span><span class="p">)</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">critical</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Got '</span><span class="si">{</span><span class="n">dataset_path</span><span class="si">}</span><span class="s2">'!"</span><span class="p">)</span>
+            <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Error with input dataset path for '</span><span class="si">{</span><span class="n">task</span><span class="si">}</span><span class="s2">' module!"</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">folders</span> <span class="o">=</span> <span class="n">dataset_path</span>
     <span class="k">else</span><span class="p">:</span>
-        <span class="c1"># Other modules are &quot;data processing modules&quot;, they can accept multiple path to dataset...</span>
+        <span class="c1"># Other modules are "data processing modules", they can accept multiple path to dataset...</span>
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">dataset_path</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
             <span class="c1"># Process the input string `dataset_path` with ``glob``:</span>
             <span class="c1">#   - check existence of path:</span>
-            <span class="c1">#   - may contain UNIX matching symbols (like &#39;*&#39; or &#39;?&#39;):</span>
+            <span class="c1">#   - may contain UNIX matching symbols (like '*' or '?'):</span>
             <span class="n">folders</span> <span class="o">=</span> <span class="n">glob</span><span class="o">.</span><span class="n">glob</span><span class="p">(</span><span class="n">dataset_path</span><span class="p">)</span>
             <span class="c1"># Resolve path (make it absolute &amp; normalize):</span>
             <span class="n">folders</span> <span class="o">=</span> <span class="p">[</span><span class="n">Path</span><span class="p">(</span><span class="n">path</span><span class="p">)</span><span class="o">.</span><span class="n">resolve</span><span class="p">()</span> <span class="k">for</span> <span class="n">path</span> <span class="ow">in</span> <span class="n">folders</span><span class="p">]</span>
@@ -2856,15 +2856,15 @@ If <code>module</code> is not <code>None</code>, check it exists.</p>
             <span class="c1"># Check that listed paths are directory (and exist, implied):</span>
             <span class="n">folders</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">([</span><span class="n">path</span> <span class="k">for</span> <span class="n">path</span> <span class="ow">in</span> <span class="n">folders</span> <span class="k">if</span> <span class="n">path</span><span class="o">.</span><span class="n">is_dir</span><span class="p">()])</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="n">logger</span><span class="o">.</span><span class="n">critical</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Can not understand input dataset path: &#39;</span><span class="si">{</span><span class="n">dataset_path</span><span class="si">}</span><span class="s2">&#39;&quot;</span><span class="p">)</span>
-            <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Error with input dataset path for &#39;</span><span class="si">{</span><span class="n">task</span><span class="si">}</span><span class="s2">&#39; module!&quot;</span><span class="p">)</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">critical</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Can not understand input dataset path: '</span><span class="si">{</span><span class="n">dataset_path</span><span class="si">}</span><span class="s2">'"</span><span class="p">)</span>
+            <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Error with input dataset path for '</span><span class="si">{</span><span class="n">task</span><span class="si">}</span><span class="s2">' module!"</span><span class="p">)</span>
         <span class="c1"># If only one element in list, make it a plain str:</span>
         <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">folders</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
             <span class="n">folders</span> <span class="o">=</span> <span class="n">folders</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">_dataset_path_error</span><span class="p">(</span><span class="n">dataset_path</span><span class="p">):</span>
-        <span class="n">logger</span><span class="o">.</span><span class="n">critical</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Could not obtain a valid path from input dataset path: &#39;</span><span class="si">{</span><span class="n">dataset_path</span><span class="si">}</span><span class="s2">&#39;!&quot;</span><span class="p">)</span>
-        <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Error with input dataset path for &#39;</span><span class="si">{</span><span class="n">task</span><span class="si">}</span><span class="s2">&#39; module!&quot;</span><span class="p">)</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">critical</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Could not obtain a valid path from input dataset path: '</span><span class="si">{</span><span class="n">dataset_path</span><span class="si">}</span><span class="s2">'!"</span><span class="p">)</span>
+        <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Error with input dataset path for '</span><span class="si">{</span><span class="n">task</span><span class="si">}</span><span class="s2">' module!"</span><span class="p">)</span>
 
     <span class="c1"># Some tasks may accept to work without a dataset:</span>
     <span class="k">if</span> <span class="n">task</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">NO_DATASET_TASK</span><span class="p">:</span>
@@ -2880,7 +2880,7 @@ If <code>module</code> is not <code>None</code>, check it exists.</p>
         <span class="k">try</span><span class="p">:</span>
             <span class="n">cfg_override</span> <span class="o">=</span> <span class="n">tomlkit</span><span class="o">.</span><span class="n">loads</span><span class="p">(</span><span class="n">cfg_override</span><span class="p">)</span>
         <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
-            <span class="n">logger</span><span class="o">.</span><span class="n">critical</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Could not parse a TOML config from &#39;</span><span class="si">{</span><span class="n">cfg_override</span><span class="si">}</span><span class="s2">&#39;: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">critical</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Could not parse a TOML config from '</span><span class="si">{</span><span class="n">cfg_override</span><span class="si">}</span><span class="s2">': </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
             <span class="n">cfg_override</span> <span class="o">=</span> <span class="kc">None</span>
     <span class="k">else</span><span class="p">:</span>
         <span class="n">cfg_override</span> <span class="o">=</span> <span class="kc">None</span>
@@ -2889,10 +2889,10 @@ If <code>module</code> is not <code>None</code>, check it exists.</p>
     <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">folders</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span>
         <span class="c1">## For each folder:</span>
         <span class="n">dataset</span> <span class="o">=</span> <span class="p">[</span><span class="n">folder</span><span class="o">.</span><span class="n">name</span> <span class="k">for</span> <span class="n">folder</span> <span class="ow">in</span> <span class="n">folders</span><span class="p">]</span>
-        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Got a list of </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">folders</span><span class="p">)</span><span class="si">}</span><span class="s2"> scan dataset to analyze: </span><span class="si">{</span><span class="s1">&#39;, &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">dataset</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Got a list of </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">folders</span><span class="p">)</span><span class="si">}</span><span class="s2"> scan dataset to analyze: </span><span class="si">{</span><span class="s1">', '</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">dataset</span><span class="p">)</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
         <span class="k">for</span> <span class="n">dataset_path_item</span> <span class="ow">in</span> <span class="n">folders</span><span class="p">:</span>
-            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>  <span class="c1"># to facilitate the search in the console by separating the datasets</span>
-            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Processing dataset &#39;</span><span class="si">{</span><span class="n">Path</span><span class="p">(</span><span class="n">dataset_path_item</span><span class="p">)</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">&#39;.&quot;</span><span class="p">)</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">"</span><span class="se">\n</span><span class="s2">"</span><span class="p">)</span>  <span class="c1"># to facilitate the search in the console by separating the datasets</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Processing dataset '</span><span class="si">{</span><span class="n">Path</span><span class="p">(</span><span class="n">dataset_path_item</span><span class="p">)</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">'."</span><span class="p">)</span>
             <span class="k">try</span><span class="p">:</span>
                 <span class="n">run_task</span><span class="p">(</span><span class="n">dataset_path_item</span><span class="p">,</span> <span class="n">task</span><span class="p">,</span> <span class="n">config</span><span class="p">,</span> <span class="n">cfg_override</span><span class="p">,</span>
                          <span class="n">log_level</span><span class="o">=</span><span class="n">log_level</span><span class="p">,</span> <span class="n">luigicmd</span><span class="o">=</span><span class="n">luigicmd</span><span class="p">,</span> <span class="n">module</span><span class="o">=</span><span class="n">module</span><span class="p">,</span>
@@ -3139,10 +3139,10 @@ romitask.log.get_log_filename</p>
 <p><span class="doc-section-title">Examples:</span></p>
     <div class="codehilite"><pre><span></span><code><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">pathlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">Path</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">romitask.cli.romi_run_task</span><span class="w"> </span><span class="kn">import</span> <span class="n">run_task</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">geom_pipe_real_conf</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="s2">&quot;configs/test_geom_pipe_real.toml&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">resolve</span><span class="p">()</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">real_plant_data</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="s2">&quot;tests/testdata/real_plant/&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">resolve</span><span class="p">()</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">process</span> <span class="o">=</span> <span class="n">run_task</span><span class="p">(</span><span class="n">real_plant_data</span><span class="p">,</span> <span class="s1">&#39;Clean&#39;</span><span class="p">,</span> <span class="n">geom_pipe_real_conf</span><span class="p">,</span> <span class="n">no_auth</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">process</span> <span class="o">=</span> <span class="n">run_task</span><span class="p">(</span><span class="n">real_plant_data</span><span class="p">,</span> <span class="s1">&#39;PointCloud&#39;</span><span class="p">,</span> <span class="n">geom_pipe_real_conf</span><span class="p">,</span> <span class="n">no_auth</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">geom_pipe_real_conf</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="s2">"configs/test_geom_pipe_real.toml"</span><span class="p">)</span><span class="o">.</span><span class="n">resolve</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">real_plant_data</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="s2">"tests/testdata/real_plant/"</span><span class="p">)</span><span class="o">.</span><span class="n">resolve</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">process</span> <span class="o">=</span> <span class="n">run_task</span><span class="p">(</span><span class="n">real_plant_data</span><span class="p">,</span> <span class="s1">'Clean'</span><span class="p">,</span> <span class="n">geom_pipe_real_conf</span><span class="p">,</span> <span class="n">no_auth</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">process</span> <span class="o">=</span> <span class="n">run_task</span><span class="p">(</span><span class="n">real_plant_data</span><span class="p">,</span> <span class="s1">'PointCloud'</span><span class="p">,</span> <span class="n">geom_pipe_real_conf</span><span class="p">,</span> <span class="n">no_auth</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 </code></pre></div>
 
 
@@ -3358,7 +3358,7 @@ romitask.log.get_log_filename</p>
              <span class="n">config</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">Path</span> <span class="o">|</span> <span class="nb">dict</span><span class="p">,</span>
              <span class="n">cfg_override</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
              <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">CompletedProcess</span><span class="p">[</span><span class="nb">bytes</span><span class="p">]:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Load the configuration to use and call the luigi command to run the selected task.</span>
+<span class="w">    </span><span class="sd">"""Load the configuration to use and call the luigi command to run the selected task.</span>
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
@@ -3378,10 +3378,10 @@ romitask.log.get_log_filename</p>
 <span class="sd">    log_fname : str</span>
 <span class="sd">        The log file name to use.</span>
 <span class="sd">        Defaults to use the standardized log filename with the date and task name from `get_log_filename`.</span>
-<span class="sd">    log_level : {&#39;DEBUG&#39;, &#39;INFO&#39;, &#39;WARNING&#39;, &#39;ERROR&#39;, &#39;CRITICAL&#39;}</span>
-<span class="sd">        The logging level to use, defaults to &#39;INFO&#39;.</span>
+<span class="sd">    log_level : {'DEBUG', 'INFO', 'WARNING', 'ERROR', 'CRITICAL'}</span>
+<span class="sd">        The logging level to use, defaults to 'INFO'.</span>
 <span class="sd">    luigicmd : str</span>
-<span class="sd">        The luigi command to use, defaults to &#39;LUIGI_CMD&#39;.</span>
+<span class="sd">        The luigi command to use, defaults to 'LUIGI_CMD'.</span>
 <span class="sd">    module : str</span>
 <span class="sd">        The module name to load the task from. Default to `None`, search in the module dictionary.</span>
 <span class="sd">    local_scheduler : bool</span>
@@ -3389,7 +3389,7 @@ romitask.log.get_log_filename</p>
 <span class="sd">    dry_run : bool</span>
 <span class="sd">        Whether to make it a dry run, returning the command but not calling it. Defaults to `False`.</span>
 <span class="sd">    no_auth : bool</span>
-<span class="sd">        Use a database with automatic &#39;admin&#39; user login, for testing purposes only.</span>
+<span class="sd">        Use a database with automatic 'admin' user login, for testing purposes only.</span>
 <span class="sd">    db_user : str</span>
 <span class="sd">        Username for FSDB login.</span>
 <span class="sd">    db_password : str</span>
@@ -3404,14 +3404,14 @@ romitask.log.get_log_filename</p>
 <span class="sd">    --------</span>
 <span class="sd">    &gt;&gt;&gt; from pathlib import Path</span>
 <span class="sd">    &gt;&gt;&gt; from romitask.cli.romi_run_task import run_task</span>
-<span class="sd">    &gt;&gt;&gt; geom_pipe_real_conf = Path(&quot;configs/test_geom_pipe_real.toml&quot;).resolve()</span>
-<span class="sd">    &gt;&gt;&gt; real_plant_data = Path(&quot;tests/testdata/real_plant/&quot;).resolve()</span>
-<span class="sd">    &gt;&gt;&gt; process = run_task(real_plant_data, &#39;Clean&#39;, geom_pipe_real_conf, no_auth=True)</span>
-<span class="sd">    &gt;&gt;&gt; process = run_task(real_plant_data, &#39;PointCloud&#39;, geom_pipe_real_conf, no_auth=True)</span>
-<span class="sd">    &quot;&quot;&quot;</span>
-    <span class="n">logger</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;logger&quot;</span><span class="p">,</span> <span class="n">getLogger</span><span class="p">(</span><span class="n">LOGGER_NAME</span><span class="p">))</span>
-    <span class="n">log_level</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;log_level&quot;</span><span class="p">,</span> <span class="s2">&quot;INFO&quot;</span><span class="p">)</span>
-    <span class="n">luigicmd</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;luigicmd&quot;</span><span class="p">,</span> <span class="n">LUIGI_CMD</span><span class="p">)</span>
+<span class="sd">    &gt;&gt;&gt; geom_pipe_real_conf = Path("configs/test_geom_pipe_real.toml").resolve()</span>
+<span class="sd">    &gt;&gt;&gt; real_plant_data = Path("tests/testdata/real_plant/").resolve()</span>
+<span class="sd">    &gt;&gt;&gt; process = run_task(real_plant_data, 'Clean', geom_pipe_real_conf, no_auth=True)</span>
+<span class="sd">    &gt;&gt;&gt; process = run_task(real_plant_data, 'PointCloud', geom_pipe_real_conf, no_auth=True)</span>
+<span class="sd">    """</span>
+    <span class="n">logger</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"logger"</span><span class="p">,</span> <span class="n">getLogger</span><span class="p">(</span><span class="n">LOGGER_NAME</span><span class="p">))</span>
+    <span class="n">log_level</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"log_level"</span><span class="p">,</span> <span class="s2">"INFO"</span><span class="p">)</span>
+    <span class="n">luigicmd</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"luigicmd"</span><span class="p">,</span> <span class="n">LUIGI_CMD</span><span class="p">)</span>
 
     <span class="n">dataset_path</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">dataset_path</span><span class="p">)</span>
     <span class="c1"># - Try to load PIPELINE backup TOML configuration:</span>
@@ -3420,44 +3420,44 @@ romitask.log.get_log_filename</p>
     <span class="c1"># - Process given PIPELINE configuration directory OR file, if any:</span>
     <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">config</span><span class="p">,</span> <span class="nb">dict</span><span class="p">):</span>
         <span class="c1"># Use directly the given config dictionary:</span>
-        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Loading configuration from dictionary.&quot;</span><span class="p">)</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">"Loading configuration from dictionary."</span><span class="p">)</span>
     <span class="k">elif</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isdir</span><span class="p">(</span><span class="n">config</span><span class="p">):</span>
         <span class="c1"># Load all config files from the given directory, if any, to a single config dictionary:</span>
         <span class="n">config</span> <span class="o">=</span> <span class="n">load_config_from_directory</span><span class="p">(</span><span class="n">config</span><span class="p">,</span> <span class="n">logger</span><span class="o">=</span><span class="n">logger</span><span class="p">)</span>
     <span class="k">elif</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">config</span><span class="p">):</span>
         <span class="c1"># Load config file to a config dictionary:</span>
         <span class="n">config</span> <span class="o">=</span> <span class="n">load_config_from_file</span><span class="p">(</span><span class="n">config</span><span class="p">,</span> <span class="n">logger</span><span class="o">=</span><span class="n">logger</span><span class="p">)</span>
-    <span class="k">elif</span> <span class="n">config</span> <span class="o">!=</span> <span class="s2">&quot;&quot;</span><span class="p">:</span>
-        <span class="n">logger</span><span class="o">.</span><span class="n">critical</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Could not understand `config` option &#39;</span><span class="si">{</span><span class="n">config</span><span class="si">}</span><span class="s2">&#39;!&quot;</span><span class="p">)</span>
-        <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="s2">&quot;Error with configuration file!&quot;</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="n">config</span> <span class="o">!=</span> <span class="s2">""</span><span class="p">:</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">critical</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Could not understand `config` option '</span><span class="si">{</span><span class="n">config</span><span class="si">}</span><span class="s2">'!"</span><span class="p">)</span>
+        <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="s2">"Error with configuration file!"</span><span class="p">)</span>
     <span class="k">else</span><span class="p">:</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="n">bak_pipe_config</span><span class="p">:</span>
             <span class="n">config</span> <span class="o">=</span> <span class="p">{}</span>
-            <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s2">&quot;Using full default configuration!&quot;</span><span class="p">)</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s2">"Using full default configuration!"</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">config</span> <span class="o">=</span> <span class="n">bak_pipe_config</span>
-            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Using a PREVIOUS pipeline configuration!&quot;</span><span class="p">)</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">"Using a PREVIOUS pipeline configuration!"</span><span class="p">)</span>
 
     <span class="c1"># Update the loaded config undefined task values with default task values from classes implementation</span>
     <span class="n">config</span> <span class="o">=</span> <span class="n">update_config_with_defaults</span><span class="p">(</span><span class="n">config</span><span class="p">,</span> <span class="n">MODULES</span><span class="p">)</span>
 
-    <span class="c1"># - Look for &quot;local&quot; PIPELINE configuration file(s) to load:</span>
+    <span class="c1"># - Look for "local" PIPELINE configuration file(s) to load:</span>
     <span class="n">local_path</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">copy</span><span class="p">(</span><span class="n">dataset_path</span><span class="p">)</span>
-    <span class="n">local_toml</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">local_path</span><span class="o">.</span><span class="n">glob</span><span class="p">(</span><span class="s1">&#39;*.toml&#39;</span><span class="p">),</span> <span class="n">reverse</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>  <span class="c1"># maintain resolution order, priority goes from first to last in alphabetical order</span>
+    <span class="n">local_toml</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">local_path</span><span class="o">.</span><span class="n">glob</span><span class="p">(</span><span class="s1">'*.toml'</span><span class="p">),</span> <span class="n">reverse</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>  <span class="c1"># maintain resolution order, priority goes from first to last in alphabetical order</span>
     <span class="n">local_toml</span> <span class="o">=</span> <span class="p">[</span><span class="n">f</span> <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">local_toml</span> <span class="k">if</span> <span class="n">f</span><span class="o">.</span><span class="n">name</span> <span class="o">!=</span> <span class="n">SCAN_TOML</span><span class="p">]</span>  <span class="c1"># exclude SCAN backup TOML config</span>
     <span class="n">local_toml</span> <span class="o">=</span> <span class="p">[</span><span class="n">f</span> <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">local_toml</span> <span class="k">if</span> <span class="n">f</span><span class="o">.</span><span class="n">name</span> <span class="o">!=</span> <span class="n">PIPE_TOML</span><span class="p">]</span>  <span class="c1"># exclude PIPELINE backup TOML config</span>
     <span class="c1"># - Load the local configuration from detected file(s):</span>
     <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">local_toml</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
         <span class="n">local_config</span> <span class="o">=</span> <span class="p">{}</span>
-        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Found </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">local_toml</span><span class="p">)</span><span class="si">}</span><span class="s2"> local TOML configuration file</span><span class="si">{</span><span class="s1">&#39;s&#39;</span><span class="w"> </span><span class="k">if</span><span class="w"> </span><span class="nb">len</span><span class="p">(</span><span class="n">local_toml</span><span class="p">)</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="mi">1</span><span class="w"> </span><span class="k">else</span><span class="w"> </span><span class="s1">&#39;&#39;</span><span class="si">}</span><span class="s2">!&quot;</span><span class="p">)</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Found </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">local_toml</span><span class="p">)</span><span class="si">}</span><span class="s2"> local TOML configuration file</span><span class="si">{</span><span class="s1">'s'</span><span class="w"> </span><span class="k">if</span><span class="w"> </span><span class="nb">len</span><span class="p">(</span><span class="n">local_toml</span><span class="p">)</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="mi">1</span><span class="w"> </span><span class="k">else</span><span class="w"> </span><span class="s1">''</span><span class="si">}</span><span class="s2">!"</span><span class="p">)</span>
         <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">local_toml</span><span class="p">:</span>
             <span class="n">local_config</span> <span class="o">=</span> <span class="n">update_config</span><span class="p">(</span><span class="n">local_config</span><span class="p">,</span> <span class="n">load_config_from_file</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">f</span><span class="p">),</span> <span class="n">logger</span><span class="o">=</span><span class="n">logger</span><span class="p">))</span>
         <span class="k">if</span> <span class="n">local_config</span> <span class="o">!=</span> <span class="p">{}:</span>
-            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Got local definitions for: </span><span class="si">{</span><span class="nb">list</span><span class="p">(</span><span class="n">local_config</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
-            <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">local_config</span><span class="si">=}</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Got local definitions for: </span><span class="si">{</span><span class="nb">list</span><span class="p">(</span><span class="n">local_config</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">local_config</span><span class="si">=}</span><span class="s2">"</span><span class="p">)</span>
             <span class="c1"># Update the given PIPELINE configuration with the local configuration:</span>
             <span class="n">config</span> <span class="o">=</span> <span class="n">update_config</span><span class="p">(</span><span class="n">config</span><span class="p">,</span> <span class="n">local_config</span><span class="p">)</span>
-            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Updated given configuration with local definitions!&quot;</span><span class="p">)</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">"Updated given configuration with local definitions!"</span><span class="p">)</span>
 
     <span class="c1"># Apply CLI override (manual definition of parameters)</span>
     <span class="k">if</span> <span class="n">cfg_override</span><span class="p">:</span>
@@ -3465,74 +3465,74 @@ romitask.log.get_log_filename</p>
             <span class="n">config</span><span class="p">[</span><span class="n">task_override</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span><span class="o">**</span><span class="n">config</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">task_override</span><span class="p">,</span> <span class="p">{}),</span> <span class="o">**</span><span class="n">param_override</span><span class="p">}</span>
 
     <span class="c1"># - Set the name of the module to be loaded for the selected task:</span>
-    <span class="n">module</span> <span class="o">=</span> <span class="n">get_task_module</span><span class="p">(</span><span class="n">task</span><span class="p">,</span> <span class="n">logger</span><span class="o">=</span><span class="n">logger</span><span class="p">,</span> <span class="n">module</span><span class="o">=</span><span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;module&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">))</span>
+    <span class="n">module</span> <span class="o">=</span> <span class="n">get_task_module</span><span class="p">(</span><span class="n">task</span><span class="p">,</span> <span class="n">logger</span><span class="o">=</span><span class="n">logger</span><span class="p">,</span> <span class="n">module</span><span class="o">=</span><span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"module"</span><span class="p">,</span> <span class="kc">None</span><span class="p">))</span>
     <span class="c1"># - Check the dataset directory is OK to use:</span>
     <span class="n">cfgname</span> <span class="o">=</span> <span class="n">check_dataset_directory</span><span class="p">(</span><span class="n">dataset_path</span><span class="p">,</span> <span class="n">task</span><span class="p">,</span> <span class="n">logger</span><span class="o">=</span><span class="n">logger</span><span class="p">)</span>
 
     <span class="k">with</span> <span class="n">tempfile</span><span class="o">.</span><span class="n">TemporaryDirectory</span><span class="p">()</span> <span class="k">as</span> <span class="n">tmpd</span><span class="p">:</span>
         <span class="c1"># Get the log_file name, with the date &amp; task name by default:</span>
-        <span class="n">log_fname</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;log_fname&#39;</span><span class="p">,</span> <span class="n">get_log_filename</span><span class="p">(</span><span class="n">task</span><span class="p">))</span>
+        <span class="n">log_fname</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">'log_fname'</span><span class="p">,</span> <span class="n">get_log_filename</span><span class="p">(</span><span class="n">task</span><span class="p">))</span>
         <span class="n">logfile_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">tmpd</span><span class="p">,</span> <span class="n">log_fname</span><span class="p">)</span>
         <span class="c1"># - Get logging configuration string for luigi, specifying the log file name :</span>
         <span class="n">logging_config</span> <span class="o">=</span> <span class="n">get_logging_config</span><span class="p">(</span><span class="n">log_level</span><span class="o">=</span><span class="n">log_level</span><span class="p">,</span> <span class="n">logfile_path</span><span class="o">=</span><span class="n">logfile_path</span><span class="p">)</span>
-        <span class="c1"># - Create a &quot;logging.cfg&quot; file to be used by `luigi`:</span>
-        <span class="n">logging_file_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">tmpd</span><span class="p">,</span> <span class="s2">&quot;logging.cfg&quot;</span><span class="p">)</span>
-        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">logging_file_path</span><span class="p">,</span> <span class="s1">&#39;w&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+        <span class="c1"># - Create a "logging.cfg" file to be used by `luigi`:</span>
+        <span class="n">logging_file_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">tmpd</span><span class="p">,</span> <span class="s2">"logging.cfg"</span><span class="p">)</span>
+        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">logging_file_path</span><span class="p">,</span> <span class="s1">'w'</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
             <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">logging_config</span><span class="p">)</span>
-        <span class="c1"># - Create the &quot;scan.toml&quot; OR &quot;pipeline.toml&quot; (backup) config file used by luigi:</span>
+        <span class="c1"># - Create the "scan.toml" OR "pipeline.toml" (backup) config file used by luigi:</span>
         <span class="n">cfg_file_path</span> <span class="o">=</span> <span class="n">create_backup_cfg</span><span class="p">(</span><span class="n">tmpd</span><span class="p">,</span> <span class="n">cfgname</span><span class="p">,</span> <span class="n">config</span><span class="p">)</span>
 
         <span class="c1"># - Define a custom environment variables dictionary</span>
         <span class="c1"># Get any value defined :</span>
-        <span class="n">env</span> <span class="o">=</span> <span class="n">dotenv_values</span><span class="p">(</span><span class="n">dataset_path</span> <span class="o">/</span> <span class="s2">&quot;.env&quot;</span><span class="p">)</span>
+        <span class="n">env</span> <span class="o">=</span> <span class="n">dotenv_values</span><span class="p">(</span><span class="n">dataset_path</span> <span class="o">/</span> <span class="s2">".env"</span><span class="p">)</span>
         <span class="c1"># Set the logging TOML file path to `luigi`:</span>
-        <span class="n">env</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="s2">&quot;LUIGI_CONFIG_PARSER&quot;</span><span class="p">:</span> <span class="s2">&quot;toml&quot;</span><span class="p">,</span>
-                    <span class="s2">&quot;LUIGI_CONFIG_PATH&quot;</span><span class="p">:</span> <span class="n">cfg_file_path</span><span class="p">,</span>
-                    <span class="s2">&quot;MPLBACKEND&quot;</span><span class="p">:</span> <span class="s2">&quot;Agg&quot;</span><span class="p">})</span>
+        <span class="n">env</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="s2">"LUIGI_CONFIG_PARSER"</span><span class="p">:</span> <span class="s2">"toml"</span><span class="p">,</span>
+                    <span class="s2">"LUIGI_CONFIG_PATH"</span><span class="p">:</span> <span class="n">cfg_file_path</span><span class="p">,</span>
+                    <span class="s2">"MPLBACKEND"</span><span class="p">:</span> <span class="s2">"Agg"</span><span class="p">})</span>
         <span class="c1"># Set the default choice for PyOpenCL context:</span>
-        <span class="n">env</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="s1">&#39;PYOPENCL_CTX&#39;</span><span class="p">:</span> <span class="s1">&#39;0&#39;</span><span class="p">})</span>
-        <span class="c1"># Set the database in &quot;no authentication&quot; mode</span>
-        <span class="k">if</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;no_auth&#39;</span><span class="p">):</span>
-            <span class="c1"># Enable the &quot;no authentication&quot; session manager if not forbidden</span>
-            <span class="c1"># 1. by a &#39;ROMI_DB_NOAUTH&#39; defined in as environment variable</span>
-            <span class="c1"># 2. by a &#39;ROMI_DB_NOAUTH&#39; defined in the dotenv file at the root of the DB</span>
-            <span class="n">env</span><span class="p">[</span><span class="s1">&#39;ROMI_DB_NOAUTH&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">getenv</span><span class="p">(</span><span class="s1">&#39;ROMI_DB_NOAUTH&#39;</span><span class="p">)</span> <span class="ow">or</span> <span class="n">env</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;ROMI_DB_NOAUTH&#39;</span><span class="p">,</span> <span class="kc">None</span><span class="p">))</span> <span class="ow">or</span> <span class="s2">&quot;1&quot;</span>
-            <span class="k">if</span> <span class="n">env</span><span class="p">[</span><span class="s1">&#39;ROMI_DB_NOAUTH&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;0&quot;</span><span class="p">:</span>
-                <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Disabling authentication on this database if forbidden.&quot;</span><span class="p">)</span>
-                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Use `--db-user` and `--db-password` to pass your credentials to the CLI.&quot;</span><span class="p">)</span>
-                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Credentials required&quot;</span><span class="p">)</span>
+        <span class="n">env</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="s1">'PYOPENCL_CTX'</span><span class="p">:</span> <span class="s1">'0'</span><span class="p">})</span>
+        <span class="c1"># Set the database in "no authentication" mode</span>
+        <span class="k">if</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">'no_auth'</span><span class="p">):</span>
+            <span class="c1"># Enable the "no authentication" session manager if not forbidden</span>
+            <span class="c1"># 1. by a 'ROMI_DB_NOAUTH' defined in as environment variable</span>
+            <span class="c1"># 2. by a 'ROMI_DB_NOAUTH' defined in the dotenv file at the root of the DB</span>
+            <span class="n">env</span><span class="p">[</span><span class="s1">'ROMI_DB_NOAUTH'</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">getenv</span><span class="p">(</span><span class="s1">'ROMI_DB_NOAUTH'</span><span class="p">)</span> <span class="ow">or</span> <span class="n">env</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">'ROMI_DB_NOAUTH'</span><span class="p">,</span> <span class="kc">None</span><span class="p">))</span> <span class="ow">or</span> <span class="s2">"1"</span>
+            <span class="k">if</span> <span class="n">env</span><span class="p">[</span><span class="s1">'ROMI_DB_NOAUTH'</span><span class="p">]</span> <span class="o">==</span> <span class="s2">"0"</span><span class="p">:</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Disabling authentication on this database if forbidden."</span><span class="p">)</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Use `--db-user` and `--db-password` to pass your credentials to the CLI."</span><span class="p">)</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">"Credentials required"</span><span class="p">)</span>
         <span class="c1"># Add database credentials to environment if provided</span>
-        <span class="k">if</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;db_user&#39;</span><span class="p">)</span> <span class="ow">and</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;db_password&#39;</span><span class="p">):</span>
-            <span class="n">env</span><span class="p">[</span><span class="s1">&#39;ROMI_DB_USER&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;db_user&#39;</span><span class="p">]</span>
-            <span class="n">env</span><span class="p">[</span><span class="s1">&#39;ROMI_DB_PASSWORD&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;db_password&#39;</span><span class="p">]</span>
+        <span class="k">if</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">'db_user'</span><span class="p">)</span> <span class="ow">and</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">'db_password'</span><span class="p">):</span>
+            <span class="n">env</span><span class="p">[</span><span class="s1">'ROMI_DB_USER'</span><span class="p">]</span> <span class="o">=</span> <span class="n">kwargs</span><span class="p">[</span><span class="s1">'db_user'</span><span class="p">]</span>
+            <span class="n">env</span><span class="p">[</span><span class="s1">'ROMI_DB_PASSWORD'</span><span class="p">]</span> <span class="o">=</span> <span class="n">kwargs</span><span class="p">[</span><span class="s1">'db_password'</span><span class="p">]</span>
 
         <span class="c1"># - Define the luigi command to run:</span>
-        <span class="c1"># &quot;--ScanConfiguration-scan args.dataset_path&quot; set the value of `scan` for the `ScanConfiguration` Config class</span>
+        <span class="c1"># "--ScanConfiguration-scan args.dataset_path" set the value of `scan` for the `ScanConfiguration` Config class</span>
         <span class="c1"># https://luigi.readthedocs.io/en/stable/parameters.html#setting-parameter-value-for-other-classes</span>
-        <span class="n">cmd</span> <span class="o">=</span> <span class="p">[</span><span class="n">luigicmd</span><span class="p">,</span> <span class="s2">&quot;--logging-conf-file&quot;</span><span class="p">,</span> <span class="n">logging_file_path</span><span class="p">,</span>
-               <span class="s2">&quot;--module&quot;</span><span class="p">,</span> <span class="n">module</span><span class="p">,</span> <span class="n">task</span><span class="p">,</span>
-               <span class="s2">&quot;--ScanConfiguration-scan&quot;</span><span class="p">,</span> <span class="n">dataset_path</span><span class="p">]</span>
-        <span class="k">if</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;local_scheduler&#39;</span><span class="p">,</span> <span class="kc">True</span><span class="p">):</span>
-            <span class="n">cmd</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;--local-scheduler&quot;</span><span class="p">)</span>
+        <span class="n">cmd</span> <span class="o">=</span> <span class="p">[</span><span class="n">luigicmd</span><span class="p">,</span> <span class="s2">"--logging-conf-file"</span><span class="p">,</span> <span class="n">logging_file_path</span><span class="p">,</span>
+               <span class="s2">"--module"</span><span class="p">,</span> <span class="n">module</span><span class="p">,</span> <span class="n">task</span><span class="p">,</span>
+               <span class="s2">"--ScanConfiguration-scan"</span><span class="p">,</span> <span class="n">dataset_path</span><span class="p">]</span>
+        <span class="k">if</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">'local_scheduler'</span><span class="p">,</span> <span class="kc">True</span><span class="p">):</span>
+            <span class="n">cmd</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">"--local-scheduler"</span><span class="p">)</span>
 
         <span class="c1"># - Print or Start the configured pipeline:</span>
-        <span class="k">if</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;dry_run&#39;</span><span class="p">,</span> <span class="kc">False</span><span class="p">):</span>
-            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Luigi command to call is:</span><span class="se">\n</span><span class="si">{</span><span class="s1">&#39; &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="nb">map</span><span class="p">(</span><span class="nb">str</span><span class="p">,</span><span class="w"> </span><span class="n">cmd</span><span class="p">)))</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">'dry_run'</span><span class="p">,</span> <span class="kc">False</span><span class="p">):</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Luigi command to call is:</span><span class="se">\n</span><span class="si">{</span><span class="s1">' '</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="nb">map</span><span class="p">(</span><span class="nb">str</span><span class="p">,</span><span class="w"> </span><span class="n">cmd</span><span class="p">)))</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">t_start</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
-            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Running luigi command:</span><span class="se">\n</span><span class="si">{</span><span class="s1">&#39; &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="nb">map</span><span class="p">(</span><span class="nb">str</span><span class="p">,</span><span class="w"> </span><span class="n">cmd</span><span class="p">)))</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
-            <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Using locally defined varenv: </span><span class="si">{</span><span class="n">env</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
-            <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Using globally defined varenv: </span><span class="si">{</span><span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Running luigi command:</span><span class="se">\n</span><span class="si">{</span><span class="s1">' '</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="nb">map</span><span class="p">(</span><span class="nb">str</span><span class="p">,</span><span class="w"> </span><span class="n">cmd</span><span class="p">)))</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Using locally defined varenv: </span><span class="si">{</span><span class="n">env</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Using globally defined varenv: </span><span class="si">{</span><span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
 
             <span class="c1"># System‑wide variables (`os.environ`) overwrite any duplicate keys from the custom `env` dict</span>
             <span class="c1"># Use `check=False` to avoid raising on non‑zero exit; we will handle failures manually.</span>
             <span class="n">p</span> <span class="o">=</span> <span class="n">subprocess</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">cmd</span><span class="p">,</span> <span class="n">env</span><span class="o">=</span><span class="p">{</span><span class="o">**</span><span class="n">env</span><span class="p">,</span> <span class="o">**</span><span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="p">},</span> <span class="n">check</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
 
             <span class="n">delta</span> <span class="o">=</span> <span class="n">timedelta</span><span class="p">(</span><span class="n">seconds</span><span class="o">=</span><span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span> <span class="o">-</span> <span class="n">t_start</span><span class="p">)</span>
-            <span class="n">delta</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">delta</span><span class="p">)</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;.&#39;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>  <span class="c1"># to get HH:MM:SS</span>
+            <span class="n">delta</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">delta</span><span class="p">)</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">'.'</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>  <span class="c1"># to get HH:MM:SS</span>
 
             <span class="k">if</span> <span class="n">p</span><span class="o">.</span><span class="n">returncode</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
-                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Done in </span><span class="si">{</span><span class="n">delta</span><span class="si">}</span><span class="s2">s!&quot;</span><span class="p">)</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Done in </span><span class="si">{</span><span class="n">delta</span><span class="si">}</span><span class="s2">s!"</span><span class="p">)</span>
                 <span class="c1"># Move the temporary logging configuration and backup TOML file</span>
                 <span class="c1"># to the actual dataset directory after the task has created it.</span>
                 <span class="c1"># This must happen **after** the subprocess call because the</span>
@@ -3547,16 +3547,16 @@ romitask.log.get_log_filename</p>
                         <span class="k">try</span><span class="p">:</span>
                             <span class="n">dest_cfg_path</span><span class="o">.</span><span class="n">unlink</span><span class="p">()</span>  <span class="c1"># Remove the existing file first</span>
                         <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e_unlink</span><span class="p">:</span>
-                            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Could not remove existing config file &#39;</span><span class="si">{</span><span class="n">dest_cfg_path</span><span class="si">}</span><span class="s2">&#39;: </span><span class="si">{</span><span class="n">e_unlink</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+                            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Could not remove existing config file '</span><span class="si">{</span><span class="n">dest_cfg_path</span><span class="si">}</span><span class="s2">': </span><span class="si">{</span><span class="n">e_unlink</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
                             <span class="k">raise</span>
                     <span class="n">shutil</span><span class="o">.</span><span class="n">move</span><span class="p">(</span><span class="n">cfg_file_path</span><span class="p">,</span> <span class="n">dest_cfg_path</span><span class="p">)</span>
                 <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">move_err</span><span class="p">:</span>
-                    <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Failed to move temporary config files: </span><span class="si">{</span><span class="n">move_err</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Failed to move temporary config files: </span><span class="si">{</span><span class="n">move_err</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
             <span class="k">else</span><span class="p">:</span>
-                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Failed after </span><span class="si">{</span><span class="n">delta</span><span class="si">}</span><span class="s2">s!&quot;</span><span class="p">)</span>
-                <span class="n">failed_tmp_workdir</span> <span class="o">=</span> <span class="n">tmpd</span> <span class="o">+</span> <span class="s2">&quot;_failed&quot;</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Failed after </span><span class="si">{</span><span class="n">delta</span><span class="si">}</span><span class="s2">s!"</span><span class="p">)</span>
+                <span class="n">failed_tmp_workdir</span> <span class="o">=</span> <span class="n">tmpd</span> <span class="o">+</span> <span class="s2">"_failed"</span>
                 <span class="n">shutil</span><span class="o">.</span><span class="n">copytree</span><span class="p">(</span><span class="n">tmpd</span><span class="p">,</span> <span class="n">failed_tmp_workdir</span><span class="p">,</span> <span class="n">copy_function</span><span class="o">=</span><span class="n">shutil</span><span class="o">.</span><span class="n">copy2</span><span class="p">)</span>
-                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Moved failed temporary working directory to: </span><span class="si">{</span><span class="n">failed_tmp_workdir</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Moved failed temporary working directory to: </span><span class="si">{</span><span class="n">failed_tmp_workdir</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
 
     <span class="k">return</span> <span class="n">p</span>
 </code></pre></div></td></tr></table></div>
@@ -3686,7 +3686,7 @@ romitask.log.get_log_filename</p>
 <span class="normal">431</span>
 <span class="normal">432</span>
 <span class="normal">433</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">update_config</span><span class="p">(</span><span class="n">config</span><span class="p">:</span> <span class="nb">dict</span><span class="p">,</span> <span class="n">update</span><span class="p">:</span> <span class="nb">dict</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Update a configuration dictionary.</span>
+<span class="w">    </span><span class="sd">"""Update a configuration dictionary.</span>
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
@@ -3703,7 +3703,7 @@ romitask.log.get_log_filename</p>
 <span class="sd">    Notes</span>
 <span class="sd">    -----</span>
 <span class="sd">    We update only the values from the update dictionary without removing any existing keys.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="k">for</span> <span class="n">task_name</span><span class="p">,</span> <span class="n">task_params</span> <span class="ow">in</span> <span class="n">update</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
         <span class="k">for</span> <span class="n">tp_name</span><span class="p">,</span> <span class="n">tp_value</span> <span class="ow">in</span> <span class="n">task_params</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
             <span class="k">try</span><span class="p">:</span>
@@ -3711,8 +3711,8 @@ romitask.log.get_log_filename</p>
                     <span class="n">config</span><span class="p">[</span><span class="n">task_name</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
                 <span class="n">config</span><span class="p">[</span><span class="n">task_name</span><span class="p">][</span><span class="n">tp_name</span><span class="p">]</span> <span class="o">=</span> <span class="n">tp_value</span>
             <span class="k">except</span> <span class="ne">TypeError</span><span class="p">:</span>
-                <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Could not update &#39;</span><span class="si">{</span><span class="n">task_name</span><span class="si">}</span><span class="s2">.</span><span class="si">{</span><span class="n">tp_name</span><span class="si">}</span><span class="s2">&#39;: </span><span class="si">{</span><span class="n">tp_value</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
-                <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">config</span><span class="p">[</span><span class="n">task_name</span><span class="p">][</span><span class="n">tp_name</span><span class="p">]</span><span class="si">=}</span><span class="s2">&quot;</span><span class="p">)</span>
+                <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Could not update '</span><span class="si">{</span><span class="n">task_name</span><span class="si">}</span><span class="s2">.</span><span class="si">{</span><span class="n">tp_name</span><span class="si">}</span><span class="s2">': </span><span class="si">{</span><span class="n">tp_value</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+                <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">config</span><span class="p">[</span><span class="n">task_name</span><span class="p">][</span><span class="n">tp_name</span><span class="p">]</span><span class="si">=}</span><span class="s2">"</span><span class="p">)</span>
                 <span class="k">raise</span>
     <span class="k">return</span> <span class="n">config</span>
 </code></pre></div></td></tr></table></div>

@@ -855,7 +855,7 @@
 <h1 id="print_task_info"><code>print_task_info</code><a class="headerlink" href="#print_task_info" title="Permanent link">Link</a></h1>
 <h2 id="get-an-example-dataset">Get an example dataset<a class="headerlink" href="#get-an-example-dataset" title="Permanent link">Link</a></h2>
 <p>To get an example dataset you may use the <code>shared_fsdb</code> CLI from <code>plantdb</code> to get the <code>real_plant_analyzed</code> processed dataset as follows:
-<div class="highlight"><pre><span></span><code><span class="nb">export</span><span class="w"> </span><span class="nv">ROMI_DB</span><span class="o">=</span><span class="s2">&quot;/tmp/ROMI_DB&quot;</span>
+<div class="highlight"><pre><span></span><code><span class="nb">export</span><span class="w"> </span><span class="nv">ROMI_DB</span><span class="o">=</span><span class="s2">"/tmp/ROMI_DB"</span>
 shared_fsdb<span class="w"> </span><span class="nv">$ROMI_DB</span><span class="w"> </span>--dataset<span class="w"> </span>real_plant_analyzed<span class="w"> </span>
 </code></pre></div></p>
 <div class="admonition note">
@@ -864,31 +864,31 @@ shared_fsdb<span class="w"> </span><span class="nv">$ROMI_DB</span><span class="
 </div>
 <h2 id="print-a-summary">Print a summary<a class="headerlink" href="#print-a-summary" title="Permanent link">Link</a></h2>
 <p>After running a task, <em>e.g.</em> <code>PointCloud</code>, on a dataset, <em>e.g.</em> <code>real_plant_analyzed</code>, print a summary as follows:
-<div class="highlight"><pre><span></span><code><span class="nb">export</span><span class="w"> </span><span class="nv">ROMI_DB</span><span class="o">=</span><span class="s2">&quot;/tmp/ROMI_DB&quot;</span>
+<div class="highlight"><pre><span></span><code><span class="nb">export</span><span class="w"> </span><span class="nv">ROMI_DB</span><span class="o">=</span><span class="s2">"/tmp/ROMI_DB"</span>
 print_task_info<span class="w"> </span>PointCloud<span class="w"> </span><span class="nv">$ROMI_DB</span>/real_plant_analyzed
 </code></pre></div></p>
 <p>This should yield something like this:
 <div class="highlight"><pre><span></span><code># -- Summary of task PointCloud:
 # - Used TOML configuration:
-{&#39;upstream_task&#39;: &#39;Voxels&#39;, &#39;level_set_value&#39;: 1.0}
+{'upstream_task': 'Voxels', 'level_set_value': 1.0}
 
 # - Generated metadata:
-Found a JSON metadata file associated to task &#39;PointCloud&#39; in dataset &#39;/tmp/ROMI_DB/real_plant_analyzed&#39;!
+Found a JSON metadata file associated to task 'PointCloud' in dataset '/tmp/ROMI_DB/real_plant_analyzed'!
 PointCloud_1_0_1_0_10_0_7ee836e5a9 task recorded the following parameters metadata:
 {
-  &quot;task_name&quot;: &quot;PointCloud&quot;,
-  &quot;task_params&quot;: {
-    &quot;background_prior&quot;: 1.0,
-    &quot;level_set_value&quot;: 1.0,
-    &quot;min_contrast&quot;: 10.0,
-    &quot;min_score&quot;: 0.2,
-    &quot;scan_id&quot;: &quot;real_plant_analyzed&quot;,
-    &quot;upstream_task&quot;: &quot;Voxels&quot;
+  "task_name": "PointCloud",
+  "task_params": {
+    "background_prior": 1.0,
+    "level_set_value": 1.0,
+    "min_contrast": 10.0,
+    "min_score": 0.2,
+    "scan_id": "real_plant_analyzed",
+    "upstream_task": "Voxels"
   }
 }
 
 # - Task outputs:
-Found PLY file for task &#39;PointCloud_1_0_1_0_10_0_7ee836e5a9&#39;:
+Found PLY file for task 'PointCloud_1_0_1_0_10_0_7ee836e5a9':
  - 57890 points
  - pointcloud dimensions (x, y, z): [ 79.17346065  58.64248768 275.51855581]
 </code></pre></div></p>
