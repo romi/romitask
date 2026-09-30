@@ -50,6 +50,7 @@ from pathlib import Path
 from typing import Any
 
 import tomlkit
+from luigi.parameter import _NoValueType
 from luigi.task_register import Register
 
 from romitask.modules import MODULES
@@ -91,8 +92,8 @@ def get_task_defaults(task_name: str, module_path: Path | str) -> dict[str, Any]
     The 'scan_id' parameter is explicitly excluded from the results.
     Special handling is applied to different parameter types:
 
-    - dictionaries and lists are converted to strings,
     - type objects are converted to their string names,
+    - luigi's no value is converted to ``None``.
 
     Examples
     --------
@@ -133,12 +134,11 @@ def get_task_defaults(task_name: str, module_path: Path | str) -> dict[str, Any]
     # Convert default parameter values to desired types:
     task_defaults = {}
     for (p_name, p_value) in defaults:
-        if isinstance(p_value, (dict, list)):
-            # Convert dictionaries and lists to strings:
-            task_defaults[p_name] = str(p_value)
-        elif isinstance(p_value, type):
+        if isinstance(p_value, type):
             # convert type objects to their string names:
             task_defaults[p_name] = p_value.__name__
+        elif isinstance(p_value, _NoValueType):
+            task_defaults[p_name] = None
         else:
             task_defaults[p_name] = p_value
 
