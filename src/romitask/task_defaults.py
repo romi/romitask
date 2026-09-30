@@ -236,6 +236,9 @@ def update_config_with_defaults(
     for task_name, task_config in config.items():
         module_path = module_mapping.get(task_name, None)
         if not module_path:
+            # Task not registered in the module mapping: retain its config section unchanged.
+            # This preserves task parameters (e.g. `scan_id`) that are not part of the defaults.
+            merged_config[task_name] = task_config
             continue
         # Get defaults from module
         task_defaults = get_task_defaults(task_name, module_path)
