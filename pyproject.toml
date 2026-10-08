@@ -1,5 +1,5 @@
 [build-system]
-requires = ["setuptools >=75"]
+requires = ["setuptools >=77"]
 build-backend = "setuptools.build_meta"
 
 [project]
@@ -17,7 +17,7 @@ dependencies = [
 description = "The ROMI task runner, a luigi based task pipeline."
 readme = "README.md"
 requires-python = ">=3.8"
-license = { 'text' = "LGPL-3.0-or-later" }  # to replace by "LGPL-3.0-or-later" only in next release, pending deprecation
+license = "LGPL-3.0-or-later"   # PEP 639 SPDX expression
 authors = [
     { name = "Peter Hanappe", email = "peter.hanappe@sony.com" },
     { name = "Timothée Wintz", email = "timothee@timwin.fr" },
