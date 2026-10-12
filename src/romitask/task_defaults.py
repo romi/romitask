@@ -29,18 +29,18 @@ This module makes it easy to keep configuration files up‑to‑date without man
 >>> # 1. Extract defaults from a task module
 >>> defaults = get_task_defaults("Clean", module_path)
 >>> print(defaults)
-{'upstream_task': None, 'no_confirm': False, 'keep_metadata': [], 'keep_pipeline_cfg': True, 'keep_task': ''}
+{'upstream_task': None, 'no_confirm': False, 'keep_metadata': [], 'keep_pipeline_cfg': True, 'keep_task': []}
 >>>
 >>> # 2. Merge with an existing configuration (e.g., loaded from a TOML file)
 >>> config = {"Clean": {"no_confirm": True, "undefined_param": None}}  # user‑provided overrides
 >>> merged = merge_config_with_defaults(config["Clean"], defaults)
 >>> print(merged)  # Note the absence on the undefined parameter 'undefined_param'
-{'upstream_task': None, 'no_confirm': True, 'keep_metadata': [], 'keep_pipeline_cfg': True, 'keep_task': ''}
+{'upstream_task': None, 'no_confirm': True, 'keep_metadata': [], 'keep_pipeline_cfg': True, 'keep_task': []}
 >>>
 >>> # 3. Update the configuration from a TOML file
 >>> pipe_cfg = update_toml_with_defaults(Path('../configs/geom_pipe_real.toml'))
 >>> print(pipe_cfg['Clean'])
-{'upstream_task': None, 'no_confirm': True, 'keep_metadata': [], 'keep_pipeline_cfg': True, 'keep_task': ''}
+{'upstream_task': None, 'no_confirm': True, 'keep_metadata': [], 'keep_pipeline_cfg': True, 'keep_task': []}
 ```
 
 """
@@ -230,7 +230,7 @@ def update_config_with_defaults(
     {'no_confirm': True}
     >>> updated_config = update_config_with_defaults(config)
     >>> print(updated_config['Clean'])
-    {'upstream_task': None, 'no_confirm': True, 'keep_metadata': [], 'keep_pipeline_cfg': True, 'keep_task': ''}
+    {'upstream_task': None, 'no_confirm': True, 'keep_metadata': [], 'keep_pipeline_cfg': True, 'keep_task': []}
     """
     merged_config: dict[str, Any] = {}
     for task_name, task_config in config.items():

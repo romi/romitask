@@ -1008,10 +1008,10 @@ class Clean(RomiTask):
     keep_metadata : luigi.listParameter
         list of metadata to keep (retain) in the `images` fileset metadata.
         Default to ``IMAGES_MD``.
-    keep_task : luigi.Parameter, optional
-        Task name to keep along with all its upstream dependencies.
-        If specified, this task and all anterior tasks will be preserved.
-        Default to empty string (keep nothing).
+    keep_task : luigi.ListParameter, optional
+        Task names to keep along with all their upstream dependencies.
+        If specified, these tasks and all their anterior tasks will be preserved.
+        Default to empty list (keep nothing).
 
     See Also
     --------
@@ -1022,7 +1022,7 @@ class Clean(RomiTask):
     no_confirm = luigi.BoolParameter(default=False)
     keep_metadata = luigi.ListParameter(default=[])
     keep_pipeline_cfg = luigi.BoolParameter(default=True)
-    keep_task = luigi.Parameter(default="")
+    keep_task = luigi.ListParameter(default=[])
 
     def requires(self):
         """No requirements here."""
@@ -1080,7 +1080,7 @@ class Clean(RomiTask):
 
         task_dependencies = {}
         try:
-            config = tomlkit.load(backup_path)
+            config = tomlkit.load(open(backup_path))
             # Update the loaded config undefined task values with default task values from classes implementation
             config = update_config_with_defaults(config, MODULES)
 
@@ -1302,16 +1302,17 @@ class Clean(RomiTask):
         # - Compute the set of filesets to preserve
         filesets_to_preserve = {"images"}  # Always keep images
 
-        tasks_to_preserve = []
+        tasks_to_preserve = set()
         if self.keep_task:
             # Parse the pipeline configuration to get task dependencies
             task_dependencies = self._parse_pipeline_toml(scan)
 
             if task_dependencies:
-                # Compute the full hierarchy of tasks to preserve
-                tasks_to_preserve = self._compute_task_hierarchy(
-                    self.keep_task, task_dependencies
-                )
+                # Union the full hierarchy of each task to preserve
+                for task_name in self.keep_task:
+                    tasks_to_preserve |= self._compute_task_hierarchy(
+                        task_name, task_dependencies
+                    )
 
                 # Fileset IDs need to be matched to task names as they have specific suffixes
                 task_fs_map = locate_task_filesets(scan, tasks_to_preserve)
@@ -1319,16 +1320,16 @@ class Clean(RomiTask):
                 filesets_to_preserve.update(list(task_fs_map.values()))
 
                 logger.info(
-                    "Preserving task %r and its ancestors: %s",
+                    "Preserving tasks %r and their ancestors: %s",
                     self.keep_task,
-                    tasks_to_preserve
+                    sorted(tasks_to_preserve),
                 )
             else:
                 logger.warning(
                     "Could not parse task dependencies, only keeping %r",
-                    self.keep_task
+                    self.keep_task,
                 )
-                filesets_to_preserve.add(self.keep_task)
+                filesets_to_preserve.update(self.keep_task)
 
         # - Handle the necessity to confirm prior to dataset & metadata cleaning.
         if not self.no_confirm:
