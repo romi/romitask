@@ -2447,13 +2447,13 @@ Default to <code>IMAGES_MD</code>.</p>
           <tr class="doc-section-item">
             <td><code><span title="romitask.task.Clean.keep_task">keep_task</span></code></td>
             <td>
-                  <code>(<a class="autorefs autorefs-external" title="luigi.Parameter" href="https://luigi.readthedocs.io/en/stable/api/luigi.html#luigi.Parameter">Parameter</a>, <span title="optional">optional</span>)</code>
+                  <code>(<a class="autorefs autorefs-external" title="luigi.ListParameter" href="https://luigi.readthedocs.io/en/stable/api/luigi.html#luigi.ListParameter">ListParameter</a>, <span title="optional">optional</span>)</code>
             </td>
             <td>
               <div class="doc-md-description">
-                <p>Task name to keep along with all its upstream dependencies.
-If specified, this task and all anterior tasks will be preserved.
-Default to empty string (keep nothing).</p>
+                <p>Task names to keep along with all their upstream dependencies.
+If specified, these tasks and all their anterior tasks will be preserved.
+Default to empty list (keep nothing).</p>
               </div>
             </td>
           </tr>
@@ -2663,7 +2663,8 @@ romitask.task.IMAGES_MD</p>
 <span class="normal">1370</span>
 <span class="normal">1371</span>
 <span class="normal">1372</span>
-<span class="normal">1373</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">run</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="normal">1373</span>
+<span class="normal">1374</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">run</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">"""Execute the cleaning workflow."""</span>
     <span class="n">scan</span> <span class="o">=</span> <span class="n">ScanConfiguration</span><span class="p">()</span><span class="o">.</span><span class="n">scan</span>
     <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Cleaning task started for scan '</span><span class="si">{</span><span class="n">scan</span><span class="o">.</span><span class="n">id</span><span class="si">}</span><span class="s2">'..."</span><span class="p">)</span>
@@ -2674,16 +2675,17 @@ romitask.task.IMAGES_MD</p>
     <span class="c1"># - Compute the set of filesets to preserve</span>
     <span class="n">filesets_to_preserve</span> <span class="o">=</span> <span class="p">{</span><span class="s2">"images"</span><span class="p">}</span>  <span class="c1"># Always keep images</span>
 
-    <span class="n">tasks_to_preserve</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">tasks_to_preserve</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
     <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">keep_task</span><span class="p">:</span>
         <span class="c1"># Parse the pipeline configuration to get task dependencies</span>
         <span class="n">task_dependencies</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_parse_pipeline_toml</span><span class="p">(</span><span class="n">scan</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="n">task_dependencies</span><span class="p">:</span>
-            <span class="c1"># Compute the full hierarchy of tasks to preserve</span>
-            <span class="n">tasks_to_preserve</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_compute_task_hierarchy</span><span class="p">(</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">keep_task</span><span class="p">,</span> <span class="n">task_dependencies</span>
-            <span class="p">)</span>
+            <span class="c1"># Union the full hierarchy of each task to preserve</span>
+            <span class="k">for</span> <span class="n">task_name</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">keep_task</span><span class="p">:</span>
+                <span class="n">tasks_to_preserve</span> <span class="o">|=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_compute_task_hierarchy</span><span class="p">(</span>
+                    <span class="n">task_name</span><span class="p">,</span> <span class="n">task_dependencies</span>
+                <span class="p">)</span>
 
             <span class="c1"># Fileset IDs need to be matched to task names as they have specific suffixes</span>
             <span class="n">task_fs_map</span> <span class="o">=</span> <span class="n">locate_task_filesets</span><span class="p">(</span><span class="n">scan</span><span class="p">,</span> <span class="n">tasks_to_preserve</span><span class="p">)</span>
@@ -2691,16 +2693,16 @@ romitask.task.IMAGES_MD</p>
             <span class="n">filesets_to_preserve</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="n">task_fs_map</span><span class="o">.</span><span class="n">values</span><span class="p">()))</span>
 
             <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
-                <span class="s2">"Preserving task </span><span class="si">%r</span><span class="s2"> and its ancestors: </span><span class="si">%s</span><span class="s2">"</span><span class="p">,</span>
+                <span class="s2">"Preserving tasks </span><span class="si">%r</span><span class="s2"> and their ancestors: </span><span class="si">%s</span><span class="s2">"</span><span class="p">,</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">keep_task</span><span class="p">,</span>
-                <span class="n">tasks_to_preserve</span>
+                <span class="nb">sorted</span><span class="p">(</span><span class="n">tasks_to_preserve</span><span class="p">),</span>
             <span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span>
                 <span class="s2">"Could not parse task dependencies, only keeping </span><span class="si">%r</span><span class="s2">"</span><span class="p">,</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">keep_task</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">keep_task</span><span class="p">,</span>
             <span class="p">)</span>
-            <span class="n">filesets_to_preserve</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">keep_task</span><span class="p">)</span>
+            <span class="n">filesets_to_preserve</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">keep_task</span><span class="p">)</span>
 
     <span class="c1"># - Handle the necessity to confirm prior to dataset &amp; metadata cleaning.</span>
     <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">no_confirm</span><span class="p">:</span>
@@ -5417,10 +5419,10 @@ if not, a new tracking dictionary is created.</p>
 
             <details class="quote">
               <summary>Source code in <code>romitask/task.py</code></summary>
-              <div class="codehilite"><table class="codehilitetable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1410</span>
-<span class="normal">1411</span>
+              <div class="codehilite"><table class="codehilitetable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1411</span>
 <span class="normal">1412</span>
-<span class="normal">1413</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">output</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="normal">1413</span>
+<span class="normal">1414</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">output</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">"""Define the output target for the retry tracker file."""</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">task_id</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span>  <span class="c1"># name the task using the class's name</span>
     <span class="k">return</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">output</span><span class="p">()</span>
@@ -5446,9 +5448,9 @@ if not, a new tracking dictionary is created.</p>
 
             <details class="quote">
               <summary>Source code in <code>romitask/task.py</code></summary>
-              <div class="codehilite"><table class="codehilitetable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1406</span>
-<span class="normal">1407</span>
-<span class="normal">1408</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">requires</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+              <div class="codehilite"><table class="codehilitetable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1407</span>
+<span class="normal">1408</span>
+<span class="normal">1409</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">requires</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">"""Nothing required."""</span>
     <span class="k">return</span> <span class="p">[]</span>
 </code></pre></div></td></tr></table></div>
@@ -5475,8 +5477,7 @@ Maps the task_id to its retry count in a dictionary stored as JSON.</p>
 
             <details class="quote">
               <summary>Source code in <code>romitask/task.py</code></summary>
-              <div class="codehilite"><table class="codehilitetable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1415</span>
-<span class="normal">1416</span>
+              <div class="codehilite"><table class="codehilitetable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1416</span>
 <span class="normal">1417</span>
 <span class="normal">1418</span>
 <span class="normal">1419</span>
@@ -5495,7 +5496,8 @@ Maps the task_id to its retry count in a dictionary stored as JSON.</p>
 <span class="normal">1432</span>
 <span class="normal">1433</span>
 <span class="normal">1434</span>
-<span class="normal">1435</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">run</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="normal">1435</span>
+<span class="normal">1436</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">run</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">"""Execute the retry tracking operation.</span>
 
 <span class="sd">    Creates or updates a JSON file with information about task retries.</span>
