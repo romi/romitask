@@ -1080,7 +1080,7 @@ class Clean(RomiTask):
 
         task_dependencies = {}
         try:
-            config = tomlkit.load(backup_path)
+            config = tomlkit.load(open(backup_path))
             # Update the loaded config undefined task values with default task values from classes implementation
             config = update_config_with_defaults(config, MODULES)
 
