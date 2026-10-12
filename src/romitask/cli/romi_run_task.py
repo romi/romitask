@@ -660,7 +660,7 @@ def run_task(dataset_path: str | Path,
     '--cfg',
     'cfg_override',
     default="",
-    help="Override configuration file using specific parameters, e.g. \"Clean.keep_task='Masks'\"."
+    help="Override configuration file using specific parameters, e.g. \"Clean.keep_task=['Masks']\"."
 )
 @click.option(
     '--module',
