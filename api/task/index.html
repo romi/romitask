@@ -2503,9 +2503,9 @@ romitask.task.IMAGES_MD</p>
 
             <details class="quote">
               <summary>Source code in <code>romitask/task.py</code></summary>
-              <div class="codehilite"><table class="codehilitetable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1035</span>
-<span class="normal">1036</span>
-<span class="normal">1037</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">complete</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+              <div class="codehilite"><table class="codehilitetable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1045</span>
+<span class="normal">1046</span>
+<span class="normal">1047</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">complete</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">"""Indicate the task as complete."""</span>
     <span class="k">return</span> <span class="kc">False</span>  <span class="c1"># there is no output</span>
 </code></pre></div></td></tr></table></div>
@@ -2530,9 +2530,9 @@ romitask.task.IMAGES_MD</p>
 
             <details class="quote">
               <summary>Source code in <code>romitask/task.py</code></summary>
-              <div class="codehilite"><table class="codehilitetable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1031</span>
-<span class="normal">1032</span>
-<span class="normal">1033</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">output</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+              <div class="codehilite"><table class="codehilitetable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1041</span>
+<span class="normal">1042</span>
+<span class="normal">1043</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">output</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">"""Override inherited method to avoid ``FilesetTarget``."""</span>
     <span class="k">return</span> <span class="kc">None</span>  <span class="c1"># we do not want the cleaning task to add a Fileset!</span>
 </code></pre></div></td></tr></table></div>
@@ -2557,9 +2557,9 @@ romitask.task.IMAGES_MD</p>
 
             <details class="quote">
               <summary>Source code in <code>romitask/task.py</code></summary>
-              <div class="codehilite"><table class="codehilitetable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1027</span>
-<span class="normal">1028</span>
-<span class="normal">1029</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">requires</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+              <div class="codehilite"><table class="codehilitetable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1037</span>
+<span class="normal">1038</span>
+<span class="normal">1039</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">requires</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">"""No requirements here."""</span>
     <span class="k">return</span> <span class="p">[]</span>
 </code></pre></div></td></tr></table></div>
@@ -2584,17 +2584,7 @@ romitask.task.IMAGES_MD</p>
 
             <details class="quote">
               <summary>Source code in <code>romitask/task.py</code></summary>
-              <div class="codehilite"><table class="codehilitetable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1294</span>
-<span class="normal">1295</span>
-<span class="normal">1296</span>
-<span class="normal">1297</span>
-<span class="normal">1298</span>
-<span class="normal">1299</span>
-<span class="normal">1300</span>
-<span class="normal">1301</span>
-<span class="normal">1302</span>
-<span class="normal">1303</span>
-<span class="normal">1304</span>
+              <div class="codehilite"><table class="codehilitetable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1304</span>
 <span class="normal">1305</span>
 <span class="normal">1306</span>
 <span class="normal">1307</span>
@@ -2664,7 +2654,17 @@ romitask.task.IMAGES_MD</p>
 <span class="normal">1371</span>
 <span class="normal">1372</span>
 <span class="normal">1373</span>
-<span class="normal">1374</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">run</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="normal">1374</span>
+<span class="normal">1375</span>
+<span class="normal">1376</span>
+<span class="normal">1377</span>
+<span class="normal">1378</span>
+<span class="normal">1379</span>
+<span class="normal">1380</span>
+<span class="normal">1381</span>
+<span class="normal">1382</span>
+<span class="normal">1383</span>
+<span class="normal">1384</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">run</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">"""Execute the cleaning workflow."""</span>
     <span class="n">scan</span> <span class="o">=</span> <span class="n">ScanConfiguration</span><span class="p">()</span><span class="o">.</span><span class="n">scan</span>
     <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Cleaning task started for scan '</span><span class="si">{</span><span class="n">scan</span><span class="o">.</span><span class="n">id</span><span class="si">}</span><span class="s2">'..."</span><span class="p">)</span>
@@ -2855,9 +2855,9 @@ romitask.task.IMAGES_MD</p>
 
             <details class="quote">
               <summary>Source code in <code>romitask/task.py</code></summary>
-              <div class="codehilite"><table class="codehilitetable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">546</span>
-<span class="normal">547</span>
-<span class="normal">548</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">complete</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+              <div class="codehilite"><table class="codehilitetable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">556</span>
+<span class="normal">557</span>
+<span class="normal">558</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">complete</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">"""Indicate the task as complete."""</span>
     <span class="k">return</span> <span class="kc">False</span>  <span class="c1"># there is no output</span>
 </code></pre></div></td></tr></table></div>
@@ -2882,9 +2882,9 @@ romitask.task.IMAGES_MD</p>
 
             <details class="quote">
               <summary>Source code in <code>romitask/task.py</code></summary>
-              <div class="codehilite"><table class="codehilitetable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">542</span>
-<span class="normal">543</span>
-<span class="normal">544</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">output</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+              <div class="codehilite"><table class="codehilitetable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">552</span>
+<span class="normal">553</span>
+<span class="normal">554</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">output</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">"""Returns nothing."""</span>
     <span class="k">return</span> <span class="kc">None</span>
 </code></pre></div></td></tr></table></div>
@@ -2909,9 +2909,9 @@ romitask.task.IMAGES_MD</p>
 
             <details class="quote">
               <summary>Source code in <code>romitask/task.py</code></summary>
-              <div class="codehilite"><table class="codehilitetable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">538</span>
-<span class="normal">539</span>
-<span class="normal">540</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">requires</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+              <div class="codehilite"><table class="codehilitetable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">548</span>
+<span class="normal">549</span>
+<span class="normal">550</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">requires</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">"""Require nothing."""</span>
     <span class="k">return</span> <span class="p">[]</span>
 </code></pre></div></td></tr></table></div>
@@ -2959,18 +2959,18 @@ romitask.task.IMAGES_MD</p>
 
             <details class="quote">
               <summary>Source code in <code>romitask/task.py</code></summary>
-              <div class="codehilite"><table class="codehilitetable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">550</span>
-<span class="normal">551</span>
-<span class="normal">552</span>
-<span class="normal">553</span>
-<span class="normal">554</span>
-<span class="normal">555</span>
-<span class="normal">556</span>
-<span class="normal">557</span>
-<span class="normal">558</span>
-<span class="normal">559</span>
-<span class="normal">560</span>
-<span class="normal">561</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">run</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+              <div class="codehilite"><table class="codehilitetable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">560</span>
+<span class="normal">561</span>
+<span class="normal">562</span>
+<span class="normal">563</span>
+<span class="normal">564</span>
+<span class="normal">565</span>
+<span class="normal">566</span>
+<span class="normal">567</span>
+<span class="normal">568</span>
+<span class="normal">569</span>
+<span class="normal">570</span>
+<span class="normal">571</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">run</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">"""Check the dataset exist.</span>
 
 <span class="sd">    Raises</span>
@@ -3093,9 +3093,9 @@ romitask.task.IMAGES_MD</p>
 
             <details class="quote">
               <summary>Source code in <code>romitask/task.py</code></summary>
-              <div class="codehilite"><table class="codehilitetable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">975</span>
-<span class="normal">976</span>
-<span class="normal">977</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">requires</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+              <div class="codehilite"><table class="codehilitetable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">985</span>
+<span class="normal">986</span>
+<span class="normal">987</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">requires</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">"""Require nothing."""</span>
     <span class="k">return</span> <span class="p">[]</span>
 </code></pre></div></td></tr></table></div>
@@ -3120,12 +3120,12 @@ romitask.task.IMAGES_MD</p>
 
             <details class="quote">
               <summary>Source code in <code>romitask/task.py</code></summary>
-              <div class="codehilite"><table class="codehilitetable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">979</span>
-<span class="normal">980</span>
-<span class="normal">981</span>
-<span class="normal">982</span>
-<span class="normal">983</span>
-<span class="normal">984</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">run</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+              <div class="codehilite"><table class="codehilitetable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">989</span>
+<span class="normal">990</span>
+<span class="normal">991</span>
+<span class="normal">992</span>
+<span class="normal">993</span>
+<span class="normal">994</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">run</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">"""Do nothing."""</span>
     <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">"Dummy task started."</span><span class="p">)</span>
     <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Got a scan named '</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">scan_id</span><span class="si">}</span><span class="s2">'..."</span><span class="p">)</span>
@@ -3343,17 +3343,7 @@ otherwise the unmodified input value.</p>
 
             <details class="quote">
               <summary>Source code in <code>romitask/task.py</code></summary>
-              <div class="codehilite"><table class="codehilitetable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">106</span>
-<span class="normal">107</span>
-<span class="normal">108</span>
-<span class="normal">109</span>
-<span class="normal">110</span>
-<span class="normal">111</span>
-<span class="normal">112</span>
-<span class="normal">113</span>
-<span class="normal">114</span>
-<span class="normal">115</span>
-<span class="normal">116</span>
+              <div class="codehilite"><table class="codehilitetable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">116</span>
 <span class="normal">117</span>
 <span class="normal">118</span>
 <span class="normal">119</span>
@@ -3375,7 +3365,17 @@ otherwise the unmodified input value.</p>
 <span class="normal">135</span>
 <span class="normal">136</span>
 <span class="normal">137</span>
-<span class="normal">138</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">parse</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">db_path</span><span class="p">):</span>
+<span class="normal">138</span>
+<span class="normal">139</span>
+<span class="normal">140</span>
+<span class="normal">141</span>
+<span class="normal">142</span>
+<span class="normal">143</span>
+<span class="normal">144</span>
+<span class="normal">145</span>
+<span class="normal">146</span>
+<span class="normal">147</span>
+<span class="normal">148</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">parse</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">db_path</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">"""Parse the parameter value.</span>
 
 <span class="sd">    If the value is a string, attempt to reconstruct an FSDB object.</span>
@@ -3405,7 +3405,7 @@ otherwise the unmodified input value.</p>
     <span class="k">if</span> <span class="ow">not</span> <span class="n">_is_fsdb</span><span class="p">(</span><span class="n">db_path</span><span class="p">):</span>
         <span class="k">raise</span> <span class="n">NotAnFSDBError</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Given path </span><span class="si">{</span><span class="n">db_path</span><span class="si">}</span><span class="s2"> is not an FSDB"</span><span class="p">)</span>
 
-    <span class="n">db</span> <span class="o">=</span> <span class="n">FSDB</span><span class="p">(</span><span class="n">db_path</span><span class="p">)</span>
+    <span class="n">db</span> <span class="o">=</span> <span class="n">FSDB</span><span class="p">(</span><span class="n">db_path</span><span class="p">,</span> <span class="n">no_auth</span><span class="o">=</span><span class="n">_no_auth_fsdb</span><span class="p">(),</span> <span class="n">lazy</span><span class="o">=</span><span class="n">_lazy_fsdb</span><span class="p">())</span>
     <span class="n">db</span><span class="o">.</span><span class="n">connect</span><span class="p">()</span>
     <span class="k">return</span> <span class="n">db</span>
 </code></pre></div></td></tr></table></div>
@@ -3486,17 +3486,7 @@ For other values, uses the default string conversion.</p>
 
             <details class="quote">
               <summary>Source code in <code>romitask/task.py</code></summary>
-              <div class="codehilite"><table class="codehilitetable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">140</span>
-<span class="normal">141</span>
-<span class="normal">142</span>
-<span class="normal">143</span>
-<span class="normal">144</span>
-<span class="normal">145</span>
-<span class="normal">146</span>
-<span class="normal">147</span>
-<span class="normal">148</span>
-<span class="normal">149</span>
-<span class="normal">150</span>
+              <div class="codehilite"><table class="codehilitetable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">150</span>
 <span class="normal">151</span>
 <span class="normal">152</span>
 <span class="normal">153</span>
@@ -3505,7 +3495,17 @@ For other values, uses the default string conversion.</p>
 <span class="normal">156</span>
 <span class="normal">157</span>
 <span class="normal">158</span>
-<span class="normal">159</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">serialize</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">db</span><span class="p">):</span>
+<span class="normal">159</span>
+<span class="normal">160</span>
+<span class="normal">161</span>
+<span class="normal">162</span>
+<span class="normal">163</span>
+<span class="normal">164</span>
+<span class="normal">165</span>
+<span class="normal">166</span>
+<span class="normal">167</span>
+<span class="normal">168</span>
+<span class="normal">169</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">serialize</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">db</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">"""Serialize the parameter value to a string.</span>
 
 <span class="sd">    For FSDB objects, converts to a string representation of the base directory path.</span>
@@ -3750,22 +3750,22 @@ By default, no filtering is performed, all inputs are used.</p>
 
             <details class="quote">
               <summary>Source code in <code>romitask/task.py</code></summary>
-              <div class="codehilite"><table class="codehilitetable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">823</span>
-<span class="normal">824</span>
-<span class="normal">825</span>
-<span class="normal">826</span>
-<span class="normal">827</span>
-<span class="normal">828</span>
-<span class="normal">829</span>
-<span class="normal">830</span>
-<span class="normal">831</span>
-<span class="normal">832</span>
-<span class="normal">833</span>
+              <div class="codehilite"><table class="codehilitetable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">833</span>
 <span class="normal">834</span>
 <span class="normal">835</span>
 <span class="normal">836</span>
 <span class="normal">837</span>
-<span class="normal">838</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">f</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">f</span><span class="p">,</span> <span class="n">outfs</span><span class="p">):</span>
+<span class="normal">838</span>
+<span class="normal">839</span>
+<span class="normal">840</span>
+<span class="normal">841</span>
+<span class="normal">842</span>
+<span class="normal">843</span>
+<span class="normal">844</span>
+<span class="normal">845</span>
+<span class="normal">846</span>
+<span class="normal">847</span>
+<span class="normal">848</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">f</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">f</span><span class="p">,</span> <span class="n">outfs</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">"""Function applied to every file in the fileset must return a file object.</span>
 
 <span class="sd">    Parameters</span>
@@ -3803,23 +3803,23 @@ By default, no filtering is performed, all inputs are used.</p>
 
             <details class="quote">
               <summary>Source code in <code>romitask/task.py</code></summary>
-              <div class="codehilite"><table class="codehilitetable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">840</span>
-<span class="normal">841</span>
-<span class="normal">842</span>
-<span class="normal">843</span>
-<span class="normal">844</span>
-<span class="normal">845</span>
-<span class="normal">846</span>
-<span class="normal">847</span>
-<span class="normal">848</span>
-<span class="normal">849</span>
-<span class="normal">850</span>
+              <div class="codehilite"><table class="codehilitetable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">850</span>
 <span class="normal">851</span>
 <span class="normal">852</span>
 <span class="normal">853</span>
 <span class="normal">854</span>
 <span class="normal">855</span>
-<span class="normal">856</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">run</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="normal">856</span>
+<span class="normal">857</span>
+<span class="normal">858</span>
+<span class="normal">859</span>
+<span class="normal">860</span>
+<span class="normal">861</span>
+<span class="normal">862</span>
+<span class="normal">863</span>
+<span class="normal">864</span>
+<span class="normal">865</span>
+<span class="normal">866</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">run</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">"""Run the task on every `File`s from a `Fileset` that fulfill the ``query``."""</span>
     <span class="n">input_fileset</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">input</span><span class="p">()</span><span class="o">.</span><span class="n">get</span><span class="p">()</span>
     <span class="n">output_fileset</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">output</span><span class="p">()</span><span class="o">.</span><span class="n">get</span><span class="p">()</span>
@@ -3968,10 +3968,10 @@ By default, no filtering is performed, all inputs are used.</p>
 
             <details class="quote">
               <summary>Source code in <code>romitask/task.py</code></summary>
-              <div class="codehilite"><table class="codehilitetable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">679</span>
-<span class="normal">680</span>
-<span class="normal">681</span>
-<span class="normal">682</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">output</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+              <div class="codehilite"><table class="codehilitetable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">689</span>
+<span class="normal">690</span>
+<span class="normal">691</span>
+<span class="normal">692</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">output</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">"""The output of the task is the fileset."""</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">task_id</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">fileset_id</span>  <span class="c1"># name the task using the fileset</span>
     <span class="k">return</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">output</span><span class="p">()</span>
@@ -3997,11 +3997,11 @@ By default, no filtering is performed, all inputs are used.</p>
 
             <details class="quote">
               <summary>Source code in <code>romitask/task.py</code></summary>
-              <div class="codehilite"><table class="codehilitetable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">684</span>
-<span class="normal">685</span>
-<span class="normal">686</span>
-<span class="normal">687</span>
-<span class="normal">688</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">output_file</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">file_id</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">create</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+              <div class="codehilite"><table class="codehilitetable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">694</span>
+<span class="normal">695</span>
+<span class="normal">696</span>
+<span class="normal">697</span>
+<span class="normal">698</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">output_file</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">file_id</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">create</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">"""The output file should exist."""</span>
     <span class="k">if</span> <span class="n">file_id</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
         <span class="n">file_id</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">file_id</span>
@@ -4028,9 +4028,9 @@ By default, no filtering is performed, all inputs are used.</p>
 
             <details class="quote">
               <summary>Source code in <code>romitask/task.py</code></summary>
-              <div class="codehilite"><table class="codehilitetable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">675</span>
-<span class="normal">676</span>
-<span class="normal">677</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">requires</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+              <div class="codehilite"><table class="codehilitetable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">685</span>
+<span class="normal">686</span>
+<span class="normal">687</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">requires</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">"""Require nothing."""</span>
     <span class="k">return</span> <span class="p">[]</span>
 </code></pre></div></td></tr></table></div>
@@ -4088,21 +4088,21 @@ By default, no filtering is performed, all inputs are used.</p>
 
             <details class="quote">
               <summary>Source code in <code>romitask/task.py</code></summary>
-              <div class="codehilite"><table class="codehilitetable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">690</span>
-<span class="normal">691</span>
-<span class="normal">692</span>
-<span class="normal">693</span>
-<span class="normal">694</span>
-<span class="normal">695</span>
-<span class="normal">696</span>
-<span class="normal">697</span>
-<span class="normal">698</span>
-<span class="normal">699</span>
-<span class="normal">700</span>
+              <div class="codehilite"><table class="codehilitetable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">700</span>
 <span class="normal">701</span>
 <span class="normal">702</span>
 <span class="normal">703</span>
-<span class="normal">704</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">run</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="normal">704</span>
+<span class="normal">705</span>
+<span class="normal">706</span>
+<span class="normal">707</span>
+<span class="normal">708</span>
+<span class="normal">709</span>
+<span class="normal">710</span>
+<span class="normal">711</span>
+<span class="normal">712</span>
+<span class="normal">713</span>
+<span class="normal">714</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">run</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">"""Check the fileset and files exist.</span>
 
 <span class="sd">    Raises</span>
@@ -4238,10 +4238,10 @@ By default, no filtering is performed, all inputs are used.</p>
 
             <details class="quote">
               <summary>Source code in <code>romitask/task.py</code></summary>
-              <div class="codehilite"><table class="codehilitetable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">587</span>
-<span class="normal">588</span>
-<span class="normal">589</span>
-<span class="normal">590</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">output</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+              <div class="codehilite"><table class="codehilitetable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">597</span>
+<span class="normal">598</span>
+<span class="normal">599</span>
+<span class="normal">600</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">output</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">"""The output of the task is the fileset."""</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">task_id</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">fileset_id</span>  <span class="c1"># name the task using the fileset</span>
     <span class="k">return</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">output</span><span class="p">()</span>
@@ -4267,9 +4267,9 @@ By default, no filtering is performed, all inputs are used.</p>
 
             <details class="quote">
               <summary>Source code in <code>romitask/task.py</code></summary>
-              <div class="codehilite"><table class="codehilitetable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">583</span>
-<span class="normal">584</span>
-<span class="normal">585</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">requires</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+              <div class="codehilite"><table class="codehilitetable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">593</span>
+<span class="normal">594</span>
+<span class="normal">595</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">requires</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">"""Require nothing."""</span>
     <span class="k">return</span> <span class="p">[]</span>
 </code></pre></div></td></tr></table></div>
@@ -4317,17 +4317,17 @@ By default, no filtering is performed, all inputs are used.</p>
 
             <details class="quote">
               <summary>Source code in <code>romitask/task.py</code></summary>
-              <div class="codehilite"><table class="codehilitetable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">592</span>
-<span class="normal">593</span>
-<span class="normal">594</span>
-<span class="normal">595</span>
-<span class="normal">596</span>
-<span class="normal">597</span>
-<span class="normal">598</span>
-<span class="normal">599</span>
-<span class="normal">600</span>
-<span class="normal">601</span>
-<span class="normal">602</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">run</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+              <div class="codehilite"><table class="codehilitetable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">602</span>
+<span class="normal">603</span>
+<span class="normal">604</span>
+<span class="normal">605</span>
+<span class="normal">606</span>
+<span class="normal">607</span>
+<span class="normal">608</span>
+<span class="normal">609</span>
+<span class="normal">610</span>
+<span class="normal">611</span>
+<span class="normal">612</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">run</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">"""Check the fileset exist.</span>
 
 <span class="sd">    Raises</span>
@@ -4512,20 +4512,20 @@ By default, no filtering is performed, all inputs are used.</p>
 
                   <details class="quote">
                     <summary>Source code in <code>romitask/task.py</code></summary>
-                    <div class="codehilite"><table class="codehilitetable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">333</span>
-<span class="normal">334</span>
-<span class="normal">335</span>
-<span class="normal">336</span>
-<span class="normal">337</span>
-<span class="normal">338</span>
-<span class="normal">339</span>
-<span class="normal">340</span>
-<span class="normal">341</span>
-<span class="normal">342</span>
-<span class="normal">343</span>
+                    <div class="codehilite"><table class="codehilitetable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">343</span>
 <span class="normal">344</span>
 <span class="normal">345</span>
-<span class="normal">346</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">scan</span><span class="p">,</span> <span class="n">fileset_id</span><span class="p">):</span>
+<span class="normal">346</span>
+<span class="normal">347</span>
+<span class="normal">348</span>
+<span class="normal">349</span>
+<span class="normal">350</span>
+<span class="normal">351</span>
+<span class="normal">352</span>
+<span class="normal">353</span>
+<span class="normal">354</span>
+<span class="normal">355</span>
+<span class="normal">356</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">scan</span><span class="p">,</span> <span class="n">fileset_id</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">"""FilesetTarget constructor.</span>
 
 <span class="sd">    Parameters</span>
@@ -4595,17 +4595,17 @@ By default, no filtering is performed, all inputs are used.</p>
 
             <details class="quote">
               <summary>Source code in <code>romitask/task.py</code></summary>
-              <div class="codehilite"><table class="codehilitetable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">348</span>
-<span class="normal">349</span>
-<span class="normal">350</span>
-<span class="normal">351</span>
-<span class="normal">352</span>
-<span class="normal">353</span>
-<span class="normal">354</span>
-<span class="normal">355</span>
-<span class="normal">356</span>
-<span class="normal">357</span>
-<span class="normal">358</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">create</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+              <div class="codehilite"><table class="codehilitetable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">358</span>
+<span class="normal">359</span>
+<span class="normal">360</span>
+<span class="normal">361</span>
+<span class="normal">362</span>
+<span class="normal">363</span>
+<span class="normal">364</span>
+<span class="normal">365</span>
+<span class="normal">366</span>
+<span class="normal">367</span>
+<span class="normal">368</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">create</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">"""Creates a ``Fileset`` using the ``plantdb`` FSDB API.</span>
 
 <span class="sd">    The name of the created ``Fileset`` is given by ``self.fileset_id``.</span>
@@ -4661,15 +4661,15 @@ By default, no filtering is performed, all inputs are used.</p>
 
             <details class="quote">
               <summary>Source code in <code>romitask/task.py</code></summary>
-              <div class="codehilite"><table class="codehilitetable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">360</span>
-<span class="normal">361</span>
-<span class="normal">362</span>
-<span class="normal">363</span>
-<span class="normal">364</span>
-<span class="normal">365</span>
-<span class="normal">366</span>
-<span class="normal">367</span>
-<span class="normal">368</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">exists</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+              <div class="codehilite"><table class="codehilitetable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">370</span>
+<span class="normal">371</span>
+<span class="normal">372</span>
+<span class="normal">373</span>
+<span class="normal">374</span>
+<span class="normal">375</span>
+<span class="normal">376</span>
+<span class="normal">377</span>
+<span class="normal">378</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">exists</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">"""Assert the target ``Fileset`` exists.</span>
 
 <span class="sd">    Returns</span>
@@ -4723,15 +4723,15 @@ By default, no filtering is performed, all inputs are used.</p>
 
             <details class="quote">
               <summary>Source code in <code>romitask/task.py</code></summary>
-              <div class="codehilite"><table class="codehilitetable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">370</span>
-<span class="normal">371</span>
-<span class="normal">372</span>
-<span class="normal">373</span>
-<span class="normal">374</span>
-<span class="normal">375</span>
-<span class="normal">376</span>
-<span class="normal">377</span>
-<span class="normal">378</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">get</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+              <div class="codehilite"><table class="codehilitetable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">380</span>
+<span class="normal">381</span>
+<span class="normal">382</span>
+<span class="normal">383</span>
+<span class="normal">384</span>
+<span class="normal">385</span>
+<span class="normal">386</span>
+<span class="normal">387</span>
+<span class="normal">388</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">get</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">"""Returns the target ``Fileset`` instance.</span>
 
 <span class="sd">    Returns</span>
@@ -5147,22 +5147,22 @@ This task runs the processing in parallel using <code>ThreadPoolExecutor</code>.
 
             <details class="quote">
               <summary>Source code in <code>romitask/task.py</code></summary>
-              <div class="codehilite"><table class="codehilitetable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">890</span>
-<span class="normal">891</span>
-<span class="normal">892</span>
-<span class="normal">893</span>
-<span class="normal">894</span>
-<span class="normal">895</span>
-<span class="normal">896</span>
-<span class="normal">897</span>
-<span class="normal">898</span>
-<span class="normal">899</span>
-<span class="normal">900</span>
+              <div class="codehilite"><table class="codehilitetable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">900</span>
 <span class="normal">901</span>
 <span class="normal">902</span>
 <span class="normal">903</span>
 <span class="normal">904</span>
-<span class="normal">905</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">f</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">f</span><span class="p">,</span> <span class="n">outfs</span><span class="p">):</span>
+<span class="normal">905</span>
+<span class="normal">906</span>
+<span class="normal">907</span>
+<span class="normal">908</span>
+<span class="normal">909</span>
+<span class="normal">910</span>
+<span class="normal">911</span>
+<span class="normal">912</span>
+<span class="normal">913</span>
+<span class="normal">914</span>
+<span class="normal">915</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">f</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">f</span><span class="p">,</span> <span class="n">outfs</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">"""Function applied to every file in the fileset must return a file object.</span>
 
 <span class="sd">    Parameters</span>
@@ -5200,17 +5200,7 @@ This task runs the processing in parallel using <code>ThreadPoolExecutor</code>.
 
             <details class="quote">
               <summary>Source code in <code>romitask/task.py</code></summary>
-              <div class="codehilite"><table class="codehilitetable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">907</span>
-<span class="normal">908</span>
-<span class="normal">909</span>
-<span class="normal">910</span>
-<span class="normal">911</span>
-<span class="normal">912</span>
-<span class="normal">913</span>
-<span class="normal">914</span>
-<span class="normal">915</span>
-<span class="normal">916</span>
-<span class="normal">917</span>
+              <div class="codehilite"><table class="codehilitetable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">917</span>
 <span class="normal">918</span>
 <span class="normal">919</span>
 <span class="normal">920</span>
@@ -5228,7 +5218,17 @@ This task runs the processing in parallel using <code>ThreadPoolExecutor</code>.
 <span class="normal">932</span>
 <span class="normal">933</span>
 <span class="normal">934</span>
-<span class="normal">935</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">run</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">input_fileset</span><span class="p">,</span> <span class="n">output_fileset</span><span class="p">):</span>
+<span class="normal">935</span>
+<span class="normal">936</span>
+<span class="normal">937</span>
+<span class="normal">938</span>
+<span class="normal">939</span>
+<span class="normal">940</span>
+<span class="normal">941</span>
+<span class="normal">942</span>
+<span class="normal">943</span>
+<span class="normal">944</span>
+<span class="normal">945</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">run</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">input_fileset</span><span class="p">,</span> <span class="n">output_fileset</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">"""Run the task on every `File`s from a `Fileset` that fulfill the ``query`` in parallel."""</span>
     <span class="n">in_files</span> <span class="o">=</span> <span class="n">input_fileset</span><span class="o">.</span><span class="n">get_files</span><span class="p">(</span><span class="n">query</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">query</span><span class="p">)</span>
     <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Got </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">in_files</span><span class="p">)</span><span class="si">}</span><span class="s2"> input files:"</span><span class="p">)</span>
@@ -5419,10 +5419,10 @@ if not, a new tracking dictionary is created.</p>
 
             <details class="quote">
               <summary>Source code in <code>romitask/task.py</code></summary>
-              <div class="codehilite"><table class="codehilitetable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1411</span>
-<span class="normal">1412</span>
-<span class="normal">1413</span>
-<span class="normal">1414</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">output</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+              <div class="codehilite"><table class="codehilitetable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1421</span>
+<span class="normal">1422</span>
+<span class="normal">1423</span>
+<span class="normal">1424</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">output</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">"""Define the output target for the retry tracker file."""</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">task_id</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span>  <span class="c1"># name the task using the class's name</span>
     <span class="k">return</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">output</span><span class="p">()</span>
@@ -5448,9 +5448,9 @@ if not, a new tracking dictionary is created.</p>
 
             <details class="quote">
               <summary>Source code in <code>romitask/task.py</code></summary>
-              <div class="codehilite"><table class="codehilitetable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1407</span>
-<span class="normal">1408</span>
-<span class="normal">1409</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">requires</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+              <div class="codehilite"><table class="codehilitetable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1417</span>
+<span class="normal">1418</span>
+<span class="normal">1419</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">requires</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">"""Nothing required."""</span>
     <span class="k">return</span> <span class="p">[]</span>
 </code></pre></div></td></tr></table></div>
@@ -5477,17 +5477,7 @@ Maps the task_id to its retry count in a dictionary stored as JSON.</p>
 
             <details class="quote">
               <summary>Source code in <code>romitask/task.py</code></summary>
-              <div class="codehilite"><table class="codehilitetable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1416</span>
-<span class="normal">1417</span>
-<span class="normal">1418</span>
-<span class="normal">1419</span>
-<span class="normal">1420</span>
-<span class="normal">1421</span>
-<span class="normal">1422</span>
-<span class="normal">1423</span>
-<span class="normal">1424</span>
-<span class="normal">1425</span>
-<span class="normal">1426</span>
+              <div class="codehilite"><table class="codehilitetable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1426</span>
 <span class="normal">1427</span>
 <span class="normal">1428</span>
 <span class="normal">1429</span>
@@ -5497,7 +5487,17 @@ Maps the task_id to its retry count in a dictionary stored as JSON.</p>
 <span class="normal">1433</span>
 <span class="normal">1434</span>
 <span class="normal">1435</span>
-<span class="normal">1436</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">run</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="normal">1436</span>
+<span class="normal">1437</span>
+<span class="normal">1438</span>
+<span class="normal">1439</span>
+<span class="normal">1440</span>
+<span class="normal">1441</span>
+<span class="normal">1442</span>
+<span class="normal">1443</span>
+<span class="normal">1444</span>
+<span class="normal">1445</span>
+<span class="normal">1446</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">run</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">"""Execute the retry tracking operation.</span>
 
 <span class="sd">    Creates or updates a JSON file with information about task retries.</span>
@@ -5653,15 +5653,15 @@ If unspecified (default), the current active scan will be used.</p>
 
             <details class="quote">
               <summary>Source code in <code>romitask/task.py</code></summary>
-              <div class="codehilite"><table class="codehilitetable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">510</span>
-<span class="normal">511</span>
-<span class="normal">512</span>
-<span class="normal">513</span>
-<span class="normal">514</span>
-<span class="normal">515</span>
-<span class="normal">516</span>
-<span class="normal">517</span>
-<span class="normal">518</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">get_task_name</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+              <div class="codehilite"><table class="codehilitetable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">520</span>
+<span class="normal">521</span>
+<span class="normal">522</span>
+<span class="normal">523</span>
+<span class="normal">524</span>
+<span class="normal">525</span>
+<span class="normal">526</span>
+<span class="normal">527</span>
+<span class="normal">528</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">get_task_name</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">"""Helper method to get the name of the current task.</span>
 
 <span class="sd">    Returns</span>
@@ -5762,22 +5762,22 @@ If unspecified (default), the current active scan will be used.</p>
 
             <details class="quote">
               <summary>Source code in <code>romitask/task.py</code></summary>
-              <div class="codehilite"><table class="codehilitetable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">413</span>
-<span class="normal">414</span>
-<span class="normal">415</span>
-<span class="normal">416</span>
-<span class="normal">417</span>
-<span class="normal">418</span>
-<span class="normal">419</span>
-<span class="normal">420</span>
-<span class="normal">421</span>
-<span class="normal">422</span>
-<span class="normal">423</span>
+              <div class="codehilite"><table class="codehilitetable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">423</span>
 <span class="normal">424</span>
 <span class="normal">425</span>
 <span class="normal">426</span>
 <span class="normal">427</span>
-<span class="normal">428</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">input_file</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">file_id</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">suffix</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="normal">428</span>
+<span class="normal">429</span>
+<span class="normal">430</span>
+<span class="normal">431</span>
+<span class="normal">432</span>
+<span class="normal">433</span>
+<span class="normal">434</span>
+<span class="normal">435</span>
+<span class="normal">436</span>
+<span class="normal">437</span>
+<span class="normal">438</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">input_file</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">file_id</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">suffix</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">"""Helper method to get a file from the input fileset.</span>
 
 <span class="sd">    Parameters</span>
@@ -5845,17 +5845,7 @@ If unspecified (default), the current active scan will be used.</p>
 
             <details class="quote">
               <summary>Source code in <code>romitask/task.py</code></summary>
-              <div class="codehilite"><table class="codehilitetable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">430</span>
-<span class="normal">431</span>
-<span class="normal">432</span>
-<span class="normal">433</span>
-<span class="normal">434</span>
-<span class="normal">435</span>
-<span class="normal">436</span>
-<span class="normal">437</span>
-<span class="normal">438</span>
-<span class="normal">439</span>
-<span class="normal">440</span>
+              <div class="codehilite"><table class="codehilitetable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">440</span>
 <span class="normal">441</span>
 <span class="normal">442</span>
 <span class="normal">443</span>
@@ -5895,7 +5885,17 @@ If unspecified (default), the current active scan will be used.</p>
 <span class="normal">477</span>
 <span class="normal">478</span>
 <span class="normal">479</span>
-<span class="normal">480</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">output</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="normal">480</span>
+<span class="normal">481</span>
+<span class="normal">482</span>
+<span class="normal">483</span>
+<span class="normal">484</span>
+<span class="normal">485</span>
+<span class="normal">486</span>
+<span class="normal">487</span>
+<span class="normal">488</span>
+<span class="normal">489</span>
+<span class="normal">490</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">output</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">"""Defines the returned ``Target``, for a ``RomiTask`` it is a ``FileSetTarget``.</span>
 
 <span class="sd">    The fileset ID being the task ID.</span>
@@ -6054,17 +6054,7 @@ If unspecified (default), the current active scan will be used.</p>
 
             <details class="quote">
               <summary>Source code in <code>romitask/task.py</code></summary>
-              <div class="codehilite"><table class="codehilitetable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">482</span>
-<span class="normal">483</span>
-<span class="normal">484</span>
-<span class="normal">485</span>
-<span class="normal">486</span>
-<span class="normal">487</span>
-<span class="normal">488</span>
-<span class="normal">489</span>
-<span class="normal">490</span>
-<span class="normal">491</span>
-<span class="normal">492</span>
+              <div class="codehilite"><table class="codehilitetable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">492</span>
 <span class="normal">493</span>
 <span class="normal">494</span>
 <span class="normal">495</span>
@@ -6080,7 +6070,17 @@ If unspecified (default), the current active scan will be used.</p>
 <span class="normal">505</span>
 <span class="normal">506</span>
 <span class="normal">507</span>
-<span class="normal">508</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">output_file</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">file_id</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">suffix</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">create</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+<span class="normal">508</span>
+<span class="normal">509</span>
+<span class="normal">510</span>
+<span class="normal">511</span>
+<span class="normal">512</span>
+<span class="normal">513</span>
+<span class="normal">514</span>
+<span class="normal">515</span>
+<span class="normal">516</span>
+<span class="normal">517</span>
+<span class="normal">518</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">output_file</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">file_id</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">suffix</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">create</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">"""Helper method to create &amp; get a file from the output fileset.</span>
 
 <span class="sd">    Parameters</span>
@@ -6153,17 +6153,17 @@ If unspecified (default), the current active scan will be used.</p>
 
             <details class="quote">
               <summary>Source code in <code>romitask/task.py</code></summary>
-              <div class="codehilite"><table class="codehilitetable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">401</span>
-<span class="normal">402</span>
-<span class="normal">403</span>
-<span class="normal">404</span>
-<span class="normal">405</span>
-<span class="normal">406</span>
-<span class="normal">407</span>
-<span class="normal">408</span>
-<span class="normal">409</span>
-<span class="normal">410</span>
-<span class="normal">411</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">requires</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+              <div class="codehilite"><table class="codehilitetable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">411</span>
+<span class="normal">412</span>
+<span class="normal">413</span>
+<span class="normal">414</span>
+<span class="normal">415</span>
+<span class="normal">416</span>
+<span class="normal">417</span>
+<span class="normal">418</span>
+<span class="normal">419</span>
+<span class="normal">420</span>
+<span class="normal">421</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">requires</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">"""Specify dependencies to other Task object.</span>
 
 <span class="sd">    This method will be overridden by the classes inheriting ``RomiTask``.</span>
@@ -6397,17 +6397,7 @@ If unspecified (default), the current active scan will be used.</p>
 
             <details class="quote">
               <summary>Source code in <code>romitask/task.py</code></summary>
-              <div class="codehilite"><table class="codehilitetable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">172</span>
-<span class="normal">173</span>
-<span class="normal">174</span>
-<span class="normal">175</span>
-<span class="normal">176</span>
-<span class="normal">177</span>
-<span class="normal">178</span>
-<span class="normal">179</span>
-<span class="normal">180</span>
-<span class="normal">181</span>
-<span class="normal">182</span>
+              <div class="codehilite"><table class="codehilitetable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">182</span>
 <span class="normal">183</span>
 <span class="normal">184</span>
 <span class="normal">185</span>
@@ -6440,7 +6430,17 @@ If unspecified (default), the current active scan will be used.</p>
 <span class="normal">212</span>
 <span class="normal">213</span>
 <span class="normal">214</span>
-<span class="normal">215</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">parse</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">scan_path</span><span class="p">):</span>
+<span class="normal">215</span>
+<span class="normal">216</span>
+<span class="normal">217</span>
+<span class="normal">218</span>
+<span class="normal">219</span>
+<span class="normal">220</span>
+<span class="normal">221</span>
+<span class="normal">222</span>
+<span class="normal">223</span>
+<span class="normal">224</span>
+<span class="normal">225</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">parse</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">scan_path</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">"""Convert the scan path to a ``plantdb.commons.fsdb.Scan`` object.</span>
 
 <span class="sd">    Override the default implementation method for specialized parsing.</span>
@@ -6473,8 +6473,8 @@ If unspecified (default), the current active scan will be used.</p>
     <span class="n">scan_id</span> <span class="o">=</span> <span class="n">path</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
     <span class="c1"># create &amp; connect to `db` if not defined:</span>
     <span class="k">if</span> <span class="n">db</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>  <span class="c1"># TODO: cannot change DB during run...</span>
-        <span class="n">no_auth</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">getenv</span><span class="p">(</span><span class="s2">"ROMI_DB_NOAUTH"</span><span class="p">)</span><span class="o">==</span><span class="s1">'1'</span> <span class="ow">or</span> <span class="kc">False</span>
-        <span class="n">db</span> <span class="o">=</span> <span class="n">FSDB</span><span class="p">(</span><span class="n">db_path</span><span class="p">,</span> <span class="n">no_auth</span><span class="o">=</span><span class="n">no_auth</span><span class="p">)</span>
+        <span class="n">no_auth</span> <span class="o">=</span> <span class="n">_no_auth_fsdb</span><span class="p">()</span>
+        <span class="n">db</span> <span class="o">=</span> <span class="n">FSDB</span><span class="p">(</span><span class="n">db_path</span><span class="p">,</span> <span class="n">no_auth</span><span class="o">=</span><span class="n">no_auth</span><span class="p">,</span> <span class="n">lazy</span><span class="o">=</span><span class="n">_lazy_fsdb</span><span class="p">())</span>
         <span class="n">db</span><span class="o">.</span><span class="n">connect</span><span class="p">()</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="n">no_auth</span><span class="p">:</span>
             <span class="n">db</span><span class="o">.</span><span class="n">login</span><span class="p">(</span><span class="n">username</span><span class="o">=</span><span class="n">os</span><span class="o">.</span><span class="n">getenv</span><span class="p">(</span><span class="s2">"ROMI_DB_USER"</span><span class="p">),</span> <span class="n">password</span><span class="o">=</span><span class="n">os</span><span class="o">.</span><span class="n">getenv</span><span class="p">(</span><span class="s2">"ROMI_DB_PASSWORD"</span><span class="p">))</span>
@@ -6561,24 +6561,24 @@ If unspecified (default), the current active scan will be used.</p>
 
             <details class="quote">
               <summary>Source code in <code>romitask/task.py</code></summary>
-              <div class="codehilite"><table class="codehilitetable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">217</span>
-<span class="normal">218</span>
-<span class="normal">219</span>
-<span class="normal">220</span>
-<span class="normal">221</span>
-<span class="normal">222</span>
-<span class="normal">223</span>
-<span class="normal">224</span>
-<span class="normal">225</span>
-<span class="normal">226</span>
-<span class="normal">227</span>
+              <div class="codehilite"><table class="codehilitetable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">227</span>
 <span class="normal">228</span>
 <span class="normal">229</span>
 <span class="normal">230</span>
 <span class="normal">231</span>
 <span class="normal">232</span>
 <span class="normal">233</span>
-<span class="normal">234</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">serialize</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">scan</span><span class="p">):</span>
+<span class="normal">234</span>
+<span class="normal">235</span>
+<span class="normal">236</span>
+<span class="normal">237</span>
+<span class="normal">238</span>
+<span class="normal">239</span>
+<span class="normal">240</span>
+<span class="normal">241</span>
+<span class="normal">242</span>
+<span class="normal">243</span>
+<span class="normal">244</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">serialize</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">scan</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">"""Converts ``plantdb.commons.fsdb.Scan`` in its path.</span>
 
 <span class="sd">    Opposite of ``parse()``.</span>
@@ -6853,17 +6853,7 @@ Defaults to "VirtualPlant".</p>
 
             <details class="quote">
               <summary>Source code in <code>romitask/task.py</code></summary>
-              <div class="codehilite"><table class="codehilitetable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">758</span>
-<span class="normal">759</span>
-<span class="normal">760</span>
-<span class="normal">761</span>
-<span class="normal">762</span>
-<span class="normal">763</span>
-<span class="normal">764</span>
-<span class="normal">765</span>
-<span class="normal">766</span>
-<span class="normal">767</span>
-<span class="normal">768</span>
+              <div class="codehilite"><table class="codehilitetable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">768</span>
 <span class="normal">769</span>
 <span class="normal">770</span>
 <span class="normal">771</span>
@@ -6884,7 +6874,17 @@ Defaults to "VirtualPlant".</p>
 <span class="normal">786</span>
 <span class="normal">787</span>
 <span class="normal">788</span>
-<span class="normal">789</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">output</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="normal">789</span>
+<span class="normal">790</span>
+<span class="normal">791</span>
+<span class="normal">792</span>
+<span class="normal">793</span>
+<span class="normal">794</span>
+<span class="normal">795</span>
+<span class="normal">796</span>
+<span class="normal">797</span>
+<span class="normal">798</span>
+<span class="normal">799</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">output</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">"""Return the fileset containing the model files."""</span>
     <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">scan_id</span> <span class="o">==</span> <span class="s2">""</span><span class="p">:</span>
         <span class="n">scan</span> <span class="o">=</span> <span class="n">ScanConfiguration</span><span class="p">()</span><span class="o">.</span><span class="n">scan</span>
@@ -6994,19 +6994,19 @@ Defaults to "VirtualPlant".</p>
 
             <details class="quote">
               <summary>Source code in <code>romitask/task.py</code></summary>
-              <div class="codehilite"><table class="codehilitetable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">938</span>
-<span class="normal">939</span>
-<span class="normal">940</span>
-<span class="normal">941</span>
-<span class="normal">942</span>
-<span class="normal">943</span>
-<span class="normal">944</span>
-<span class="normal">945</span>
-<span class="normal">946</span>
-<span class="normal">947</span>
-<span class="normal">948</span>
+              <div class="codehilite"><table class="codehilitetable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">948</span>
 <span class="normal">949</span>
-<span class="normal">950</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@RomiTask</span><span class="o">.</span><span class="n">event_handler</span><span class="p">(</span><span class="n">luigi</span><span class="o">.</span><span class="n">Event</span><span class="o">.</span><span class="n">FAILURE</span><span class="p">)</span>
+<span class="normal">950</span>
+<span class="normal">951</span>
+<span class="normal">952</span>
+<span class="normal">953</span>
+<span class="normal">954</span>
+<span class="normal">955</span>
+<span class="normal">956</span>
+<span class="normal">957</span>
+<span class="normal">958</span>
+<span class="normal">959</span>
+<span class="normal">960</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@RomiTask</span><span class="o">.</span><span class="n">event_handler</span><span class="p">(</span><span class="n">luigi</span><span class="o">.</span><span class="n">Event</span><span class="o">.</span><span class="n">FAILURE</span><span class="p">)</span>
 <span class="k">def</span><span class="w"> </span><span class="nf">mourn_failure</span><span class="p">(</span><span class="n">task</span><span class="p">,</span> <span class="n">exception</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">"""In the case of failure of a task, remove the corresponding fileset from the database.</span>
 

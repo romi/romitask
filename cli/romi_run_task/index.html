@@ -1224,7 +1224,7 @@ This makes complex pipeline execution simple, reproducible, and portable.</p>
 <li><strong>Robust logging</strong>: generates per‑task log files, configurable log level, and temporary logging configuration passed to Luigi.</li>
 <li><strong>Environment preparation</strong>: injects <code>.env</code> variables, sets <code>LUIGI_CONFIG_PATH</code>, <code>PYOPENCL_CTX</code>, and optional DB authentication flags.</li>
 <li><strong>Dry‑run mode</strong>: prints the full Luigi command without executing it, useful for debugging.</li>
-<li><strong>Authentication options</strong>: support for DB credentials or a “no‑auth” testing mode.</li>
+<li><strong>Authentication options</strong>: support for DB credentials, with “no‑auth” as the default (disable with <code>ROMI_DB_NOAUTH=0</code>).</li>
 <li><strong>Local scheduler by default</strong>: runs the Luigi scheduler locally unless overridden.</li>
 <li><strong>Programmatic API</strong>: <code>run_task()</code> can be called from Python code for tighter integration.</li>
 </ul>
@@ -2543,7 +2543,7 @@ If <code>module</code> is not <code>None</code>, check it exists.</p>
 
 
 <h2 id="romitask.cli.romi_run_task.main" class="doc doc-heading">
-            <code class=" language-python"><span class="n">main</span><span class="p">(</span><span class="n">task</span><span class="p">,</span> <span class="n">dataset_path</span><span class="p">,</span> <span class="n">config</span><span class="p">,</span> <span class="n">cfg_override</span><span class="p">,</span> <span class="n">module</span><span class="p">,</span> <span class="n">log_level</span><span class="p">,</span> <span class="n">dry_run</span><span class="p">,</span> <span class="n">db_user</span><span class="p">,</span> <span class="n">db_password</span><span class="p">,</span> <span class="n">no_auth</span><span class="p">,</span> <span class="n">luigicmd</span><span class="p">,</span> <span class="n">local_scheduler</span><span class="p">)</span></code>
+            <code class=" language-python"><span class="n">main</span><span class="p">(</span><span class="n">task</span><span class="p">,</span> <span class="n">dataset_path</span><span class="p">,</span> <span class="n">config</span><span class="p">,</span> <span class="n">cfg_override</span><span class="p">,</span> <span class="n">module</span><span class="p">,</span> <span class="n">log_level</span><span class="p">,</span> <span class="n">dry_run</span><span class="p">,</span> <span class="n">db_user</span><span class="p">,</span> <span class="n">db_password</span><span class="p">,</span> <span class="n">luigicmd</span><span class="p">,</span> <span class="n">local_scheduler</span><span class="p">)</span></code>
 
 <a href="#romitask.cli.romi_run_task.main" class="headerlink" title="Permanent link">Link</a></h2>
 
@@ -2722,13 +2722,7 @@ If <code>module</code> is not <code>None</code>, check it exists.</p>
 <span class="normal">807</span>
 <span class="normal">808</span>
 <span class="normal">809</span>
-<span class="normal">810</span>
-<span class="normal">811</span>
-<span class="normal">812</span>
-<span class="normal">813</span>
-<span class="normal">814</span>
-<span class="normal">815</span>
-<span class="normal">816</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@click</span><span class="o">.</span><span class="n">command</span><span class="p">(</span>
+<span class="normal">810</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@click</span><span class="o">.</span><span class="n">command</span><span class="p">(</span>
     <span class="n">context_settings</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span><span class="n">help_option_names</span><span class="o">=</span><span class="p">[</span><span class="s1">'-h'</span><span class="p">,</span> <span class="s1">'--help'</span><span class="p">]),</span>
     <span class="n">help</span><span class="o">=</span><span class="sa">f</span><span class="s2">"Run a ROMI task on selected dataset.</span><span class="se">\n\n</span><span class="s2">"</span>
          <span class="sa">f</span><span class="s2">"The list of pre-defined tasks is: </span><span class="si">{</span><span class="s1">', '</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">TASKS</span><span class="p">)</span><span class="si">}</span><span class="s2">.</span><span class="se">\n\n</span><span class="s2">"</span>
@@ -2780,11 +2774,6 @@ If <code>module</code> is not <code>None</code>, check it exists.</p>
     <span class="n">default</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
     <span class="n">help</span><span class="o">=</span><span class="s2">"Password for FSDB login."</span>
 <span class="p">)</span>
-<span class="nd">@optgroup</span><span class="o">.</span><span class="n">option</span><span class="p">(</span>
-    <span class="s1">'--no-auth'</span><span class="p">,</span>
-    <span class="n">is_flag</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
-    <span class="n">help</span><span class="o">=</span><span class="s2">"Use a database with automatic 'admin' user log in, for testing purposes only."</span>
-<span class="p">)</span>
 <span class="nd">@optgroup</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="s1">'Luigi options'</span><span class="p">)</span>
 <span class="nd">@optgroup</span><span class="o">.</span><span class="n">option</span><span class="p">(</span>
     <span class="s1">'--luigicmd'</span><span class="p">,</span>
@@ -2808,7 +2797,6 @@ If <code>module</code> is not <code>None</code>, check it exists.</p>
         <span class="n">dry_run</span><span class="p">:</span> <span class="nb">bool</span><span class="p">,</span>
         <span class="n">db_user</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span>
         <span class="n">db_password</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span>
-        <span class="n">no_auth</span><span class="p">:</span> <span class="nb">bool</span><span class="p">,</span>
         <span class="n">luigicmd</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
         <span class="n">local_scheduler</span><span class="p">:</span> <span class="nb">bool</span>
 <span class="p">):</span>
@@ -2893,7 +2881,7 @@ If <code>module</code> is not <code>None</code>, check it exists.</p>
                 <span class="n">run_task</span><span class="p">(</span><span class="n">dataset_path_item</span><span class="p">,</span> <span class="n">task</span><span class="p">,</span> <span class="n">config</span><span class="p">,</span> <span class="n">cfg_override</span><span class="p">,</span>
                          <span class="n">log_level</span><span class="o">=</span><span class="n">log_level</span><span class="p">,</span> <span class="n">luigicmd</span><span class="o">=</span><span class="n">luigicmd</span><span class="p">,</span> <span class="n">module</span><span class="o">=</span><span class="n">module</span><span class="p">,</span>
                          <span class="n">local_scheduler</span><span class="o">=</span><span class="n">local_scheduler</span><span class="p">,</span> <span class="n">dry_run</span><span class="o">=</span><span class="n">dry_run</span><span class="p">,</span>
-                         <span class="n">no_auth</span><span class="o">=</span><span class="n">no_auth</span><span class="p">,</span> <span class="n">db_user</span><span class="o">=</span><span class="n">db_user</span><span class="p">,</span> <span class="n">db_password</span><span class="o">=</span><span class="n">db_password</span><span class="p">)</span>
+                         <span class="n">db_user</span><span class="o">=</span><span class="n">db_user</span><span class="p">,</span> <span class="n">db_password</span><span class="o">=</span><span class="n">db_password</span><span class="p">)</span>
             <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
                 <span class="nb">print</span><span class="p">(</span><span class="n">e</span><span class="p">)</span>
     <span class="k">else</span><span class="p">:</span>
@@ -2901,7 +2889,7 @@ If <code>module</code> is not <code>None</code>, check it exists.</p>
         <span class="n">run_task</span><span class="p">(</span><span class="n">folders</span><span class="p">,</span> <span class="n">task</span><span class="p">,</span> <span class="n">config</span><span class="p">,</span> <span class="n">cfg_override</span><span class="p">,</span>
                  <span class="n">log_level</span><span class="o">=</span><span class="n">log_level</span><span class="p">,</span> <span class="n">luigicmd</span><span class="o">=</span><span class="n">luigicmd</span><span class="p">,</span> <span class="n">module</span><span class="o">=</span><span class="n">module</span><span class="p">,</span>
                  <span class="n">local_scheduler</span><span class="o">=</span><span class="n">local_scheduler</span><span class="p">,</span> <span class="n">dry_run</span><span class="o">=</span><span class="n">dry_run</span><span class="p">,</span>
-                 <span class="n">no_auth</span><span class="o">=</span><span class="n">no_auth</span><span class="p">,</span> <span class="n">db_user</span><span class="o">=</span><span class="n">db_user</span><span class="p">,</span> <span class="n">db_password</span><span class="o">=</span><span class="n">db_password</span><span class="p">)</span>
+                 <span class="n">db_user</span><span class="o">=</span><span class="n">db_user</span><span class="p">,</span> <span class="n">db_password</span><span class="o">=</span><span class="n">db_password</span><span class="p">)</span>
 </code></pre></div></td></tr></table></div>
             </details>
     </div>
@@ -3096,7 +3084,7 @@ Defaults to use the standardized log filename with the date and task name from <
             </td>
             <td>
               <div class="doc-md-description">
-                <p>Use a database with automatic 'admin' user login, for testing purposes only.</p>
+                <p>Use a database with automatic 'admin' user login. Defaults to <code>True</code>.</p>
               </div>
             </td>
           </tr>
@@ -3385,7 +3373,7 @@ romitask.log.get_log_filename</p>
 <span class="sd">    dry_run : bool</span>
 <span class="sd">        Whether to make it a dry run, returning the command but not calling it. Defaults to `False`.</span>
 <span class="sd">    no_auth : bool</span>
-<span class="sd">        Use a database with automatic 'admin' user login, for testing purposes only.</span>
+<span class="sd">        Use a database with automatic 'admin' user login. Defaults to `True`.</span>
 <span class="sd">    db_user : str</span>
 <span class="sd">        Username for FSDB login.</span>
 <span class="sd">    db_password : str</span>
