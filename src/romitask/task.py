@@ -96,6 +96,11 @@ logger = get_logger(__name__)
 db = None
 
 
+def _lazy_fsdb() -> bool:
+    """Use lazy FSDB scan loading by default, disable with ``ROMI_DB_LAZY=0``."""
+    return os.getenv("ROMI_DB_LAZY", "1") != "0"
+
+
 class FSDBParameter(luigi.Parameter):
     """A custom Luigi Parameter for handling FSDB objects.
 
@@ -133,7 +138,7 @@ class FSDBParameter(luigi.Parameter):
         if not _is_fsdb(db_path):
             raise NotAnFSDBError(f"Given path {db_path} is not an FSDB")
 
-        db = FSDB(db_path)
+        db = FSDB(db_path, lazy=_lazy_fsdb())
         db.connect()
         return db
 
@@ -203,7 +208,7 @@ class ScanParameter(luigi.Parameter):
         # create & connect to `db` if not defined:
         if db is None:  # TODO: cannot change DB during run...
             no_auth = os.getenv("ROMI_DB_NOAUTH")=='1' or False
-            db = FSDB(db_path, no_auth=no_auth)
+            db = FSDB(db_path, no_auth=no_auth, lazy=_lazy_fsdb())
             db.connect()
             if not no_auth:
                 db.login(username=os.getenv("ROMI_DB_USER"), password=os.getenv("ROMI_DB_PASSWORD"))
