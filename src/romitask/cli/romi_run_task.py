@@ -39,9 +39,38 @@ This makes complex pipeline execution simple, reproducible, and portable.
 - **Robust logging**: generates per‑task log files, configurable log level, and temporary logging configuration passed to Luigi.
 - **Environment preparation**: injects `.env` variables, sets `LUIGI_CONFIG_PATH`, `PYOPENCL_CTX`, and optional DB authentication flags.
 - **Dry‑run mode**: prints the full Luigi command without executing it, useful for debugging.
-- **Authentication options**: support for DB credentials or a “no‑auth” testing mode.
+- **Authentication options**: support for DB credentials, with "no‑auth" as the default (disable with `ROMI_DB_NOAUTH=0`).
 - **Local scheduler by default**: runs the Luigi scheduler locally unless overridden.
 - **Programmatic API**: `run_task()` can be called from Python code for tighter integration.
+
+## Environment Variables
+
+The CLI reads configuration from environment variables. Values defined in a `.env` file at the root of the dataset directory are loaded first (via `dotenv_values`), then values already present in the process environment take precedence (system‑wide `os.environ` overwrites duplicate keys).
+
+A `.env` file placed in the dataset directory may look like:
+
+```bash
+ROMI_DB_USER=my_user
+ROMI_DB_PASSWORD=secret
+```
+
+### FSDB connection
+
+| Variable           | Effect                                                                                     |
+|--------------------|--------------------------------------------------------------------------------------------|
+| `ROMI_DB_LAZY`     | Lazy FSDB scan loading, the default. Set to `0` to force eager loading.                    |
+| `ROMI_DB_NOAUTH`   | No‑authentication FSDB session manager, the default. Set to `0` to require authentication. |
+| `ROMI_DB_USER`     | Username for FSDB login, used when authentication is enabled.                              |
+| `ROMI_DB_PASSWORD` | Password for FSDB login, used when authentication is enabled.                              |
+
+### Luigi / runtime
+
+| Variable              | Effect                                             |
+|-----------------------|----------------------------------------------------|
+| `LUIGI_CONFIG_PARSER` | Set to `toml` for the Luigi configuration file.    |
+| `LUIGI_CONFIG_PATH`   | Path to the TOML configuration file used by Luigi. |
+| `PYOPENCL_CTX`        | Default PyOpenCL context, set to `0`.              |
+| `MPLBACKEND`          | Matplotlib backend, set to `Agg`.                  |
 
 ## Usage Examples
 
@@ -63,8 +92,8 @@ romi_run_task Scan /data/ROMI/scan01 --config /path/to/my/config.toml
 
 The call performs the same steps as the CLI, loading configurations, preparing logging, and invoking Luigi.
 
-References
-----------
+## References
+
 [^1]: https://luigi.readthedocs.io/en/stable/configuration.html#parameters-from-config-ingestion
 """
 
@@ -467,8 +496,6 @@ def run_task(dataset_path: str | Path,
         Whether to run the task locally. Defaults to `True`.
     dry_run : bool
         Whether to make it a dry run, returning the command but not calling it. Defaults to `False`.
-    no_auth : bool
-        Use a database with automatic 'admin' user login, for testing purposes only.
     db_user : str
         Username for FSDB login.
     db_password : str
@@ -692,11 +719,6 @@ def run_task(dataset_path: str | Path,
     default=None,
     help="Password for FSDB login."
 )
-@optgroup.option(
-    '--no-auth',
-    is_flag=True,
-    help="Use a database with automatic 'admin' user log in, for testing purposes only."
-)
 @optgroup.group('Luigi options')
 @optgroup.option(
     '--luigicmd',
@@ -720,7 +742,6 @@ def main(
         dry_run: bool,
         db_user: Optional[str],
         db_password: Optional[str],
-        no_auth: bool,
         luigicmd: str,
         local_scheduler: bool
 ):
@@ -805,7 +826,7 @@ def main(
                 run_task(dataset_path_item, task, config, cfg_override,
                          log_level=log_level, luigicmd=luigicmd, module=module,
                          local_scheduler=local_scheduler, dry_run=dry_run,
-                         no_auth=no_auth, db_user=db_user, db_password=db_password)
+                         db_user=db_user, db_password=db_password)
             except Exception as e:
                 print(e)
     else:
@@ -813,7 +834,7 @@ def main(
         run_task(folders, task, config, cfg_override,
                  log_level=log_level, luigicmd=luigicmd, module=module,
                  local_scheduler=local_scheduler, dry_run=dry_run,
-                 no_auth=no_auth, db_user=db_user, db_password=db_password)
+                 db_user=db_user, db_password=db_password)
 
 
 if __name__ == '__main__':
